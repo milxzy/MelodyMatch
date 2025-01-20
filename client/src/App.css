@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+background: #232136;
+}
+
+html, body {
+    background-color: #232136; /* Desired background color */
+    color: #232136;              /* Optional: Text color */
+    margin: 0;                 /* Removes default margin */
+    padding: 0;                /* Removes default padding */
+    min-height: 100vh;         /* Ensures full height */
+    overflow-x: hidden; 
+    overflow: hidden;       /* Prevents horizontal scrolling */
+  }
+
+/* *{
+    padding: 0;
+    margin:0;
+} */

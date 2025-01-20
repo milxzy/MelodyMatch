@@ -1,0 +1,180 @@
+import React, { useEffect, useState, useMemo } from "react";
+import ProfileCard from "./ProfileCard";
+import Header from "./Header";
+import { Center, Flex, Text, Button, Heading } from "@chakra-ui/react";
+
+const Matches = () => {
+  const [state, setState] = useState({
+    matches: [],
+    currentMatchIndex: 0,
+    loading: true,
+    allMatchesViewed: false,
+  });
+
+  const { matches, currentMatchIndex, loading, allMatchesViewed } = state;
+
+  const [currentIndex, setCurrentIndex] = useState(0); // Initialize currentIndex state
+
+  // Function to handle click on previous button
+  const handlePrevClick = () => {
+    setCurrentIndex(currentIndex - 5 < 0 ? 0 : currentIndex - 5);
+  };
+
+  // Function to handle click on next button
+  const handleNextClick = () => {
+    setCurrentIndex(
+      currentIndex + 5 > activeMatch.genres.length - 1
+        ? activeMatch.genres.length - 1
+        : currentIndex + 5
+    );
+  };
+
+  // Get the current active match safely
+  const activeMatch = useMemo(
+    () => matches[currentMatchIndex] || null,
+    [matches, currentMatchIndex]
+  );
+
+  const moveToNextMatch = () => {
+    setState((prevState) => {
+      const nextIndex = prevState.currentMatchIndex + 1;
+      const allViewed = nextIndex >= matches.length;
+
+      return {
+        ...prevState,
+        currentMatchIndex: nextIndex,
+        allMatchesViewed: allViewed,
+      };
+    });
+    setCurrentIndex(0);
+  };
+
+  const handleLike = async () => {
+    if (!activeMatch) return;
+    console.log('match')
+
+    try {
+      console.log('work')
+      const activeUser = JSON.parse(localStorage.getItem("userInfo"));
+
+      // Send the like to the database
+      await fetch("http://localhost:4000/like", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          likedUserId: activeMatch._id,
+          liker: activeUser._id,
+        }),
+      });
+
+      console.log(`User ${activeUser._id} liked ${activeMatch._id}`);
+    } catch (error) {
+      console.error("Error liking user:", error);
+    }
+
+    moveToNextMatch();
+    console.log('moving to next match')
+  };
+
+  const handleDislike = async () => {
+    if (!activeMatch) return;
+
+    try {
+      const activeUser = JSON.parse(localStorage.getItem("userInfo"));
+
+      // Optionally, log or handle a "dislike" action if needed
+      console.log(`User ${activeUser._id} disliked ${activeMatch._id}`);
+    } catch (error) {
+      console.error("Error disliking user:", error);
+    }
+
+    moveToNextMatch();
+  };
+
+  const handleViewMatchesAgain = () => {
+    setState((prevState) => ({
+      ...prevState,
+      currentMatchIndex: 0,
+      allMatchesViewed: false,
+    }));
+  };
+
+  useEffect(() => {
+    const fetchUserProfiles = async () => {
+      try {
+        const activeUser = JSON.parse(localStorage.getItem("userInfo"));
+        if (!activeUser || !activeUser._id) {
+          console.error("User not found in localStorage");
+          return;
+        }
+        const userId = activeUser._id; // Get the current user's ID
+  
+        const response = await fetch(`http://localhost:4000/GetUsers?userId=${userId}`);
+        const data = await response.json();
+        console.log(data);
+  
+        setState((prevState) => ({
+          ...prevState,
+          matches: data.users,
+          loading: false,
+        }));
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setState((prevState) => ({ ...prevState, loading: false }));
+      }
+    };
+  
+    fetchUserProfiles();
+  }, []);
+  
+
+
+  return (
+    <>
+      <Header />
+      <Center bg="#232136" minHeight="100vh">
+        <Flex direction="column" justifyContent="center" alignItems="center">
+           <Heading as="h3" textAlign="center" color="#eb6f92">
+                    Users
+                  </Heading>
+          {loading ? (
+            <Text>Loading...</Text>
+          ) : matches.length > 0 ? (
+            !allMatchesViewed ? (
+              <ProfileCard
+                profilePic={activeMatch?.profile_pic}
+                name={activeMatch?.preferred_name}
+                age={activeMatch?.age}
+                genres={activeMatch?.genres}
+                handleNextMatch={handleLike}
+                handlePreviousMatch={handleDislike}
+                handleNextClick={handleNextClick}
+                handlePrevClick={handlePrevClick}
+                currentIndex={currentIndex}
+              />
+            ) : (
+              <Flex direction="column" alignItems="center" mt={4}>
+                <Text fontSize="xl" mb={2}>
+                  No more users available.
+                </Text>
+                <Button
+                  onClick={handleViewMatchesAgain}
+                  colorScheme="teal"
+                  variant="solid"
+                >
+                  View Matches Again
+                </Button>
+              </Flex>
+            )
+          ) : (
+            <Text>No matches found</Text>
+          )}
+        </Flex>
+      </Center>
+    </>
+  );
+};
+
+export default Matches;

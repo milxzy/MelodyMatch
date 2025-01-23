@@ -6,7 +6,6 @@ the .env needs the CLIENT_ID, CLIENT_SECRET, and REDIRECT_URI
 also run npm install
 
 # Currently waiting on green light from spotify to go live, refactoring and adding security
-![Logo](MelodyMatch
-/Screen Shot 2025-01-23 at 12.04.06 AM.png)
+![Screenshot of app](ss)
 
 

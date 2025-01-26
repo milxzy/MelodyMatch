@@ -63,7 +63,7 @@ function App() {
 
           <Route path ="/matcheslist" element={<MatchesList />}></Route> // protect
           <Route path="/welcome" element={<Welcome />}></Route> // protect
-          <Route path="/profilequestion" element={<ProtectedRoute token={token}><ProfileQuestion /></ProtectedRoute>} /> // protect
+          <Route path="/profilequestion" element={<ProfileQuestion />}></Route>  // protect
           <Route path="/profile" element={<Profile />}></Route> // protect
           <Route path="/matches" element={<Matches />}></Route> // protect
           <Route path ="/messaging" element={<Messaging />}></Route> // protect

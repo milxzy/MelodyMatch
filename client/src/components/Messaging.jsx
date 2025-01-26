@@ -24,6 +24,11 @@ const Messaging = ({ userId }) => {
 
   // Fetch matches on component mount
   useEffect(() => {
+     const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
     const fetchMatches = async () => {
       setLoading(true);
       const storedData = localStorage.getItem("userInfo");

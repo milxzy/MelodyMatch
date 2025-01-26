@@ -63,6 +63,11 @@ const Profile = () => {
   }
 
   useEffect(() => {
+     const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
 
     console.log(user)
     getMainUser();

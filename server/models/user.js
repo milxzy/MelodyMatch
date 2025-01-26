@@ -102,6 +102,10 @@ const userSchema = new mongoose.Schema({
   likedBy: [{  // Define the likedBy field
     type: Schema.Types.ObjectId,
     ref: 'User'
+  }],
+  allowedAccess: [{
+    type: Boolean,
+    defaule: false,
   }]
 })
 

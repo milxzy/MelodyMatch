@@ -12,8 +12,10 @@ const [pass, setPass] = useState('')
 const [confirmPass, setConfirmPass] = useState('')
 const [loginName, setLoginName] = useState('')
 const [error, setError] = useState(false)
+const [allowedAccess, setAllowedAccess] = useState(false)
 
 useEffect(() => {
+  setAllowedAccess(false)
   const userInfo = localStorage.getItem("userInfo");
   if(userInfo){
     navigate("/spotify")
@@ -40,13 +42,18 @@ const submitHandler = async (e) => {
     const {data} = await axios.post(
       "http://localhost:4000/registerUser",
       {
-         loginName, email, pass,
+         loginName, email, pass, allowedAccess,
       },
       config
     )
     console.log(data)
 localStorage.setItem("userInfo", JSON.stringify(data))
 console.log('Succsesful registration')
+
+//if user allowedAccess === false, then take them to a landing page that explains they have to wait 24 hours for access
+//automate a job that will get the blacklisted users and automate them
+
+
 navigate("/spotify")
 
   } catch (error){

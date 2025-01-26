@@ -20,6 +20,8 @@ const Matches = () => {
     setCurrentIndex(currentIndex - 5 < 0 ? 0 : currentIndex - 5);
   };
 
+  
+
   // Function to handle click on next button
   const handleNextClick = () => {
     setCurrentIndex(

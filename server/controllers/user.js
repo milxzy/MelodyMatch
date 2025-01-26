@@ -290,7 +290,7 @@ if (!likingUser) {
 }
 export const registerUser = asyncHandler(async (req, res) => {
   console.log('42')
-  const { loginName, email, pass } = req.body;
+  const { loginName, email, pass, allowedAccess} = req.body;
   console.log(req.body)
   const userExists = await User.findOne({email})
   if (userExists){
@@ -300,7 +300,8 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     loginName, email,
-    password: pass
+    password: pass,
+    allowedAccess: allowedAccess,
   })
   console.log(user)
 

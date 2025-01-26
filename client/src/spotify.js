@@ -24,4 +24,22 @@ export const setClientToken = (token) => {
         return config
     })
 }
+
+
+const refreshSpotifyToken = async () => {
+    const refreshToken = window.localStorage.getItem("refresh_token");
+  
+    if (refreshToken) {
+      const response = await fetch("/refresh_token", { // your server-side endpoint to handle the refresh
+        method: "POST",
+        body: JSON.stringify({ refreshToken }),
+      });
+  
+      const { newToken } = await response.json();
+      window.localStorage.setItem("token", newToken);
+      setToken(newToken);
+      setClientToken(newToken);
+    }
+  };
+  
 export default apiClient

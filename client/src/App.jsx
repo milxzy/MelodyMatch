@@ -17,6 +17,7 @@ import BeRegister from "./components/BeRegister.jsx";
 import MatchesList from "./components/MatchesList.jsx";
 import Header from "./components/Header.jsx";
 import Messaging from "./components/Messaging.jsx";
+import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 
 const spotify = new SpotifyWebApi();
 
@@ -53,20 +54,19 @@ function App() {
     <Router>
       <div className="app">
         <Routes>
-          <Route path="/" element={<Auth />}></Route>
-          
-          <Route path="/belogin" element={<BeLogin />}></Route>
+          <Route path="/" element={<Auth />}></Route> // dont protect
+          <Route path="/belogin" element={<BeLogin />}></Route> // dont protect
+          <Route path="/beregister" element={<BeRegister />}></Route> // dont protect
+          <Route path="/spotify" element={<Login />}></Route> // dont protect
+          <Route path="/signup" element={<SignUp />}></Route> // dont protect
+          <Route path="/standby" element={<Standby />}></Route> // dont protect
 
-          <Route path="/beregister" element={<BeRegister />}></Route>
-          <Route path ="/matcheslist" element={<MatchesList />}></Route>
-          <Route path="/spotify" element={<Login />}></Route>
-          <Route path="/welcome" element={<Welcome />}></Route>
-          <Route path="/profilequestion" element={<ProfileQuestion />}></Route>
-          <Route path="/profile" element={<Profile />}></Route>
-          <Route path="/standby" element={<Standby />}></Route>
-          <Route path="/matches" element={<Matches />}></Route>
-          <Route path="/signup" element={<SignUp />}></Route>
-          <Route path ="/messaging" element={<Messaging />}></Route>
+          <Route path ="/matcheslist" element={<MatchesList />}></Route> // protect
+          <Route path="/welcome" element={<Welcome />}></Route> // protect
+          <Route path="/profilequestion" element={<ProtectedRoute token={token}><ProfileQuestion /></ProtectedRoute>} /> // protect
+          <Route path="/profile" element={<Profile />}></Route> // protect
+          <Route path="/matches" element={<Matches />}></Route> // protect
+          <Route path ="/messaging" element={<Messaging />}></Route> // protect
         </Routes>
       </div>
     </Router>

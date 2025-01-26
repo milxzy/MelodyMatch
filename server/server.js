@@ -15,6 +15,7 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import User from "./models/user.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
+import waitlistRoutes from "./routes/waitlistRoutes.js"
 // import messagesRoute from "./routes/message.js"
 // import matchesRoute from "./routes/matches.js"
 
@@ -59,7 +60,7 @@ app.use(express.json())
 //maybe delete the line below
 app.use(express.urlencoded({ extended: true }))
 app.use('/', userRoutes)
-
+app.use('/api/waitlist', waitlistRoutes);
 
 passport.use(new LocalStrategy(
   {

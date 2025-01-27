@@ -38,7 +38,7 @@ const Messaging = ({ userId }) => {
       
       
       try {
-        const { data } = await axios.get(`http://localhost:4000/getMatches/${userId}`);
+        const { data } = await axios.get(`https://melodymatch-3ro0.onrender.com/getMatches/${userId}`);
         setMatches(data.matches);
         // console.log(data.matches[0].preferred_name)
       } catch (error) {

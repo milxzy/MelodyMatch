@@ -36,7 +36,7 @@ const Profile = () => {
   async function getMainUser() {
     console.log(userData.email);
     const api = await fetch(
-      `http://localhost:4000/getSingleUser?keyword=${userData.email}`,
+      `https://melodymatch-3ro0.onrender.com/getSingleUser?keyword=${userData.email}`,
       {
         method: "GET",
         headers: {

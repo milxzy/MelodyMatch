@@ -66,7 +66,7 @@ const MatchesList = ({}) => {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:4000/getMatches/${userId}`,
+          `https://melodymatch-3ro0.onrender.com/getMatches/${userId}`,
           {
             method: "GET",
             headers: {

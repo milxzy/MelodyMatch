@@ -40,7 +40,7 @@ const Standby = () => {
       const sharedVariable = searchTerm;
       if (searchTerm !== "") {
         await fetch(
-          ` http://localhost:4000/databaseLookup?keyword=${searchTerm}`,
+          ` https://melodymatch-3ro0.onrender.com/databaseLookup?keyword=${searchTerm}`,
           {
             method: "GET",
             headers: {

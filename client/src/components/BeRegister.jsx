@@ -40,7 +40,7 @@ const submitHandler = async (e) => {
     };
     
     const {data} = await axios.post(
-      "http://localhost:4000/registerUser",
+      "https://melodymatch-3ro0.onrender.com/registerUser",
       {
          loginName, email, pass, allowedAccess,
       },

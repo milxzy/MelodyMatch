@@ -36,20 +36,31 @@ function App() {
   const [token, setToken] = useState("");
 
   useEffect(() => {
-    const token = window.localStorage.getItem("token");
+    // Check if the token is already stored in localStorage
+    const storedToken = window.localStorage.getItem("token");
+    
+    // Get the hash part from the URL
     const hash = window.location.hash;
+    
+    // Clear the hash from the URL (to avoid it persisting after page reload)
     window.location.hash = "";
-    if (!token && hash) {
-      const _token = hash.split("&")[0].split("=")[1];
-      window.localStorage.setItem("token", _token);
-      console.log(_token);
-      setToken(_token);
-      setClientToken(_token);
+  
+    // If no token is found in localStorage and there's a hash in the URL, extract the token from the hash
+    if (!storedToken && hash) {
+      const tokenFromHash = hash.split("&")[0].split("=")[1]; // Extract token value from hash
+  
+      // Store the token in localStorage and update the state
+      window.localStorage.setItem("token", tokenFromHash);
+      console.log("Token from URL hash:", tokenFromHash);
+      setToken(tokenFromHash);
+      setClientToken(tokenFromHash);
     } else {
-      setToken(token);
-      setClientToken(token);
+      // If the token is found in localStorage, use it
+      setToken(storedToken);
+      setClientToken(storedToken);
     }
   }, []);
+  
 
   return  (
     <Router>

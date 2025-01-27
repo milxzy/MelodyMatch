@@ -4,7 +4,7 @@
     "description": "Spotify example node app",
     "main": "server.js",
     "scripts": {
-        "start": "nodemon server.js",
+        "start": "npm i && nodemon server.js",
         "build": "echo 'No build step for backend'"
     },
     "type": "module",

@@ -21,6 +21,13 @@ const Standby = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const tokenFromUrl = new URLSearchParams(window.location.hash).get("#access_token");
+    if (tokenFromUrl) {
+      // Store token in localStorage or sessionStorage
+      window.localStorage.setItem("token", tokenFromUrl);
+      setToken(tokenFromUrl);
+      setClientToken(tokenFromUrl);
+    }
     async function getUsername() {
       try {
         const myProfileResponse = await apiClient.get("me");

@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export const authEndpoint = "https://accounts.spotify.com/authorize"
 
-const redirectUri = "http://localhost:5173/standby"
+const redirectUri = "https://melody-match-flax.vercel.app/standby"
 
 const clientId = '***REMOVED***'
 

@@ -92,6 +92,7 @@ export const displayDashboard = async (req, res) => {
 };
 
 export const callback = async (req, res) => {
+  console.log('callback')
     const code = req.query.code;
     let body = new URLSearchParams({
       code: code,

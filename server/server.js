@@ -16,6 +16,7 @@ import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import User from "./models/user.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 import waitlistRoutes from "./routes/waitlistRoutes.js"
+import authRoutes from "./routes/auth.routes.js"
 // import messagesRoute from "./routes/message.js"
 // import matchesRoute from "./routes/matches.js"
 
@@ -61,6 +62,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use('/', userRoutes)
 app.use('/api/waitlist', waitlistRoutes);
+app.use('/api/auth', authRoutes)
 
 passport.use(new LocalStrategy(
   {
@@ -153,6 +155,22 @@ app.get("/callback", async (req, res) => {
 res.redirect('/dashboard')
 })
 
+
+app.post('/api/spotify/callback', (req, res) => {
+  const params = req.body;
+  console.log('Received Spotify callback data:', params);
+    const accessToken = params.access_token;
+    const tokenType = params.token_type;
+    const expiresIn = params.expires_in;
+   console.log(`Access Token: ${accessToken}`);
+    console.log(`Token Type: ${tokenType}`);
+    console.log(`Expires In: ${expiresIn}`);
+      // Process or save the data as needed
+    res.json({
+        message: 'Spotify callback processed successfully',
+        data: { accessToken, tokenType, expiresIn },
+    });
+})
 // app.get('/dashboard', async (req, res) => {
 
 

@@ -3,9 +3,10 @@
     "version": "0.0.1",
     "description": "Spotify example node app",
     "main": "server.js",
-    "scripts": {
-        "start": "nodemon server.js"
-    },
+   "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "start": "nodemon --watch src --exec 'npm run build'"
+  },
     "type": "module",
     "dependencies": {
         "bcryptjs": "^2.4.3",

@@ -29,9 +29,14 @@ const MatchesList = ({}) => {
   const [noMatches, setNoMatches] = useState(false); // New state for no matches message
   const navigate = useNavigate();
 
+
+  
+
   const goBack = () => {
     navigate("/profile");
   };
+
+
 
   const handlePrevClick = (index) => {
     setCurrentIndices((prevIndices) =>
@@ -46,6 +51,13 @@ const MatchesList = ({}) => {
   };
 
   useEffect(() => {
+
+ const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
     const storedData = localStorage.getItem("userInfo");
     const userInfo = JSON.parse(storedData);
     const userId = userInfo._id;

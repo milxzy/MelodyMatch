@@ -1,6 +1,6 @@
 import express from "express"
 const router = express.Router();
-import Waitlist from "../models/WaitlistModel.js"
+// import Waitlist from "../models/waitlistModel.js"
 
 // 1. Route to add a user to the waitlist
 router.post('/add-to-waitlist', async (req, res) => {

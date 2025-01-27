@@ -22,7 +22,6 @@ import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 const spotify = new SpotifyWebApi();
 
 import {
-  HashRouter,
   BrowserRouter as Router,
   Routes,
   Route,
@@ -38,11 +37,11 @@ function App() {
   useEffect(() => {
     // Check if the token is already stored in localStorage
     const storedToken = window.localStorage.getItem("token");
-    
+
     // Get the query parameters from the URL
     const urlParams = new URLSearchParams(window.location.search);
     const tokenFromUrl = urlParams.get("access_token"); // Retrieve the token from query params
-  
+
     // If no token is found in localStorage and there's a token in the URL parameters, use it
     if (!storedToken && tokenFromUrl) {
       // Store the token in localStorage and update the state

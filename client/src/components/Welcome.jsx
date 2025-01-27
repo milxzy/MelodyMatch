@@ -34,6 +34,11 @@ const Welcome = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
+     const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
     async function fetchData() {
       const myProfileResponse = await apiClient.get("me");
       const myProfileData = myProfileResponse.data;

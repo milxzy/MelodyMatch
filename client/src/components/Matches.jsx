@@ -104,6 +104,13 @@ const Matches = () => {
   };
 
   useEffect(() => {
+
+ const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
     const fetchUserProfiles = async () => {
       try {
         const activeUser = JSON.parse(localStorage.getItem("userInfo"));

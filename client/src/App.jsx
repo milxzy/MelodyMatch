@@ -23,8 +23,7 @@ const spotify = new SpotifyWebApi();
 
 import {
   HashRouter,
-  BrowserRouter,
-  Router,
+  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,

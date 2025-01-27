@@ -92,7 +92,7 @@ const Welcome = () => {
   async function onSubmit(e) {
     e.preventDefault();
     const newPerson = { form, artistState, genreState, profileState };
-    await fetch("http://localhost:4000/addUserInfo", {
+    await fetch("https://melodymatch-3ro0.onrender.com/addUserInfo", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

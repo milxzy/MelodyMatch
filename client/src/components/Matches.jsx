@@ -60,7 +60,7 @@ const Matches = () => {
       const activeUser = JSON.parse(localStorage.getItem("userInfo"));
 
       // Send the like to the database
-      await fetch("http://localhost:4000/like", {
+      await fetch("https://melodymatch-3ro0.onrender.com/like", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -120,7 +120,7 @@ const Matches = () => {
         }
         const userId = activeUser._id; // Get the current user's ID
   
-        const response = await fetch(`http://localhost:4000/GetUsers?userId=${userId}`);
+        const response = await fetch(`https://melodymatch-3ro0.onrender.com/GetUsers?userId=${userId}`);
         const data = await response.json();
         console.log(data);
   

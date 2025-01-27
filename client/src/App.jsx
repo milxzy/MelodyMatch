@@ -22,6 +22,7 @@ import ProtectedRoute from "./components/ProtectedRoutes.jsx";
 const spotify = new SpotifyWebApi();
 
 import {
+  HashRouter,
   BrowserRouter as Router,
   Routes,
   Route,

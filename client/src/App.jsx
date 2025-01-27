@@ -39,27 +39,24 @@ function App() {
     // Check if the token is already stored in localStorage
     const storedToken = window.localStorage.getItem("token");
     
-    // Get the hash part from the URL
-    const hash = window.location.hash;
-    
-    // Clear the hash from the URL (to avoid it persisting after page reload)
-    window.location.hash = "";
+    // Get the query parameters from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenFromUrl = urlParams.get("access_token"); // Retrieve the token from query params
   
-    // If no token is found in localStorage and there's a hash in the URL, extract the token from the hash
-    if (!storedToken && hash) {
-      const tokenFromHash = hash.split("&")[0].split("=")[1]; // Extract token value from hash
-  
+    // If no token is found in localStorage and there's a token in the URL parameters, use it
+    if (!storedToken && tokenFromUrl) {
       // Store the token in localStorage and update the state
-      window.localStorage.setItem("token", tokenFromHash);
-      console.log("Token from URL hash:", tokenFromHash);
-      setToken(tokenFromHash);
-      setClientToken(tokenFromHash);
+      window.localStorage.setItem("token", tokenFromUrl);
+      console.log("Token from URL parameters:", tokenFromUrl);
+      setToken(tokenFromUrl);
+      setClientToken(tokenFromUrl);
     } else {
       // If the token is found in localStorage, use it
       setToken(storedToken);
       setClientToken(storedToken);
     }
   }, []);
+  
   
 
   return  (

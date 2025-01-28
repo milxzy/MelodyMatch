@@ -18,6 +18,7 @@ import SignUp from "./components/SignUp.jsx";
 import Messaging from "./components/Messaging.jsx";
 import { setClientToken } from "./spotify";
 import Dashboard from "./components/Dashboard.jsx";
+import Whitelist from "./components/Whitelist.jsx";
 
 function App() {
   const [token, setToken] = useState("");

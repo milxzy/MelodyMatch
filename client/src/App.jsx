@@ -50,6 +50,7 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/standby" element={<Standby />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/whitelist" element={<Whitelist />} />
 
             {/* Protected Routes */}
             <Route path="/matcheslist" element={<MatchesList />} />

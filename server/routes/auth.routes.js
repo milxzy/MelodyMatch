@@ -13,7 +13,7 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 console.log(CLIENT_SECRET)
 const REDIRECT_URI = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'; // Change in production
-//const FRONTEND_URI = 'http://localhost:5173'; // Change in production
+//const FRONTEND_URI = 'https://melody-match-flax.vercel.app'; // Change in production
 
 
 router.get('/login', (req, res) => {
@@ -74,10 +74,10 @@ router.get('/spotify/callback', async (req, res) => {
     
     // Redirect to frontend with tokens
       if (data.access_token) {
-        res.redirect(`http://localhost:5173/standby?token=${data.access_token}`);
+        res.redirect(`https://melody-match-flax.vercel.app/standby?token=${data.access_token}`);
     } else {
         // Handle the error case
-        res.redirect(`http://localhost:5173/error`);
+        res.redirect(`https://melody-match-flax.vercel.app/error`);
     }
 
 });
@@ -98,7 +98,7 @@ router.get('/callback', async (req, res) => {
         })
     });
     const data = await response.json();
-    res.redirect(`http://localhost:5173/standby?token=${data.access_token}`);
+    res.redirect(`https://melody-match-flax.vercel.app/standby?token=${data.access_token}`);
 });
 
 

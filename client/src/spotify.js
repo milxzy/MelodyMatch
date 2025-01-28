@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export const authEndpoint = "https://accounts.spotify.com/authorize"
 
-const redirectUri = `https://melodymatch-3ro0.onrender.com/auth/spotify/callback`
+const redirectUri = "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"
 
 const clientId = '***REMOVED***'
 

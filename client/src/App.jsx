@@ -17,6 +17,7 @@ import MatchesList from "./components/MatchesList.jsx";
 import SignUp from "./components/SignUp.jsx";
 import Messaging from "./components/Messaging.jsx";
 import { setClientToken } from "./spotify";
+import Dashboard from "./components/Dashboard.jsx";
 
 function App() {
   const [token, setToken] = useState("");
@@ -48,6 +49,7 @@ function App() {
             <Route path="/spotify" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/standby" element={<Standby />} />
+            <Route path="/dashboard" element={<Dashboard />} />
 
             {/* Protected Routes */}
             <Route path="/matcheslist" element={<MatchesList />} />

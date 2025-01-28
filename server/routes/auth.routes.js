@@ -3,41 +3,103 @@
 import express from "express"
 const router = express.Router();
 import querystring  from 'querystring';
+import crypto from 'crypto';
+import dotenv from 'dotenv'
+dotenv.config()
+// console.log('All env variables:', process.env);
 
 // Your Spotify API credentials
 const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.JWT_SECRET;
-const REDIRECT_URI = 'http://localhost:5173/auth/callback'; // Change in production
-const FRONTEND_URI = 'http://localhost:5173'; // Change in production
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+console.log(CLIENT_SECRET)
+const REDIRECT_URI = 'http://localhost:4000/auth/spotify/callback'; // Change in production
+//const FRONTEND_URI = 'http://localhost:5173'; // Change in production
+
+
+router.get('/login', (req, res) => {
+  const state = crypto.randomBytes(16).toString('hex');
+  const scopes = [
+    "user-read-private",
+    "user-read-email",
+    "user-top-read",
+    "user-library-read",
+    "playlist-read-private"
+];
+  const redirect_uri = 'http://localhost:4000/auth/spotify/callback'; // Change in production
+  
+  const authUrl = 'https://accounts.spotify.com/authorize?' + 
+    new URLSearchParams({
+        response_type: 'code',
+        client_id: process.env.CLIENT_ID,
+        scope: scopes.join(' '),
+        redirect_uri: REDIRECT_URI,
+        show_dialog: true
+    });
+    res.redirect(authUrl);
+});
+
+
 
 // Route to initiate Spotify login
 router.get('/spotify/callback', async (req, res) => {
-  const code = req.query.code;
+  console.log('spotify callback')
+  const  code  = req.query.code;
+  console.log(code)
+  console.log('id : ' + CLIENT_ID)
+  console.log('secret: ' + CLIENT_SECRET)
+   // const redirect_uri = 'http://localhost:4000/auth/spotify/callback';
+  // if (!state) {
+  //   return res.redirect(`localhost:5173/error?message=state_mismatch`);
+  // }
   
-  try {
+
+  
     const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': 'Basic ' + Buffer.from(
-          process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET
+          `8fbcd37be4d04871bc6e482ea4b64807:066df6cb08d242e7b3d025c5d82d3696`
         ).toString('base64')
       },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
+        redirect_uri: 'http://localhost:4000/auth/spotify/callback'
       })
     });
 
-    const data = await tokenResponse.json();
+     const data = await tokenResponse.json();
+     console.log(data)
     
-    // Instead of using hash, redirect with query parameters
-    res.redirect(`${process.env.FRONTEND_URL}/standby?access_token=${data.access_token}&token_type=${data.token_type}&expires_in=${data.expires_in}`);
-  } catch (error) {
-    console.error('Error:', error);
-    res.redirect(`${process.env.FRONTEND_URL}/error?message=Authentication failed`);
-  }
+    // Redirect to frontend with tokens
+      if (data.access_token) {
+        res.redirect(`http://localhost:5173/standby?token=${data.access_token}`);
+    } else {
+        // Handle the error case
+        res.redirect(`http://localhost:5173/error`);
+    }
+
 });
+
+router.get('/callback', async (req, res) => {
+  console.log('spotify callback')
+    const code = req.query.code;
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Basic ' + Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64')
+        },
+        body: new URLSearchParams({
+            code: code,
+            redirect_uri: REDIRECT_URI,
+            grant_type: 'authorization_code'
+        })
+    });
+    const data = await response.json();
+    res.redirect(`http://localhost:5173/standby?token=${data.access_token}`);
+});
+
 
 export default router;

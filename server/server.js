@@ -62,7 +62,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use('/', userRoutes)
 app.use('/api/waitlist', waitlistRoutes);
-app.use('/api/auth', authRoutes)
+app.use('/auth', authRoutes)
 
 passport.use(new LocalStrategy(
   {

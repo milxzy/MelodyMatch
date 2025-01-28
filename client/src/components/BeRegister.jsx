@@ -54,7 +54,7 @@ console.log('Succsesful registration')
 //automate a job that will get the blacklisted users and automate them
 
 
-navigate("/spotify")
+navigate("/whitelist")
 
   } catch (error){
 

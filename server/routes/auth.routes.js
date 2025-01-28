@@ -12,7 +12,7 @@ dotenv.config()
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 console.log(CLIENT_SECRET)
-const REDIRECT_URI = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'; // Change in production
+const REDIRECT_URI = "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"; // Change in production
 //const FRONTEND_URI = 'https://melody-match-flax.vercel.app'; // Change in production
 
 
@@ -25,15 +25,15 @@ router.get('/login', (req, res) => {
     "user-library-read",
     "playlist-read-private"
 ];
-  const redirect_uri = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'; // Change in production
-  let encodedRedirectUri = encodeURIComponent(redirect_uri);
+  const redirect_uri = "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"; // Change in production
+  
   
   const authUrl = 'https://accounts.spotify.com/authorize?' + 
     new URLSearchParams({
         response_type: 'code',
         client_id: process.env.CLIENT_ID,
         scope: scopes.join(' '),
-        redirect_uri: encodedRedirectUri,
+        redirect_uri: redirect_uri,
         show_dialog: true
     });
     res.redirect(authUrl);
@@ -53,8 +53,8 @@ router.get('/spotify/callback', async (req, res) => {
   //   return res.redirect(`localhost:5173/error?message=state_mismatch`);
   // }
   
-  const redirectUri = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'
- let encodedRedirectUri = encodeURIComponent(redirectUri);
+  const redirectUri = "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"
+
 
   
     const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
@@ -68,7 +68,7 @@ router.get('/spotify/callback', async (req, res) => {
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: encodedRedirectUri,
+        redirect_uri: REDIRECT_URI,
       })
     });
 

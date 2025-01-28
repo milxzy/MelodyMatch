@@ -26,13 +26,14 @@ router.get('/login', (req, res) => {
     "playlist-read-private"
 ];
   const redirect_uri = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'; // Change in production
+  encodedRedirectUri = encodeURIComponent(redirect_uri);
   
   const authUrl = 'https://accounts.spotify.com/authorize?' + 
     new URLSearchParams({
         response_type: 'code',
         client_id: process.env.CLIENT_ID,
         scope: scopes.join(' '),
-        redirect_uri: REDIRECT_URI,
+        redirect_uri: encodedRedirectUri,
         show_dialog: true
     });
     res.redirect(authUrl);
@@ -52,6 +53,8 @@ router.get('/spotify/callback', async (req, res) => {
   //   return res.redirect(`localhost:5173/error?message=state_mismatch`);
   // }
   
+  const redirectUri = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'
+  encodedRedirectUri = encodeURIComponent(redirectUri);
 
   
     const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
@@ -65,7 +68,7 @@ router.get('/spotify/callback', async (req, res) => {
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'
+        redirect_uri: encodedRedirectUri,
       })
     });
 

@@ -12,7 +12,7 @@ dotenv.config()
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 console.log(CLIENT_SECRET)
-const REDIRECT_URI = 'http://localhost:4000/auth/spotify/callback'; // Change in production
+const REDIRECT_URI = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'; // Change in production
 //const FRONTEND_URI = 'http://localhost:5173'; // Change in production
 
 
@@ -25,7 +25,7 @@ router.get('/login', (req, res) => {
     "user-library-read",
     "playlist-read-private"
 ];
-  const redirect_uri = 'http://localhost:4000/auth/spotify/callback'; // Change in production
+  const redirect_uri = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'; // Change in production
   
   const authUrl = 'https://accounts.spotify.com/authorize?' + 
     new URLSearchParams({
@@ -47,7 +47,7 @@ router.get('/spotify/callback', async (req, res) => {
   console.log(code)
   console.log('id : ' + CLIENT_ID)
   console.log('secret: ' + CLIENT_SECRET)
-   // const redirect_uri = 'http://localhost:4000/auth/spotify/callback';
+   // const redirect_uri = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback';
   // if (!state) {
   //   return res.redirect(`localhost:5173/error?message=state_mismatch`);
   // }
@@ -65,7 +65,7 @@ router.get('/spotify/callback', async (req, res) => {
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: 'http://localhost:4000/auth/spotify/callback'
+        redirect_uri: 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'
       })
     });
 

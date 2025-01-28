@@ -19,77 +19,67 @@ const Standby = () => {
   const [spotifyIdState, setSpotifyIdState] = useState("");
   const [profielePicState, setProfilePicState] = useState("");
   const [ultimateState, setUltimateState] = useState([]);
- 
 
-useEffect(() => {
-
-  const token = searchParams.get('token');
-  if(token){
-    localStorage.setItem("token", token);
-    async function getUsername() {
-      try {
-        const myProfileResponse = await apiClient.get("me");
-        const username = myProfileResponse.data.id;
-        setSearchTerm(username);
-        return username; // Add this line
-      } catch (error) {
-        console.error("Error getting username:", error);
-      }
-    }
-    getUsername();
-  }
-
-
-  }, []);
   useEffect(() => {
-    async function checkDB() {
-      console.log(searchTerm);
-      console.log(`checking on ${searchTerm}`);
-      const sharedVariable = searchTerm;
-      if (searchTerm !== "") {
-        await fetch(
-          ` https://melodymatch-3ro0.onrender.com/databaseLookup?keyword=${searchTerm}`,
+    const token = searchParams.get('token');
+    if (token) {
+      localStorage.setItem("token", token);
+      async function getUsername() {
+        try {
+          const myProfileResponse = await apiClient.get("me");
+          const username = myProfileResponse.data.id;
+          setSearchTerm(username);
+        } catch (error) {
+          console.error("Error getting username:", error);
+        }
+      }
+      getUsername();
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (searchTerm !== "") {
+      async function checkDB() {
+        console.log("Checking for user:", searchTerm);
+        const sharedVariable = searchTerm;
+        const response = await fetch(
+          `https://melodymatch-3ro0.onrender.com/databaseLookup?keyword=${searchTerm}`,
           {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
             },
           }
-        )
-          .then((res) => res.json())
-          .then(console.log("front"))
-          .then((data) => {
-            if (data == "found") {
-              console.log("user found");
-              console.log(data);
-              navigate("/profile", { state: { sharedVariable } });
-            } else {
-              console.log("user not found");
-              navigate("/welcome");
-            }
-          });
+        );
+        const data = await response.json();
+        console.log("Database response:", data);
+        if (data === "found") {
+          console.log("User found");
+          navigate("/profile", { state: { sharedVariable } });
+        } else {
+          console.log("User not found");
+          navigate("/welcome");
+        }
       }
+      checkDB();
     }
-    checkDB();
-  }, [searchTerm]);
+  }, [searchTerm, navigate]);
 
   useEffect(() => {
-    const sharedVariable = "hello";
     console.log(
-      ageState,
-      artistState,
-      contactInfoState,
-      countryState,
-      contactInfoState,
-      countryState,
-      emailState,
-      genderState,
-      genreState,
-      preferredNameState,
-      spotifyDisplayNameState,
-      spotifyIdState
+      "Age:", ageState,
+      "Artist:", artistState,
+      "Contact Info:", contactInfoState,
+      "Country:", countryState,
+      "Email:", emailState,
+      "Gender:", genderState,
+      "Genre:", genreState,
+      "Preferred Name:", preferredNameState,
+      "Spotify Display Name:", spotifyDisplayNameState,
+      "Spotify ID:", spotifyIdState,
+      "Profile Pic:", profielePicState,
+      "Ultimate State:", ultimateState
     );
-    console.log("Ultimate state" + ultimateState);
   }, [spotifyIdState]);
 
   return (
@@ -99,4 +89,4 @@ useEffect(() => {
   );
 };
 
-export default Standby; 
+export default Standby;

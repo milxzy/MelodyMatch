@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import apiClient from "../spotify";
+import apiClient, { setClientToken } from "../spotify";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 
@@ -24,6 +24,7 @@ const Standby = () => {
     const token = searchParams.get('token');
     if (token) {
       localStorage.setItem("token", token);
+      setClientToken(token);
       async function getUsername() {
         try {
           const myProfileResponse = await apiClient.get("me");

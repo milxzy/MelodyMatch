@@ -1,8 +1,9 @@
 import axios from 'axios'
 
+
 export const authEndpoint = "https://accounts.spotify.com/authorize"
 
-const redirectUri = "https://melody-match-flax.vercel.app/standby"
+const redirectUri = `http://localhost:4000/auth/spotify/callback`
 
 const clientId = '***REMOVED***'
 
@@ -12,7 +13,8 @@ const scopes = [
      "user-follow-read"
 ]
 
-export const loginUrl = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join("%20")}&response_type=token&show_dialog=true`
+export const loginUrl = `http://localhost:4000/auth/login`;
+
 
 const apiClient = axios.create({
     baseURL: "https://api.spotify.com/v1/",

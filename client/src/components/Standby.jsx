@@ -1,72 +1,102 @@
 import React, { useState, useEffect } from "react";
 import apiClient from "../spotify";
 import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
 
 const Standby = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [ageState, setAgeState] = useState("");
+  const [artistState, setArtistState] = useState("");
+  const [contactInfoState, setContactInfoState] = useState("");
+  const [countryState, setCountryState] = useState("");
+  const [emailState, setEmailState] = useState("");
+  const [genderState, setGenderState] = useState("");
+  const [genreState, setGenreState] = useState([]);
+  const [preferredNameState, setPreferredNameState] = useState("");
+  const [spotifyDisplayNameState, setSpotifyDisplayNameState] = useState("");
+  const [spotifyIdState, setSpotifyIdState] = useState("");
+  const [profielePicState, setProfilePicState] = useState("");
+  const [ultimateState, setUltimateState] = useState([]);
+ 
 
-  useEffect(() => {
-    // Extract token from hash fragment
-    const hashFragment = window.location.hash.substring(1); // Remove the '#'
-    const params = new URLSearchParams(hashFragment);
-    const token = params.get("access_token");
+useEffect(() => {
 
-    if (token) {
-      // Store token and set client token
-      localStorage.setItem("token", token);
-      apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      
-      // Fetch user profile
-      apiClient
-        .get("me")
-        .then((response) => {
-          const username = response.data.id;
-          setSearchTerm(username); // Update searchTerm with the username
-        })
-        .catch((error) => console.error("Error fetching user profile:", error));
-    } else {
-      console.error("No token found in URL.");
-      navigate("/error"); // Redirect to an error page if no token is found
-    }
-  }, [navigate]);
-
-  useEffect(() => {
-    // Check if user exists in the database
-    const checkDB = async () => {
-      if (searchTerm) {
-        console.log(`Checking database for: ${searchTerm}`);
-        try {
-          const response = await fetch(
-            `https://melodymatch-3ro0.onrender.com/databaseLookup?keyword=${searchTerm}`,
-            {
-              method: "GET",
-              headers: { "Content-Type": "application/json" },
-            }
-          );
-          const data = await response.json();
-          if (data === "found") {
-            console.log("User found in the database.");
-            navigate("/profile", { state: { username: searchTerm } });
-          } else {
-            console.log("User not found. Redirecting to welcome page.");
-            navigate("/welcome");
-          }
-        } catch (error) {
-          console.error("Error checking database:", error);
-        }
+  const token = searchParams.get('token');
+  if(token){
+    localStorage.setItem("token", token);
+    async function getUsername() {
+      try {
+        const myProfileResponse = await apiClient.get("me");
+        const username = myProfileResponse.data.id;
+        setSearchTerm(username);
+        return username; // Add this line
+      } catch (error) {
+        console.error("Error getting username:", error);
       }
-    };
+    }
+    getUsername();
+  }
 
+
+  }, []);
+  useEffect(() => {
+    async function checkDB() {
+      console.log(searchTerm);
+      console.log(`checking on ${searchTerm}`);
+      const sharedVariable = searchTerm;
+      if (searchTerm !== "") {
+        await fetch(
+          ` https://melodymatch-3ro0.onrender.com/databaseLookup?keyword=${searchTerm}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
+          .then((res) => res.json())
+          .then(console.log("front"))
+          .then((data) => {
+            if (data == "found") {
+              console.log("user found");
+              console.log(data);
+              navigate("/profile", { state: { sharedVariable } });
+            } else {
+              console.log("user not found");
+              navigate("/welcome");
+            }
+          });
+      }
+    }
     checkDB();
-  }, [searchTerm, navigate]);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const sharedVariable = "hello";
+    console.log(
+      ageState,
+      artistState,
+      contactInfoState,
+      countryState,
+      contactInfoState,
+      countryState,
+      emailState,
+      genderState,
+      genreState,
+      preferredNameState,
+      spotifyDisplayNameState,
+      spotifyIdState
+    );
+    console.log("Ultimate state" + ultimateState);
+  }, [spotifyIdState]);
 
   return (
-    <div>
-      <h1>Loading...</h1>
-      <p>Please wait while we process your information.</p>
-    </div>
+    <>
+      <h1>Loading</h1>
+    </>
   );
 };
 
-export default Standby;
+export default Standby; 

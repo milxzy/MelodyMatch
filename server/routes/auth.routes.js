@@ -26,7 +26,7 @@ router.get('/login', (req, res) => {
     "playlist-read-private"
 ];
   const redirect_uri = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'; // Change in production
-  encodedRedirectUri = encodeURIComponent(redirect_uri);
+  let encodedRedirectUri = encodeURIComponent(redirect_uri);
   
   const authUrl = 'https://accounts.spotify.com/authorize?' + 
     new URLSearchParams({
@@ -54,7 +54,7 @@ router.get('/spotify/callback', async (req, res) => {
   // }
   
   const redirectUri = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback'
-  encodedRedirectUri = encodeURIComponent(redirectUri);
+ let encodedRedirectUri = encodeURIComponent(redirectUri);
 
   
     const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {

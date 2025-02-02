@@ -31,7 +31,8 @@ const SignUp = () => {
   async function onSubmit(e) {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:4000/login", {
+      const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
+      const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

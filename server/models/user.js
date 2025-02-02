@@ -109,6 +109,11 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// Alias for compatibility with different naming conventions
+userSchema.methods.isValidPassword = async function (enteredPassword) {
+  return await this.matchPassword(enteredPassword);
+};
+
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {

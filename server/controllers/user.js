@@ -51,7 +51,7 @@ export const getUser = async (req, res) => {
 
 
 export const displayDashboard = async (req, res) => {
-  const response = await fetch("https:// api.spotify.com/v1/me", {
+  const response = await fetch("https://api.spotify.com/v1/me", {
     method: "get",
     headers: {
       Authorization: "Bearer " + global.access_token,
@@ -61,7 +61,7 @@ export const displayDashboard = async (req, res) => {
   console.log(data);
 
   const artistGenres = await fetch(
-    "https:// api.spotify.com/v1/me/following?type=artist",
+    "https://api.spotify.com/v1/me/following?type=artist",
     {
       method: "get",
       headers: {
@@ -100,7 +100,7 @@ export const callback = async (req, res) => {
       grant_type: "authorization_code"
   
     })
-    const response = await fetch('https:// accounts.spotify.com/api/token', {
+    const response = await fetch('https://accounts.spotify.com/api/token', {
       method: "post",
       body: body,
       headers: {

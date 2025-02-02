@@ -7,6 +7,8 @@ dotenv.config()
 import mongoose from "mongoose";
 import cors from "cors"
 import bodyParser from 'body-parser'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import userRoutes from "./routes/user.js"
 import session from 'express-session'
 import passportLocalMongoose from 'passport-local-mongoose'
@@ -40,6 +42,9 @@ app.use(session({
   cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
 }));
 
+
+// Security middleware
+app.use(helmet());
 
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',

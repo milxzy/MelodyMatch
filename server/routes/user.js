@@ -19,7 +19,7 @@ const router = express.Router();
 router.post('/makeauser', makeAUser)
 // login route
 router.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
-    const token = jwt.sign({ id: req.user._id }, 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#'); // generate jwt token
+    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET); // generate jwt token
     res.json({ token });
 });
 

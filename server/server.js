@@ -194,6 +194,10 @@ app.post('/api/spotify/callback', (req, res) => {
 // res.render('dashboard', {user: data})
 // })
 
+// Error handling middleware (must be after all routes)
+app.use(notFound);
+app.use(errorHandler);
+
 // create http server for socket.io
 const httpServer = createServer(app);
 

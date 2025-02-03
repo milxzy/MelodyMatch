@@ -8,7 +8,6 @@ import mongoose from "mongoose";
 import cors from "cors"
 import bodyParser from 'body-parser'
 import helmet from 'helmet'
-import rateLimit from 'express-rate-limit'
 import userRoutes from "./routes/user.js"
 import session from 'express-session'
 import passportLocalMongoose from 'passport-local-mongoose'

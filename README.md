@@ -10,6 +10,7 @@ a music-based dating application that connects people through their spotify musi
 - **swipe interface**: tinder-style swiping to like or pass on potential matches
 - **user dashboard**: view your stats, matches, and music preferences at a glance
 - **secure authentication**: jwt-based authentication with passport.js
+- **security hardened**: helmet.js for security headers, rate limiting, CORS protection
 - **responsive design**: works seamlessly on desktop and mobile devices
 
 ## tech stack

@@ -3,10 +3,6 @@ import bcrypt from 'bcryptjs'
 const { Schema } = mongoose;
 
 const userSchema = new mongoose.Schema({
-  contact_info: {
-    type: String,
-    required: false
-  },
   name: {
     type: String,
     required: false
@@ -16,10 +12,7 @@ const userSchema = new mongoose.Schema({
     required: false,
     select: false // Don't include password in queries by default
   },
-  preferred_name: {
-    type: String,
-    required: false
-  },
+
   spotify_display_name: {
     type:String,
     required: false
@@ -65,10 +58,7 @@ const userSchema = new mongoose.Schema({
     required: false
   },
 
-  new_name: {
-    type: String,
-    required: false
-  },
+
 
   pic: {
     type: String,

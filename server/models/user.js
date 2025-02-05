@@ -53,10 +53,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  likes: {
-    type: String,
-    required: false
-  },
+  // Deprecated: Use likedUsers instead
+  // likes: {
+  //   type: String,
+  //   required: false
+  // },
 
 
 
@@ -72,10 +73,10 @@ const userSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   }],
-  allowedAccess: [{
+  allowedAccess: {
     type: Boolean,
-    defaule: false,
-  }]
+    default: false, // Fixed typo: was "defaule"
+  }
 })
 
 userSchema.methods.matchPassword = async function (enteredPassword) {

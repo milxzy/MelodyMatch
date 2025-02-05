@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: false
+    required: false,
+    select: false // Don't include password in queries by default
   },
   preferred_name: {
     type: String,
@@ -63,30 +64,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  db_username: {
-    type: String,
-    required: false
-  },
-  db_password: {
-    type: String,
-    required: false
-  },
+
   new_name: {
     type: String,
     required: false
   },
-  loginName: {
-    type : String,
-    require: false
-  },
-  pass: {
-    type: String,
-    require: false
-  },
-  beEmail: {
-    type: String,
-    required: false
-  },
+
   pic: {
     type: String,
     default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"

@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 const { Schema } = mongoose;
 
 const userSchema = new mongoose.Schema({
+  // Basic user information
   name: {
     type: String,
     required: false
@@ -76,7 +77,19 @@ const userSchema = new mongoose.Schema({
   allowedAccess: {
     type: Boolean,
     default: false, // Fixed typo: was "defaule"
+  },
+  
+  // User status tracking
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  lastActive: {
+    type: Date,
+    default: Date.now
   }
+}, {
+  timestamps: true // Adds createdAt and updatedAt automatically
 })
 
 userSchema.methods.matchPassword = async function (enteredPassword) {

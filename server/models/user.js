@@ -90,7 +90,13 @@ const userSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true // Adds createdAt and updatedAt automatically
-})
+});
+
+// Indexes for better query performance
+userSchema.index({ email: 1 }, { unique: true, sparse: true });
+userSchema.index({ spotify_id: 1 }, { unique: true, sparse: true });
+userSchema.index({ likedUsers: 1 });
+userSchema.index({ createdAt: -1 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);

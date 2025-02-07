@@ -2,6 +2,7 @@ import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import { authLimiter, actionLimiter } from '../middlewares/rateLimiter.js';
+import { protect } from '../middlewares/authMiddleware.js';
 
 import { backendLogin,  makeAUser, registerUser, like, getUsers, createUser, getUser, getSingleUser, databaseLookup, addSpotifyArtists, addUserInfo, addSpotifyData, displayDashboard, getMatches } from '../controllers/user.js';
 
@@ -28,10 +29,10 @@ router.get('/profile', passport.authenticate('jwt', { session: false }), (req, r
     res.json({ user: req.user }); // access user information from req.user
 });
 
-router.post('/like', actionLimiter, like)
+router.post('/like', protect, actionLimiter, like)
 
-router.get('/dashboard', displayDashboard)
-router.get('/getMatches/:userId', getMatches)
+router.get('/dashboard', protect, displayDashboard)
+router.get('/getMatches/:userId', protect, getMatches)
 
 router.post('/addUserInfo', addUserInfo)
 router.post('/addSpotifyData', addSpotifyData)

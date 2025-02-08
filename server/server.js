@@ -7,6 +7,8 @@ dotenv.config()
 import mongoose from "mongoose";
 import cors from "cors"
 import bodyParser from 'body-parser'
+import helmet from 'helmet'
+import { corsOptions } from './config/security.js'
 import userRoutes from "./routes/user.js"
 import session from 'express-session'
 import passportLocalMongoose from 'passport-local-mongoose'
@@ -41,11 +43,9 @@ app.use(session({
 }));
 
 
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-}));
+// Security middleware
+app.use(helmet());
+app.use(cors(corsOptions));
 
 app.use(express.static('public'))
 app.use(bodyParser.json());
@@ -193,6 +193,10 @@ app.post('/api/spotify/callback', (req, res) => {
 
 // res.render('dashboard', {user: data})
 // })
+
+// Error handling middleware (must be after all routes)
+app.use(notFound);
+app.use(errorHandler);
 
 // create http server for socket.io
 const httpServer = createServer(app);

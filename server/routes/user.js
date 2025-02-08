@@ -1,6 +1,8 @@
 import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import { authLimiter, actionLimiter } from '../middlewares/rateLimiter.js';
+import { protect } from '../middlewares/authMiddleware.js';
 
 import { backendLogin,  makeAUser, registerUser, like, getUsers, createUser, getUser, getSingleUser, databaseLookup, addSpotifyArtists, addUserInfo, addSpotifyData, displayDashboard, getMatches } from '../controllers/user.js';
 
@@ -16,10 +18,10 @@ const router = express.Router();
 
 // router.patch('/:id', updateuser);
 
-router.post('/makeauser', makeAUser)
+router.post('/makeauser', authLimiter, makeAUser)
 // login route
-router.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
-    const token = jwt.sign({ id: req.user._id }, 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#'); // generate jwt token
+router.post('/login', authLimiter, passport.authenticate('local', { session: false }), (req, res) => {
+    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET); // generate jwt token
     res.json({ token });
 });
 
@@ -27,10 +29,10 @@ router.get('/profile', passport.authenticate('jwt', { session: false }), (req, r
     res.json({ user: req.user }); // access user information from req.user
 });
 
-router.post('/like', like)
+router.post('/like', protect, actionLimiter, like)
 
-router.get('/dashboard', displayDashboard)
-router.get('/getMatches/:userId', getMatches)
+router.get('/dashboard', protect, displayDashboard)
+router.get('/getMatches/:userId', protect, getMatches)
 
 router.post('/addUserInfo', addUserInfo)
 router.post('/addSpotifyData', addSpotifyData)
@@ -51,8 +53,8 @@ router.get('/getUserById/:userId', async (req, res) => {
     res.status(500).json({ error: 'internal server error' });
   }
 })
-router.post('/registerUser', registerUser)
-router.post('/backendlogin', backendLogin)
+router.post('/registerUser', authLimiter, registerUser)
+router.post('/backendlogin', authLimiter, backendLogin)
 
 
 

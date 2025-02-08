@@ -3,22 +3,17 @@ import bcrypt from 'bcryptjs'
 const { Schema } = mongoose;
 
 const userSchema = new mongoose.Schema({
-  contact_info: {
-    type: String,
-    required: false
-  },
+  // Basic user information
   name: {
     type: String,
     required: false
   },
   password: {
     type: String,
-    required: false
+    required: false,
+    select: false // Don't include password in queries by default
   },
-  preferred_name: {
-    type: String,
-    required: false
-  },
+
   spotify_display_name: {
     type:String,
     required: false
@@ -59,34 +54,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  likes: {
-    type: String,
-    required: false
-  },
-  db_username: {
-    type: String,
-    required: false
-  },
-  db_password: {
-    type: String,
-    required: false
-  },
-  new_name: {
-    type: String,
-    required: false
-  },
-  loginName: {
-    type : String,
-    require: false
-  },
-  pass: {
-    type: String,
-    require: false
-  },
-  beEmail: {
-    type: String,
-    required: false
-  },
+  // Deprecated: Use likedUsers instead
+  // likes: {
+  //   type: String,
+  //   required: false
+  // },
+
+
+
   pic: {
     type: String,
     default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
@@ -99,14 +74,37 @@ const userSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   }],
-  allowedAccess: [{
+  allowedAccess: {
     type: Boolean,
-    defaule: false,
-  }]
-})
+    default: false, // Fixed typo: was "defaule"
+  },
+  
+  // User status tracking
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  lastActive: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: true // Adds createdAt and updatedAt automatically
+});
+
+// Indexes for better query performance
+userSchema.index({ email: 1 }, { unique: true, sparse: true });
+userSchema.index({ spotify_id: 1 }, { unique: true, sparse: true });
+userSchema.index({ likedUsers: 1 });
+userSchema.index({ createdAt: -1 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Alias for compatibility with different naming conventions
+userSchema.methods.isValidPassword = async function (enteredPassword) {
+  return await this.matchPassword(enteredPassword);
 };
 
 

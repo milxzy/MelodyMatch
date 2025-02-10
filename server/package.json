@@ -5,7 +5,9 @@
     "main": "server.js",
     "scripts": {
         "start": "npm i && nodemon server.js",
-        "build": "echo 'No build step for backend'"
+        "build": "echo 'No build step for backend'",
+        "test": "NODE_ENV=test jest --coverage",
+        "test:watch": "NODE_ENV=test jest --watch"
     },
     "type": "module",
     "dependencies": {
@@ -34,5 +36,19 @@
         "tr46": "^5.0.0",
         "whatwg-url": "^14.0.0"
     },
-    "license": "MIT"
+    "license": "MIT",
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "supertest": "^6.3.3",
+        "@types/jest": "^29.5.8"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "coveragePathIgnorePatterns": [
+            "/node_modules/"
+        ],
+        "testMatch": [
+            "**/tests/**/*.test.js"
+        ]
+    }
 }

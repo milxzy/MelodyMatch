@@ -80,11 +80,35 @@ const Dashboard = () => {
       // get top genres from user's profile
       const topGenres = userData.user?.genres?.slice(0, 5) || [];
 
+      // Fetch profile views count
+      const viewsResponse = await fetch(
+        `${API_URL}/api/profile-views/count/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const viewsData = await viewsResponse.json();
+      const profileViews = viewsData.viewCount || 0;
+
+      // Fetch message count
+      const messagesResponse = await fetch(
+        `${API_URL}/api/messages/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const messagesData = await messagesResponse.json();
+      const totalMessages = messagesData.messages?.length || 0;
+
       setStats({
         totalLikes,
         totalMatches,
-        totalMessages: 0, // this would require querying the messages collection
-        profileViews: Math.floor(Math.random() * 100) + 20, // placeholder
+        totalMessages,
+        profileViews,
         topGenres,
         recentMatches: matches.slice(0, 3),
         matchRate,

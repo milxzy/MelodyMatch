@@ -74,6 +74,21 @@ const userSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   }],
+  blockedUsers: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  preferences: {
+    type: Object,
+    default: {}
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedAt: {
+    type: Date
+  },
   allowedAccess: {
     type: Boolean,
     default: false, // Fixed typo: was "defaule"

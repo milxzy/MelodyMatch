@@ -242,25 +242,33 @@ export const getSingleUser = async (req, res) => {
 
 
 export const getUsers = async (req, res) => {
-  const { userId } = req.query;  // get userid from query parameters
+  const { userId, page = 1, limit = 20 } = req.query;  // add pagination params
 
   if (!userId) {
     return res.status(400).json({ error: "User ID is required" });
   }
 
   try {
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
     // get current user to compare against
     const currentUser = await User.findById(userId);
     if (!currentUser) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // find all users excluding the current user and those already liked
+    // find all users excluding the current user, already liked, and blocked users
+    const excludedIds = [
+      userId,
+      ...(currentUser.likedUsers || []),
+      ...(currentUser.blockedUsers || [])
+    ];
+
     const allUsers = await User.find({
-      _id: {
-        $ne: userId,
-        $nin: currentUser.likedUsers || []
-      }
+      _id: { $nin: excludedIds },
+      isDeleted: { $ne: true } // Exclude soft-deleted users
     }).lean();
 
     // import matching algorithm
@@ -269,8 +277,23 @@ export const getUsers = async (req, res) => {
     // sort users by music compatibility
     const sortedUsers = sortUsersByCompatibility(currentUser, allUsers);
 
-    console.log(`found ${sortedUsers.length} potential matches for user ${userId}`);
-    res.json({ users: sortedUsers });
+    // Apply pagination
+    const paginatedUsers = sortedUsers.slice(skip, skip + limitNum);
+    const totalUsers = sortedUsers.length;
+    const totalPages = Math.ceil(totalUsers / limitNum);
+
+    console.log(`found ${sortedUsers.length} potential matches for user ${userId} (page ${pageNum}/${totalPages})`);
+    
+    res.json({ 
+      users: paginatedUsers,
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalUsers,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1
+      }
+    });
   } catch (error) {
     console.error("error fetching users:", error);
     res.status(500).json({ error: "internal server error" });

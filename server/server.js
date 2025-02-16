@@ -22,6 +22,9 @@ import waitlistRoutes from "./routes/waitlistRoutes.js"
 import authRoutes from "./routes/auth.routes.js"
 import messagesRoute from "./routes/message.js"
 import matchesRoute from "./routes/matches.js"
+import profileViewRoutes from "./routes/profileView.js"
+import profileRoutes from "./routes/profile.js"
+import matchManagementRoutes from "./routes/matchManagement.js"
 import { initializeSocket } from "./socket.js"
 
 
@@ -60,6 +63,9 @@ app.use('/api/waitlist', waitlistRoutes);
 app.use('/auth', authRoutes)
 app.use("/api/matches", matchesRoute);
 app.use("/api/messages", messagesRoute);
+app.use("/api/profile-views", profileViewRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/match-management", matchManagementRoutes);
 
 passport.use(new LocalStrategy(
   {

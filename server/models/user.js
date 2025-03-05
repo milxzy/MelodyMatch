@@ -102,6 +102,10 @@ const userSchema = new mongoose.Schema({
   lastActive: {
     type: Date,
     default: Date.now
+  },
+  isBot: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true // Adds createdAt and updatedAt automatically

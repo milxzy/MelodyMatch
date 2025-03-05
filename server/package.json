@@ -7,7 +7,16 @@
         "start": "npm i && nodemon server.js",
         "build": "echo 'No build step for backend'",
         "test": "NODE_ENV=test jest --coverage",
-        "test:watch": "NODE_ENV=test jest --watch"
+        "test:watch": "NODE_ENV=test jest --watch",
+        "seed": "node scripts/seedUsers.js",
+        "seed:clear": "node scripts/seedUsers.js --clear",
+        "seed:diverse": "node scripts/seedUsers.js --strategy diverse --count 30",
+        "seed:clustered": "node scripts/seedUsers.js --strategy clustered --count 40",
+        "seed:realistic": "node scripts/seedUsers.js --strategy realistic --count 50",
+        "seed:interactions": "node scripts/seedInteractions.js",
+        "seed:likes": "node scripts/seedInteractions.js --likes 100",
+        "seed:matches": "node scripts/seedInteractions.js --matches 30",
+        "clear:bots": "node scripts/seedUsers.js --count 0 --clear"
     },
     "type": "module",
     "dependencies": {

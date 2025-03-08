@@ -89,7 +89,7 @@ function parseCustomMap(str) {
 // Print help message
 function printHelp() {
   console.log(`
-🎵 MelodyMatch Bot User Seeder
+MelodyMatch Bot User Seeder
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Usage: node seedUsers.js [options]
@@ -136,7 +136,7 @@ Strategies:
 
 // Print configuration
 function printConfig(options) {
-  console.log(`\n🎵 MelodyMatch Bot User Seeder`);
+  console.log(`\nMelodyMatch Bot User Seeder`);
   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
   console.log(`Configuration:`);
   console.log(`  Strategy: ${options.strategy}`);
@@ -159,13 +159,13 @@ function printConfig(options) {
 // Clear existing bot users
 async function clearBots(verbose) {
   if (verbose) {
-    console.log(`🗑️  Clearing existing bot users...`);
+    console.log(`Clearing existing bot users...`);
   }
   
   const result = await User.deleteMany({ isBot: true });
   
   if (verbose) {
-    console.log(`✅ Deleted ${result.deletedCount} existing bot users\n`);
+    console.log(`Deleted ${result.deletedCount} existing bot users\n`);
   }
   
   return result.deletedCount;
@@ -185,7 +185,7 @@ async function createBots(users, verbose) {
 
 // Print user details (for verbose mode)
 function printUser(user, index, total) {
-  console.log(`👤 User ${index}/${total}: ${user.name} (${user.email})`);
+  console.log(`User ${index}/${total}: ${user.name} (${user.email})`);
   console.log(`   Age: ${user.age} | Gender: ${user.gender} | Country: ${user.country}`);
   console.log(`   Genres: ${user.genres.slice(0, 4).join(', ')}${user.genres.length > 4 ? '...' : ''}`);
   console.log(`   Artists: ${user.artists.slice(0, 3).join(', ')}${user.artists.length > 3 ? ` (+${user.artists.length - 3} more)` : ''}`);
@@ -196,8 +196,8 @@ function printUser(user, index, total) {
 // Print statistics
 function printStats(users, options) {
   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
-  console.log(`✅ Successfully ${options.dryRun ? 'generated' : 'created'} ${users.length} bot users!\n`);
-  console.log(`📊 Summary:`);
+  console.log(`Successfully ${options.dryRun ? 'generated' : 'created'} ${users.length} bot users!\n`);
+  console.log(`Summary:`);
   console.log(`  Total users: ${users.length}`);
   console.log(`  Strategy: ${options.strategy}`);
   
@@ -296,9 +296,9 @@ async function main() {
       process.exit(1);
     }
     
-    console.log('📡 Connecting to database...');
+    console.log('Connecting to database...');
     await mongoose.connect(process.env.CONNECTION_STRING);
-    console.log('✅ Connected to database\n');
+    console.log('Connected to database\n');
     
     // Clear existing bots if requested
     if (options.clear) {

@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 // import { gettokenfromurl } from '../spotify.js'
 import SpotifyWebApi from "spotify-web-api-js";
-import axios from "axios";
 import apiClient from "../spotify";
-const spotify = new SpotifyWebApi();
+const _spotify = new SpotifyWebApi();
 import {
   Box,
   Button,
@@ -12,8 +11,6 @@ import {
   FormLabel,
   Heading,
   Input,
-  Radio,
-  RadioGroup,
   Stack,
   Text,
   Flex,
@@ -31,17 +28,17 @@ const Welcome = () => {
   const [artistState, setArtistState] = useState([]);
   const [profileState, setProfileState] = useState([]);
   const [genreState, setGenreState] = useState([]);
-  const [beState, setBeState] = useState([]);
+  const [_beState, _setBeState] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [userData, setUserData] = useState({
+  const [_userData, _setUserData] = useState({
     userSpotifyData: {},
     userSpotifyArtists: {},
     userSpotifyGenres: {},
   });
-  const [data, setData] = useState([]);
+  const [_data, _setData] = useState([]);
 
   useEffect(() => {
      const token = localStorage.getItem("token");
@@ -96,7 +93,7 @@ const Welcome = () => {
     fetchData();
   }, [navigate]);
 
-  const [text, setText] = useState({
+  const [_text, _setText] = useState({
     contactInfo: "",
   });
   const [form, setForm] = useState({
@@ -146,6 +143,7 @@ const Welcome = () => {
     }
   }
   async function onDecline() {
+    const token = localStorage.getItem("token");
     const response = await fetch("https://api.spotify.com/v1/me", {
       method: "get",
       headers: {

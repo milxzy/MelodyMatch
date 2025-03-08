@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { redirect } from "react-router-dom";
 
 const UserCard = ({
-  profilePic,
-  name,
-  handleNextMatch,
+  _profilePic: profilePic,
+  _name: name,
+  _handleNextMatch: handleNextMatch,
   handlePreviousMatch,
 }) => {
-  const handleLike = () => {
+  const _handleLike = () => {
     console.log("like");
   };
 
-  const handlePass = () => {
+  const _handlePass = () => {
     console.log("pass");
   };
 

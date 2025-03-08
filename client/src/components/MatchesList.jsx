@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   VStack,
@@ -7,26 +7,22 @@ import {
   Badge,
   Text,
   Flex,
-  Button,
   Center,
   Stack,
   IconButton,
 } from "@chakra-ui/react";
 import {
-  FaHeart,
-  FaTimes,
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
-import MatchesCard from "./MatchesCard";
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
 
-const MatchesList = ({}) => {
+const MatchesList = () => {
   const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [currentIndices, setCurrentIndices] = useState([]);
   const [noMatches, setNoMatches] = useState(false); // new state for no matches message
   const navigate = useNavigate();
@@ -34,7 +30,7 @@ const MatchesList = ({}) => {
 
   
 
-  const goBack = () => {
+  const _goBack = () => {
     navigate("/profile");
   };
 
@@ -110,7 +106,7 @@ const MatchesList = ({}) => {
         {noMatches ? (
           <Center>
             <Text color="white" fontSize="lg" mt={4}>
-              You don't have any matches yet. Keep searching!
+              You don&apos;t have any matches yet. Keep searching!
             </Text>
           </Center>
         ) : (

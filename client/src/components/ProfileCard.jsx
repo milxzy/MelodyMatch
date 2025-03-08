@@ -1,5 +1,4 @@
-import React from "react";
-import { Stack, HStack, VStack } from "@chakra-ui/react";
+
 import { FaHeart, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Box, Image, Badge, Text, Flex, IconButton, Heading, Wrap, WrapItem } from "@chakra-ui/react";
 
@@ -7,7 +6,7 @@ const ProfileCard = ({
   name,
   primaryGenre,
   genres,
-  subGenres,
+  _subGenres,
   age,
   country,
   profilePic,
@@ -72,7 +71,7 @@ const ProfileCard = ({
             fontWeight="bold"
             mb="4"
           >
-            🎵 {primaryGenre}
+            {primaryGenre}
           </Badge>
         )}
 

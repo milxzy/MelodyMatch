@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
 import Header from './Header';
 
-import { Box, VStack, Heading, Image, Badge, Text, Flex, Button, Center, Stack } from '@chakra-ui/react';
+import { Flex, Center } from '@chakra-ui/react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
 
@@ -13,7 +13,7 @@ const [email, setEmail] = useState('')
 const [pass, setPass] = useState('')
 const [confirmPass, setConfirmPass] = useState('')
 const [loginName, setLoginName] = useState('')
-const [error, setError] = useState(false)
+const [, setError] = useState(false)
 const [allowedAccess, setAllowedAccess] = useState(false)
 
 useEffect(() => {
@@ -22,7 +22,7 @@ useEffect(() => {
   if(userInfo){
     navigate("/spotify")
   }
-})
+}, [navigate, setAllowedAccess])
 
   
 

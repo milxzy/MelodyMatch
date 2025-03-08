@@ -361,24 +361,42 @@ export const registerUser = asyncHandler(async (req, res) => {
 })
 
 export const backendLogin = asyncHandler(async (req, res) => {
-  console.log('42')
-  const { name, email, pass, pic } = req.body;
-  console.log(req.body)
-  const user = await User.findOne({email})
-  console.log(user)
+  const { email, pass } = req.body;
 
-  if (user && (await user.matchPassword(pass))){
-    res.status(201).json({
-      _id:user._id,
-      name:user.name,
-      email:user.email,
-      pass:user.pass,
-      pic:user.pic,
-      token:generateToken(user._id),
-    })
-  } else{
-    res.status(400)
-    throw new Error("Invalid email or password")
+  // Validate input
+  if (!email || !pass) {
+    res.status(400);
+    throw new Error("Please provide both email and password");
+  }
+
+  // Find user and explicitly select password field (it has select: false by default)
+  const user = await User.findOne({ email }).select('+password');
+
+  if (!user) {
+    res.status(401);
+    throw new Error("Invalid email or password");
+  }
+
+  // Check if user has a password set (some users only use Spotify login)
+  if (!user.password) {
+    res.status(401);
+    throw new Error("This account uses Spotify login. Please use 'Continue with Spotify'");
+  }
+
+  // Verify password
+  const isPasswordMatch = await user.matchPassword(pass);
+
+  if (isPasswordMatch) {
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      pic: user.pic,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(401);
+    throw new Error("Invalid email or password");
   }
 })
 

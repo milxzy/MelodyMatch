@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import apiClient, { setClientToken } from "../spotify";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
@@ -10,24 +10,25 @@ const Standby = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [ageState, setAgeState] = useState("");
-  const [artistState, setArtistState] = useState("");
-  const [contactInfoState, setContactInfoState] = useState("");
-  const [countryState, setCountryState] = useState("");
-  const [emailState, setEmailState] = useState("");
-  const [genderState, setGenderState] = useState("");
-  const [genreState, setGenreState] = useState([]);
-  const [preferredNameState, setPreferredNameState] = useState("");
-  const [spotifyDisplayNameState, setSpotifyDisplayNameState] = useState("");
-  const [spotifyIdState, setSpotifyIdState] = useState("");
-  const [profielePicState, setProfilePicState] = useState("");
-  const [ultimateState, setUltimateState] = useState([]);
+  const [ageState, _setAgeState] = useState("");
+  const [artistState, _setArtistState] = useState("");
+  const [contactInfoState, _setContactInfoState] = useState("");
+  const [countryState, _setCountryState] = useState("");
+  const [emailState, _setEmailState] = useState("");
+  const [genderState, _setGenderState] = useState("");
+  const [genreState, _setGenreState] = useState([]);
+  const [preferredNameState, _setPreferredNameState] = useState("");
+  const [spotifyDisplayNameState, _setSpotifyDisplayNameState] = useState("");
+  const [spotifyIdState, _setSpotifyIdState] = useState("");
+  const [profielePicState, _setProfilePicState] = useState("");
+  const [ultimateState, _setUltimateState] = useState([]);
 
   useEffect(() => {
     const token = searchParams.get('token');
     if (token) {
       localStorage.setItem("token", token);
       setClientToken(token);
+      // eslint-disable-next-line no-inner-declarations
       async function getUsername() {
         try {
           const myProfileResponse = await apiClient.get("me");
@@ -43,6 +44,7 @@ const Standby = () => {
 
   useEffect(() => {
     if (searchTerm !== "") {
+      // eslint-disable-next-line no-inner-declarations
       async function checkDB() {
         console.log("Checking for user:", searchTerm);
         const sharedVariable = searchTerm;

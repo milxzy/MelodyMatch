@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { loginUrl } from "../spotify";
 import {
   Button,
@@ -17,9 +17,6 @@ const Login = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // check if there's already a valid token
-    const token = localStorage.getItem("token");
-
     // simulate an async check for loginurl (if necessary)
     if (loginUrl) {
       setLoading(false);
@@ -63,13 +60,13 @@ const Login = () => {
           <Box bg="#393552" p={6} borderRadius="md" w="full">
             <VStack spacing={3} color="#e0def4">
               <Text fontSize="md" textAlign="center">
-                🎵 Connect through your music taste
+                Connect through your music taste
               </Text>
               <Text fontSize="md" textAlign="center">
-                💕 Match with people who share your vibe
+                Match with people who share your vibe
               </Text>
               <Text fontSize="md" textAlign="center">
-                💬 Chat and discover new music together
+                Chat and discover new music together
               </Text>
             </VStack>
           </Box>

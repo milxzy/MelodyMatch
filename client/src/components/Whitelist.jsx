@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Box, Text, VStack, Heading, Center, Container, Icon, Button } from '@chakra-ui/react';
 import { FaClock, FaCheckCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -41,7 +41,7 @@ const Whitelist = () => {
                 </Text>
 
                 <Text color="white" fontSize="md">
-                  Once approved, you'll be able to:
+                  Once approved, you&apos;ll be able to:
                 </Text>
 
                 <VStack align="start" pl={4} color="white" spacing={2}>
@@ -54,7 +54,7 @@ const Whitelist = () => {
             </Box>
 
             <Text fontSize="sm" color="#232136" textAlign="center" fontStyle="italic">
-              We'll notify you via email once your account is approved. Please check back soon!
+              We&apos;ll notify you via email once your account is approved. Please check back soon!
             </Text>
 
             <Button

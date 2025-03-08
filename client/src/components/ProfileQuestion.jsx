@@ -1,5 +1,5 @@
-import { React, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import {
   Box,
@@ -48,13 +48,13 @@ const ProfileQuestion = () => {
             <Box bg="#232136" p={6} borderRadius="md" w="full">
               <VStack spacing={3} color="white">
                 <Text fontSize="md">
-                  ✓ Your music preferences have been imported
+                  Your music preferences have been imported
                 </Text>
                 <Text fontSize="md">
-                  ✓ Your profile is ready to be discovered
+                  Your profile is ready to be discovered
                 </Text>
                 <Text fontSize="md">
-                  ✓ You can now start matching with others
+                  You can now start matching with others
                 </Text>
               </VStack>
             </Box>

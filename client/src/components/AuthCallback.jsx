@@ -8,7 +8,6 @@ function AuthCallback() {
 
   useEffect(() => {
     const access_token = searchParams.get('access_token');
-    const expires_in = searchParams.get('expires_in');
     
     if (access_token) {
       setClientToken(access_token);

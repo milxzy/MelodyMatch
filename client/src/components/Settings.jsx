@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Button,
@@ -31,7 +31,7 @@ const Settings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
-  const cancelRef = React.useRef();
+  const cancelRef = useRef();
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
 

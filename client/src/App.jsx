@@ -21,7 +21,7 @@ import Dashboard from "./components/Dashboard.jsx";
 import Whitelist from "./components/Whitelist.jsx";
 
 function App() {
-  const [token, setToken] = useState("");
+  const [, setToken] = useState("");
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem("token");

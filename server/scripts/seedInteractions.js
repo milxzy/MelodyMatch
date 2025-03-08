@@ -95,7 +95,7 @@ Examples:
 
 Notes:
   - Likes are one-way (User A likes User B)
-  - Matches are mutual likes (User A ↔ User B)
+  - Matches are mutual likes (User A <-> User B)
   - Weighted mode uses compatibility scores to create more realistic likes
   - Only works with bot users (isBot: true)
 
@@ -113,13 +113,13 @@ function printConfig(options, botCount) {
   console.log(`  Matches to create: ${options.matches}`);
   console.log(`  Clear existing: ${options.clear ? 'Yes' : 'No'}`);
   console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
-  console.log(`📊 Found ${botCount} bot users in database\n`);
+  console.log(`Found ${botCount} bot users in database\n`);
 }
 
 // Clear bot interactions
 async function clearInteractions(verbose) {
   if (verbose) {
-    console.log(`🗑️  Clearing bot interactions...`);
+    console.log(`Clearing bot interactions...`);
   }
   
   // Get all bot user IDs
@@ -140,15 +140,15 @@ async function clearInteractions(verbose) {
   });
   
   if (verbose) {
-    console.log(`✅ Cleared interactions for ${bots.length} bots`);
-    console.log(`✅ Deleted ${matchResult.deletedCount} matches\n`);
+    console.log(`Cleared interactions for ${bots.length} bots`);
+    console.log(`Deleted ${matchResult.deletedCount} matches\n`);
   }
 }
 
 // Create random likes
 async function createRandomLikes(bots, count, verbose) {
   if (verbose) {
-    console.log(`🎲 Creating ${count} random likes...\n`);
+    console.log(`Creating ${count} random likes...\n`);
   }
   
   const created = [];
@@ -182,12 +182,12 @@ async function createRandomLikes(bots, count, verbose) {
     created.push({ liker, liked, compatibility: null });
     
     if (verbose && created.length % 10 === 0) {
-      console.log(`  ✓ Created ${created.length}/${count} likes...`);
+      console.log(`  Created ${created.length}/${count} likes...`);
     }
   }
   
   if (verbose && created.length > 0) {
-    console.log(`✅ Created ${created.length} likes\n`);
+    console.log(`Created ${created.length} likes\n`);
   }
   
   return created;
@@ -196,7 +196,7 @@ async function createRandomLikes(bots, count, verbose) {
 // Create weighted likes (based on compatibility)
 async function createWeightedLikes(bots, count, verbose) {
   if (verbose) {
-    console.log(`🎲 Creating ${count} weighted likes (based on compatibility)...\n`);
+    console.log(`Creating ${count} weighted likes (based on compatibility)...\n`);
   }
   
   const created = [];
@@ -255,12 +255,12 @@ async function createWeightedLikes(bots, count, verbose) {
     created.push({ liker, liked, compatibility });
     
     if (verbose) {
-      console.log(`  ✓ ${liker.name} → ${liked.name} (${compatibility.percentage}% compatibility)`);
+      console.log(`  ${liker.name} -> ${liked.name} (${compatibility.percentage}% compatibility)`);
     }
   }
   
   if (verbose) {
-    console.log(`\n✅ Created ${created.length} weighted likes\n`);
+    console.log(`\nCreated ${created.length} weighted likes\n`);
   }
   
   return created;
@@ -269,7 +269,7 @@ async function createWeightedLikes(bots, count, verbose) {
 // Create mutual matches
 async function createMatches(bots, count, verbose) {
   if (verbose) {
-    console.log(`❤️  Creating ${count} mutual matches...\n`);
+    console.log(`Creating ${count} mutual matches...\n`);
   }
   
   const created = [];
@@ -321,12 +321,12 @@ async function createMatches(bots, count, verbose) {
     created.push({ user1, user2, compatibility });
     
     if (verbose) {
-      console.log(`  ✓ Match: ${user1.name} ↔ ${user2.name} (${compatibility.percentage}% compatibility)`);
+      console.log(`  Match: ${user1.name} <-> ${user2.name} (${compatibility.percentage}% compatibility)`);
     }
   }
   
   if (verbose) {
-    console.log(`\n✅ Created ${created.length} mutual matches\n`);
+    console.log(`\nCreated ${created.length} mutual matches\n`);
   }
   
   return created;
@@ -335,8 +335,8 @@ async function createMatches(bots, count, verbose) {
 // Print statistics
 function printStats(likes, matches) {
   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
-  console.log(`✅ Interaction seeding complete!\n`);
-  console.log(`📈 Summary:`);
+  console.log(`Interaction seeding complete!\n`);
+  console.log(`Summary:`);
   console.log(`  Total likes created: ${likes.length}`);
   console.log(`  Mutual matches created: ${matches.length}`);
   
@@ -395,9 +395,9 @@ async function main() {
       process.exit(1);
     }
     
-    console.log('📡 Connecting to database...');
+    console.log('Connecting to database...');
     await mongoose.connect(process.env.CONNECTION_STRING);
-    console.log('✅ Connected to database\n');
+    console.log('Connected to database\n');
     
     // Get all bot users
     const bots = await User.find({ isBot: true });

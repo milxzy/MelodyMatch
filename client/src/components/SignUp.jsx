@@ -1,14 +1,14 @@
-import React from "react";
+
 import { useState } from "react";
-import { fileURLToPath } from "url";
-import { useNavigate } from "react-router";
-import Header from "./Header";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [, setForm] = useState({});
 
-  function updateForm(value) {
+  function _updateForm(value) {
     return setForm((prev) => {
       return { ...prev, ...value };
     });

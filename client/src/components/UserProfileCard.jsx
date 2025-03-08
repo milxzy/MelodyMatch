@@ -1,11 +1,7 @@
-import React, { useState } from "react";
-import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
-import Header from "./Header";
+import { useState } from "react";
 
-import { Stack, HStack, VStack } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import {
-  FaHeart,
-  FaTimes,
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
@@ -15,12 +11,12 @@ const UserProfileCard = ({
   name,
   primaryGenre,
   genres,
-  subGenres,
+  _subGenres,
   age,
   country,
   profilePic,
-  handleNextMatch,
-  handlePreviousMatch,
+  _handleNextMatch,
+  _handlePreviousMatch,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0); // initialize currentindex state
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -26,7 +26,7 @@ import {
 import { FiHeart, FiUsers, FiMessageCircle, FiMusic } from "react-icons/fi";
 import Header from "./Header";
 
-const apiUrl = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -63,12 +63,14 @@ const Dashboard = () => {
 
   const fetchDashboardData = async (userId) => {
     try {
+      const token = localStorage.getItem("token");
+      
       // fetch user's full data
-      const userResponse = await fetch(`${apiUrl}/getUserById/${userId}`);
+      const userResponse = await fetch(`${API_URL}/getUserById/${userId}`);
       const userData = await userResponse.json();
 
       // fetch matches
-      const matchesResponse = await fetch(`${apiUrl}/getMatches/${userId}`);
+      const matchesResponse = await fetch(`${API_URL}/getMatches/${userId}`);
       const matchesData = await matchesResponse.json();
       const matches = matchesData.matches || [];
 
@@ -152,7 +154,7 @@ const Dashboard = () => {
                   welcome back, {userInfo?.preferred_name || "user"}!
                 </Heading>
                 <Text color="#908caa" fontSize="lg" mt={2}>
-                  here's what's happening with your music connections
+                  here&apos;s what&apos;s happening with your music connections
                 </Text>
               </Box>
             </HStack>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Heading, Text, Button, VStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,7 +20,7 @@ const NotFound = () => {
           Page Not Found
         </Heading>
         <Text color="#908caa" textAlign="center" maxW="md">
-          The page you're looking for doesn't exist. It might have been moved or deleted.
+          The page you&apos;re looking for doesn&apos;t exist. It might have been moved or deleted.
         </Text>
         <Button
           bg="#eb6f92"

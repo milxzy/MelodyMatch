@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react';
 import Header from './Header';
 
@@ -45,7 +45,7 @@ const TermsOfService = () => {
                 4. Disclaimer
               </Heading>
               <Text mb={4}>
-                MelodyMatch is provided "as is" without warranties. We are not responsible
+                MelodyMatch is provided &quot;as is&quot; without warranties. We are not responsible
                 for interactions between users outside our platform.
               </Text>
             </Box>

@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import SpotifyWebApi from "spotify-web-api-js";
-import axios from "axios";
-import apiClient from "../spotify";
-const spotify = new SpotifyWebApi();
-import ProfileCard from "./ProfileCard";
-import { Center, Square, Circle, Heading, Spinner, Text, Alert, AlertIcon } from '@chakra-ui/react'
-import { Button, ButtonGroup } from '@chakra-ui/react'
-import { Stack, HStack, VStack, Flex, Box } from '@chakra-ui/react'
+const _spotify = new SpotifyWebApi();
+import { Center, Heading, Spinner, Text, Alert, AlertIcon } from '@chakra-ui/react'
+import { Button } from '@chakra-ui/react'
+import { VStack } from '@chakra-ui/react'
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
@@ -16,7 +13,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrend
 
 const Profile = () => {
   const location = useLocation();
-  const sharedVariable = location.state?.sharedVariable;
+  const _sharedVariable = location.state?.sharedVariable;
   const userData = JSON.parse(localStorage.getItem("userInfo"))
   console.log(userData);
   const [user, setUser] = useState({
@@ -100,9 +97,10 @@ const Profile = () => {
 
     console.log(user)
     getMainUser();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const goToMatches = () => {
+  const _goToMatches = () => {
     navigate('/matches')
   }
 

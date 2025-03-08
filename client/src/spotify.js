@@ -2,11 +2,11 @@ import axios from 'axios'
 
 export const authEndpoint = "https://accounts.spotify.com/authorize"
 
-const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI
+const _redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI
 
-const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID
+const _clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID
 
-const scopes = [
+const _scopes = [
      "user-read-private",
      "user-read-email",
      "user-follow-read"
@@ -28,7 +28,7 @@ export const setClientToken = (token) => {
     })
 }
 
-const refreshSpotifyToken = async () => {
+const _refreshSpotifyToken = async () => {
   const refreshToken = window.localStorage.getItem("refresh_token");
 
   if (refreshToken) {

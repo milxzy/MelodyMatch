@@ -1,33 +1,24 @@
-import React, { useState } from "react";
-import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
-import Header from "./Header";
+import { useState } from "react";
 
-import { Stack, HStack, VStack } from "@chakra-ui/react";
 import {
-  FaHeart,
-  FaTimes,
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
-import { Box, Image, Badge, Text, Flex, IconButton } from "@chakra-ui/react";
+import { Box, Image, Badge, Text, Flex, IconButton, Stack } from "@chakra-ui/react";
 
 const UserProfileCard = ({
-  name,
+  _name,
   primaryGenre,
   genres,
-  subGenres,
-  age,
-  country,
-  profilePic,
-  handleNextMatch,
-  handlePreviousMatch,
+  _subGenres,
+  _age,
+  _country,
+  _profilePic,
+  _handleNextMatch,
+  _handlePreviousMatch,
+  match,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0); // initialize currentindex state
-
-
-  useEffect(() => {
-    setCurrentIndex(0);
-  },[]);
   // function to handle click on previous button
   const handlePrevClick = () => {
     setCurrentIndex(currentIndex - 5 < 0 ? 0 : currentIndex - 5);

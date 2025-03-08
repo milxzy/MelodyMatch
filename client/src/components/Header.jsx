@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Flex,
-  Box,
   Heading,
   Button,
   IconButton,
@@ -16,7 +15,6 @@ import {
   VStack,
   Icon,
   HStack,
-  Badge,
 } from "@chakra-ui/react";
 import { FiMenu, FiHome, FiUsers, FiMessageCircle, FiUser, FiLogOut, FiHeart } from "react-icons/fi";
 

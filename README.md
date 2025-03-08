@@ -102,14 +102,16 @@ a music-based dating application that connects people through their spotify musi
 
 4. **run the application**
    ```bash
-   # start the server (from server directory)
+   # start the server in development mode (from server directory)
    cd server
-   npm start
+   npm run dev
 
    # start the client (from client directory - in a new terminal)
    cd client
    npm run dev
    ```
+
+   note: use `npm run dev` for local development (auto-reload with nodemon)
 
 5. **access the application**
    - frontend: http://localhost:5173
@@ -132,10 +134,21 @@ a music-based dating application that connects people through their spotify musi
 2. set environment variables in vercel dashboard
 3. deploy!
 
-### render (backend)
+### railway (backend) - recommended
+1. install railway cli: `npm install -g @railway/cli`
+2. login: `railway login`
+3. initialize project: `railway init`
+4. set environment variables (see RAILWAY_DEPLOYMENT.md)
+5. deploy: `railway up`
+6. no cold starts! instant response times!
+
+**detailed migration guide**: see [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for complete step-by-step instructions
+
+### alternative: render (backend)
+note: render free tier has cold starts (30-60 second delays)
 1. connect your github repository to render
 2. set environment variables in render dashboard
-3. deploy!
+3. deploy (requires paid tier for no cold starts)
 
 ## project structure
 

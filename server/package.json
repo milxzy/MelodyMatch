@@ -4,7 +4,8 @@
     "description": "Spotify example node app",
     "main": "server.js",
     "scripts": {
-        "start": "npm i && nodemon server.js",
+        "start": "node server.js",
+        "dev": "npm i && nodemon server.js",
         "build": "echo 'No build step for backend'",
         "test": "NODE_ENV=test jest --coverage",
         "test:watch": "NODE_ENV=test jest --watch",

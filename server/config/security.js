@@ -44,9 +44,13 @@ export const corsOptions = {
       return callback(null, true);
     }
     
+    // Log rejected origins for debugging
+    console.log(`CORS rejected origin: ${origin}`);
+    
     // Reject all other origins
     callback(new Error('Not allowed by CORS'));
   },
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
+  optionsSuccessStatus: 200
 };

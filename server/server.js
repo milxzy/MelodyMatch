@@ -46,9 +46,11 @@ app.use(session({
 }));
 
 
+// CORS must be before other middleware
+app.use(cors(corsOptions));
+
 // Security middleware
 app.use(helmet());
-app.use(cors(corsOptions));
 
 app.use(express.static('public'))
 app.use(bodyParser.json());
@@ -58,6 +60,12 @@ app.use(passport.session());
 app.use(express.json())
 // maybe delete the line below
 app.use(express.urlencoded({ extended: true }))
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.use('/', userRoutes)
 app.use('/api/waitlist', waitlistRoutes);
 app.use('/auth', authRoutes)

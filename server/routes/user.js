@@ -56,14 +56,16 @@ router.get('/getUserById/:userId', async (req, res) => {
   }
 })
 // Handle OPTIONS preflight for POST routes
-router.options('/registerUser', cors(corsOptions));
-router.options('/backendlogin', cors(corsOptions));
-router.options('/like', cors(corsOptions));
-router.options('/addUserInfo', cors(corsOptions));
-router.options('/addSpotifyData', cors(corsOptions));
-router.options('/addSpotifyArtists', cors(corsOptions));
-router.options('/makeauser', cors(corsOptions));
-router.options('/login', cors(corsOptions));
+const sendPreflightOk = (req, res) => res.sendStatus(204);
+
+router.options('/registerUser', cors(corsOptions), sendPreflightOk);
+router.options('/backendlogin', cors(corsOptions), sendPreflightOk);
+router.options('/like', cors(corsOptions), sendPreflightOk);
+router.options('/addUserInfo', cors(corsOptions), sendPreflightOk);
+router.options('/addSpotifyData', cors(corsOptions), sendPreflightOk);
+router.options('/addSpotifyArtists', cors(corsOptions), sendPreflightOk);
+router.options('/makeauser', cors(corsOptions), sendPreflightOk);
+router.options('/login', cors(corsOptions), sendPreflightOk);
 
 router.post('/registerUser', authLimiter, registerUser)
 router.post('/backendlogin', authLimiter, backendLogin)

@@ -79,7 +79,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/match-management", matchManagementRoutes);
 
 // Handle preflight OPTIONS requests for ALL routes (must be after route definitions)
-app.options('*', cors(corsOptions));
+app.options('*', cors(corsOptions), (req, res) => res.sendStatus(204));
 
 passport.use(new LocalStrategy(
   {

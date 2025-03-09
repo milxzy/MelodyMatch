@@ -41,9 +41,6 @@ const connectionString = process.env.CONNECTION_STRING
 // CORS must be FIRST - before ANY other middleware
 app.use(cors(corsOptions));
 
-// Handle preflight requests explicitly
-app.options('*', cors(corsOptions));
-
 // Security middleware - configure helmet to not interfere with CORS
 app.use(helmet({
   crossOriginResourcePolicy: false,
@@ -80,6 +77,9 @@ app.use("/api/messages", messagesRoute);
 app.use("/api/profile-views", profileViewRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/match-management", matchManagementRoutes);
+
+// Handle preflight OPTIONS requests for ALL routes (must be after route definitions)
+app.options('*', cors(corsOptions));
 
 passport.use(new LocalStrategy(
   {

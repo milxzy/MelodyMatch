@@ -1,8 +1,14 @@
 import express from "express";
+import cors from "cors";
 import Message from "../models/message.js";
 import User from "../models/user.js";
+import { corsOptions } from "../config/security.js";
 
 const router = express.Router();
+
+// Handle OPTIONS preflight for POST/PUT routes
+router.options("/", cors(corsOptions));
+router.options("/read/:userId/:recipientId", cors(corsOptions));
 
 // fetch messages between two users
 router.get("/:userId/:recipientId", async (req, res) => {

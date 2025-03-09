@@ -1,6 +1,12 @@
 import express from "express"
+import cors from "cors";
+import { corsOptions } from "../config/security.js";
 const router = express.Router();
 import Waitlist from "../models/waitlistModel.js"
+
+// Handle OPTIONS preflight
+router.options('/add-to-waitlist', cors(corsOptions));
+router.options('/approve-reject', cors(corsOptions));
 
 // 1. route to add a user to the waitlist
 router.post('/add-to-waitlist', async (req, res) => {

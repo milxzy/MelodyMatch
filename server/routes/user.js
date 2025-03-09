@@ -1,8 +1,10 @@
 import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import cors from 'cors';
 import { authLimiter, actionLimiter } from '../middlewares/rateLimiter.js';
 import { protect } from '../middlewares/authMiddleware.js';
+import { corsOptions } from '../config/security.js';
 
 import { backendLogin,  makeAUser, registerUser, like, getUsers, createUser, getUser, getSingleUser, databaseLookup, addSpotifyArtists, addUserInfo, addSpotifyData, displayDashboard, getMatches } from '../controllers/user.js';
 
@@ -53,6 +55,16 @@ router.get('/getUserById/:userId', async (req, res) => {
     res.status(500).json({ error: 'internal server error' });
   }
 })
+// Handle OPTIONS preflight for POST routes
+router.options('/registerUser', cors(corsOptions));
+router.options('/backendlogin', cors(corsOptions));
+router.options('/like', cors(corsOptions));
+router.options('/addUserInfo', cors(corsOptions));
+router.options('/addSpotifyData', cors(corsOptions));
+router.options('/addSpotifyArtists', cors(corsOptions));
+router.options('/makeauser', cors(corsOptions));
+router.options('/login', cors(corsOptions));
+
 router.post('/registerUser', authLimiter, registerUser)
 router.post('/backendlogin', authLimiter, backendLogin)
 

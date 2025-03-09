@@ -31,26 +31,35 @@ export const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = getAllowedOrigins();
     
+    console.log(`[CORS] Request from origin: ${origin}`);
+    console.log(`[CORS] Allowed origins: ${JSON.stringify(allowedOrigins)}`);
+    
     // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('[CORS] Allowing request with no origin');
+      return callback(null, true);
+    }
     
     // Check exact matches (localhost, FRONTEND_URL)
     if (allowedOrigins.includes(origin)) {
+      console.log('[CORS] Allowing origin (exact match)');
       return callback(null, true);
     }
     
     // Allow any Vercel deployment (production + preview URLs)
     if (origin.endsWith('.vercel.app')) {
+      console.log('[CORS] Allowing Vercel deployment');
       return callback(null, true);
     }
     
     // Log rejected origins for debugging
-    console.log(`CORS rejected origin: ${origin}`);
+    console.log(`[CORS] REJECTING origin: ${origin}`);
     
     // Reject all other origins
     callback(new Error('Not allowed by CORS'));
   },
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  preflightContinue: false
 };

@@ -49,6 +49,9 @@ app.use(session({
 // CORS must be before other middleware
 app.use(cors(corsOptions));
 
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
 // Security middleware
 app.use(helmet());
 

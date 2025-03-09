@@ -38,22 +38,25 @@ const connectionString = process.env.CONNECTION_STRING
 // app.set('views', './views')
 // app.set('view engine', 'pug')
 
+// CORS must be FIRST - before ANY other middleware
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
+// Security middleware - configure helmet to not interfere with CORS
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
 }));
-
-
-// CORS must be before other middleware
-app.use(cors(corsOptions));
-
-// Handle preflight requests explicitly
-app.options('*', cors(corsOptions));
-
-// Security middleware
-app.use(helmet());
 
 app.use(express.static('public'))
 app.use(bodyParser.json());

@@ -41,6 +41,10 @@ const connectionString = process.env.CONNECTION_STRING
 // CORS must be FIRST - before ANY other middleware
 app.use(cors(corsOptions));
 
+// Handle ALL preflight OPTIONS requests IMMEDIATELY after CORS middleware
+// This ensures preflight requests are handled before any other middleware/routes
+app.options('*', cors(corsOptions));
+
 // Security middleware - configure helmet to not interfere with CORS
 app.use(helmet({
   crossOriginResourcePolicy: false,
@@ -64,11 +68,12 @@ app.use(express.json())
 // maybe delete the line below
 app.use(express.urlencoded({ extended: true }))
 
-// Health check endpoint
+// Health check endpoint (no auth required)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// API Routes
 app.use('/', userRoutes)
 app.use('/api/waitlist', waitlistRoutes);
 app.use('/auth', authRoutes)
@@ -77,9 +82,6 @@ app.use("/api/messages", messagesRoute);
 app.use("/api/profile-views", profileViewRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/match-management", matchManagementRoutes);
-
-// Handle preflight OPTIONS requests for ALL routes (must be after route definitions)
-app.options('*', cors(corsOptions), (req, res) => res.sendStatus(204));
 
 passport.use(new LocalStrategy(
   {

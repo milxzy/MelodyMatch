@@ -1,34 +1,26 @@
 import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import cors from 'cors';
 import { authLimiter, actionLimiter } from '../middlewares/rateLimiter.js';
 import { protect } from '../middlewares/authMiddleware.js';
-import { corsOptions } from '../config/security.js';
 
 import { backendLogin,  makeAUser, registerUser, like, getUsers, createUser, getUser, getSingleUser, databaseLookup, addSpotifyArtists, addUserInfo, addSpotifyData, displayDashboard, getMatches } from '../controllers/user.js';
 
 const router = express.Router();
 
-// router.get('/', getusers);
-
-// router.post('/add', createuser);
-
-// router.get('/:id', getuser);
-
-// router.delete('/:id', deleteuser);
-
-// router.patch('/:id', updateuser);
-
+// POST routes
 router.post('/makeauser', authLimiter, makeAUser)
-// login route
+router.post('/registerUser', authLimiter, registerUser)
+router.post('/backendlogin', authLimiter, backendLogin)
+
+// Login route with passport
 router.post('/login', authLimiter, passport.authenticate('local', { session: false }), (req, res) => {
-    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET); // generate jwt token
+    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET);
     res.json({ token });
 });
 
 router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res) => {
-    res.json({ user: req.user }); // access user information from req.user
+    res.json({ user: req.user });
 });
 
 router.post('/like', protect, actionLimiter, like)
@@ -55,20 +47,6 @@ router.get('/getUserById/:userId', async (req, res) => {
     res.status(500).json({ error: 'internal server error' });
   }
 })
-// Handle OPTIONS preflight for POST routes
-const sendPreflightOk = (req, res) => res.sendStatus(204);
-
-router.options('/registerUser', cors(corsOptions), sendPreflightOk);
-router.options('/backendlogin', cors(corsOptions), sendPreflightOk);
-router.options('/like', cors(corsOptions), sendPreflightOk);
-router.options('/addUserInfo', cors(corsOptions), sendPreflightOk);
-router.options('/addSpotifyData', cors(corsOptions), sendPreflightOk);
-router.options('/addSpotifyArtists', cors(corsOptions), sendPreflightOk);
-router.options('/makeauser', cors(corsOptions), sendPreflightOk);
-router.options('/login', cors(corsOptions), sendPreflightOk);
-
-router.post('/registerUser', authLimiter, registerUser)
-router.post('/backendlogin', authLimiter, backendLogin)
 
 
 

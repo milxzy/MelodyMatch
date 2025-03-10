@@ -33,7 +33,7 @@ const Settings = () => {
   const navigate = useNavigate();
   const cancelRef = useRef();
 
-  const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
   useEffect(() => {
     fetchUserData();

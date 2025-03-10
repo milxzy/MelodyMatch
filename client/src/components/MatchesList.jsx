@@ -18,7 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
 const MatchesList = () => {
   const [matches, setMatches] = useState([]);

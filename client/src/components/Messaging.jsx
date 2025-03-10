@@ -16,7 +16,7 @@ import {
 import { io } from "socket.io-client";
 import Header from "./Header";
 
-const apiUrl = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
+const apiUrl = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
 const Messaging = () => {
   const navigate = useNavigate();

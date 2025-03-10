@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import UserProfileCard from "./UserProfileCard";
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
 const Profile = () => {
   const location = useLocation();

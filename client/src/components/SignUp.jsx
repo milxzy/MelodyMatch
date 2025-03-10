@@ -31,7 +31,7 @@ const SignUp = () => {
   async function onSubmit(e) {
     e.preventDefault();
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
       const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: {

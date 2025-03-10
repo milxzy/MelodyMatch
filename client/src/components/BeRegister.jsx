@@ -5,7 +5,7 @@ import Header from './Header';
 
 import { Flex, Center } from '@chakra-ui/react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
 const BeRegister= () => {
 const navigate = useNavigate()

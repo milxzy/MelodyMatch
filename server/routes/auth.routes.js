@@ -6,12 +6,12 @@ import querystring  from 'querystring';
 import crypto from 'crypto';
 import dotenv from 'dotenv'
 dotenv.config()
-// console.log('all env variables:', process.env);
 
 // your spotify api credentials
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || "https://melodymatch-3ro0.onrender.com/auth/spotify/callback";
+const BACKEND_URL = process.env.BACKEND_URL || 'https://melodymatch-production.up.railway.app';
+const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || `${BACKEND_URL}/auth/spotify/callback`;
 const FRONTEND_URI = process.env.FRONTEND_URL || 'https://melody-match-flax.vercel.app';
 
 
@@ -40,22 +40,17 @@ router.get('/login', (req, res) => {
 
 
 
-// route to initiate spotify login
+// Spotify OAuth callback handler
 router.get('/spotify/callback', async (req, res) => {
-  console.log('spotify callback')
-  const  code  = req.query.code;
-  console.log(code)
-  console.log('id : ' + CLIENT_ID)
-  console.log('secret: ' + CLIENT_SECRET)
-   // const redirect_uri = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback';
-  // if (!state) {
-  // return res.redirect(`localhost:5173/error?message=state_mismatch`);
-  // }
+  console.log('spotify callback received');
+  const code = req.query.code;
   
-  const redirectUri = "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"
+  if (!code) {
+    console.error('No authorization code received');
+    return res.redirect(`${FRONTEND_URI}/error?message=no_code`);
+  }
 
-
-
+  try {
     const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: {
@@ -71,17 +66,19 @@ router.get('/spotify/callback', async (req, res) => {
       })
     });
 
-     const data = await tokenResponse.json();
-     console.log(data)
+    const data = await tokenResponse.json();
+    console.log('Spotify token response received');
     
-    // redirect to frontend with tokens
-      if (data.access_token) {
-        res.redirect(`${FRONTEND_URI}/standby?token=${data.access_token}`);
+    if (data.access_token) {
+      res.redirect(`${FRONTEND_URI}/standby?token=${data.access_token}`);
     } else {
-        // handle the error case
-        res.redirect(`${FRONTEND_URI}/error`);
+      console.error('No access token in response:', data);
+      res.redirect(`${FRONTEND_URI}/error?message=token_error`);
     }
-
+  } catch (error) {
+    console.error('Spotify callback error:', error);
+    res.redirect(`${FRONTEND_URI}/error?message=callback_error`);
+  }
 });
 
 router.get('/callback', async (req, res) => {

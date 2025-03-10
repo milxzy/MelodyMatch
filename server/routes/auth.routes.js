@@ -10,9 +10,19 @@ dotenv.config()
 // your spotify api credentials
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const BACKEND_URL = process.env.BACKEND_URL || 'https://melodymatch-production.up.railway.app';
+
+// Ensure BACKEND_URL has https:// prefix
+let BACKEND_URL = process.env.BACKEND_URL || 'https://melodymatch-production.up.railway.app';
+if (BACKEND_URL && !BACKEND_URL.startsWith('http://') && !BACKEND_URL.startsWith('https://')) {
+  BACKEND_URL = `https://${BACKEND_URL}`;
+}
+
 const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || `${BACKEND_URL}/auth/spotify/callback`;
 const FRONTEND_URI = process.env.FRONTEND_URL || 'https://melody-match-flax.vercel.app';
+
+// Log configuration on startup (remove sensitive data)
+console.log('[Auth Config] REDIRECT_URI:', REDIRECT_URI);
+console.log('[Auth Config] FRONTEND_URI:', FRONTEND_URI);
 
 
 router.get('/login', (req, res) => {

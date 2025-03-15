@@ -1,154 +1,160 @@
-# MelodyMatch 🎵
+# MelodyMatch
 
-a music-based dating application that connects people through their spotify music preferences. find your perfect match based on shared musical taste!
+a music-based dating app that connects people through their music taste. find your perfect match based on shared artists, genres, and vibes.
 
-## features
+## the pivot
 
-- **spotify integration**: authenticate with spotify to import your music preferences
-- **smart matching algorithm**: users are ranked by music compatibility using genre and artist similarity
-- **real-time messaging**: chat with your matches using socket.io for instant communication
-- **swipe interface**: tinder-style swiping to like or pass on potential matches
-- **user dashboard**: view your stats, matches, and music preferences at a glance
-- **secure authentication**: jwt-based authentication with passport.js
-- **security hardened**: helmet.js for security headers, rate limiting, CORS protection
-- **responsive design**: works seamlessly on desktop and mobile devices
+> **february 2026**: spotify changed their api policy to require 250k monthly active users for access. since we're not there yet, we're going full speed into adding **apple music** and **youtube music** support. the matching algorithm doesn't care where your music comes from - it just needs artists and genres to work its magic.
+
+## current status
+
+| platform | status | notes |
+|----------|--------|-------|
+| spotify | **blocked** | requires 250k MAU for api access |
+| apple music | **in progress** | official api, $99/year, no approval needed |
+| youtube music | **planned** | unofficial api (ytmusicapi), free but risky |
+
+## what it does
+
+- **music-based matching**: you get ranked by how similar your music taste is to other users
+- **real-time chat**: socket.io messaging with your matches
+- **swipe interface**: like or pass on potential matches
+- **dashboard**: see your stats, matches, and music preferences
+
+## how matching works
+
+the algorithm is platform-agnostic. it just needs:
+- your favorite genres
+- your favorite artists
+
+then it calculates compatibility:
+- 60% weight on genre overlap (jaccard coefficient)
+- 40% weight on artist overlap
+- ranks everyone from best match to worst
+
+compatibility levels:
+- 80%+ = perfect match
+- 60-79% = great match  
+- 40-59% = good match
+- 20-39% = fair match
+- <20% = probably not your vibe
 
 ## tech stack
 
-### frontend
-- react 18 with vite
-- chakra ui for components
-- socket.io-client for real-time messaging
-- react router v6 for navigation
-- axios for api calls
-- spotify web api js
+**frontend**
+- react 18 + vite
+- chakra ui
+- socket.io-client
+- react router v6
 
-### backend
-- node.js with express
-- mongodb with mongoose
-- socket.io for real-time features
-- passport.js (local + jwt strategies)
-- spotify web api integration
-- bcryptjs for password hashing
+**backend**
+- node.js + express
+- mongodb + mongoose
+- socket.io
+- passport.js (jwt)
+- bcryptjs
+
+**deployment**
+- frontend: vercel
+- backend: railway (no cold starts)
 
 ## getting started
 
 ### prerequisites
 
-- node.js (v16 or higher)
-- mongodb atlas account or local mongodb installation
-- spotify developer account with app credentials
+- node.js v16+
+- mongodb (atlas or local)
+- apple developer account ($99/year) - for apple music integration
 
 ### installation
 
-1. **clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/MelodyMatch.git
-   cd MelodyMatch
-   ```
+```bash
+# clone it
+git clone https://github.com/milxzy/MelodyMatch.git
+cd MelodyMatch
 
-2. **set up environment variables**
+# install server deps
+cd server && npm install
 
-   **server .env file** (`server/.env`):
-   ```env
-   # mongodb connection string
-   CONNECTION_STRING=your_mongodb_connection_string
+# install client deps
+cd ../client && npm install
+```
 
-   # server port
-   PORT=4000
+### environment variables
 
-   # spotify api credentials (get from https://developer.spotify.com/dashboard)
-   CLIENT_ID=your_spotify_client_id
-   CLIENT_SECRET=your_spotify_client_secret
+**server/.env**
+```env
+CONNECTION_STRING=your_mongodb_connection_string
+PORT=4000
+JWT_SECRET=generate_a_secure_random_string
+SESSION_SECRET=generate_another_secure_random_string
+FRONTEND_URL=http://localhost:5173
+BACKEND_URL=http://localhost:4000
 
-   # jwt secret for authentication tokens (generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
-   JWT_SECRET=your_secure_random_jwt_secret
+# apple music (coming soon)
+APPLE_TEAM_ID=your_apple_team_id
+APPLE_KEY_ID=your_musickit_key_id
+APPLE_PRIVATE_KEY_PATH=./keys/AuthKey.p8
+```
 
-   # session secret (generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
-   SESSION_SECRET=your_secure_random_session_secret
+**client/.env**
+```env
+VITE_API_URL=http://localhost:4000
 
-   # api urls
-   FRONTEND_URL=http://localhost:5173
-   BACKEND_URL=http://localhost:4000
-   REDIRECT_URI=http://localhost:4000/callback
-   ```
+# apple music (coming soon)
+VITE_APPLE_MUSIC_TEAM_ID=your_apple_team_id
+VITE_APPLE_MUSIC_KEY_ID=your_musickit_key_id
+```
 
-   **client .env file** (`client/.env`):
-   ```env
-   # backend api url
-   VITE_API_URL=http://localhost:4000
+### run it
 
-   # spotify configuration (should match server CLIENT_ID)
-   VITE_SPOTIFY_CLIENT_ID=your_spotify_client_id
-   VITE_SPOTIFY_REDIRECT_URI=http://localhost:4000/callback
-   ```
+```bash
+# terminal 1: start server
+cd server && npm run dev
 
-   **important**:
-   - Copy `.env.example` files from both `client` and `server` directories
-   - Never commit your actual `.env` files to version control
-   - Generate secure random secrets for JWT_SECRET and SESSION_SECRET
-   - Use the same CLIENT_ID in both server and client configurations
+# terminal 2: start client
+cd client && npm run dev
+```
 
-3. **install dependencies**
-   ```bash
-   # install server dependencies
-   cd server
-   npm install
-
-   # install client dependencies
-   cd ../client
-   npm install
-   ```
-
-4. **run the application**
-   ```bash
-   # start the server in development mode (from server directory)
-   cd server
-   npm run dev
-
-   # start the client (from client directory - in a new terminal)
-   cd client
-   npm run dev
-   ```
-
-   note: use `npm run dev` for local development (auto-reload with nodemon)
-
-5. **access the application**
-   - frontend: http://localhost:5173
-   - backend api: http://localhost:4000
-
-## spotify setup
-
-1. go to [spotify developer dashboard](https://developer.spotify.com/dashboard)
-2. create a new app
-3. add redirect uris in the app settings:
-   - development: `http://localhost:4000/callback`
-   - production: `https://your-backend-url.com/callback`
-4. copy your client id and client secret to your .env files
-5. ensure the redirect uri in your spotify dashboard exactly matches the REDIRECT_URI in your server .env file
+- frontend: http://localhost:5173
+- backend: http://localhost:4000
 
 ## deployment
 
-### vercel (frontend)
-1. connect your github repository to vercel
-2. set environment variables in vercel dashboard
-3. deploy!
+**frontend (vercel)**
+1. connect github repo
+2. set env vars
+3. deploy
 
-### railway (backend) - recommended
-1. install railway cli: `npm install -g @railway/cli`
-2. login: `railway login`
-3. initialize project: `railway init`
-4. set environment variables (see RAILWAY_DEPLOYMENT.md)
-5. deploy: `railway up`
-6. no cold starts! instant response times!
+**backend (railway)**
+```bash
+railway login
+railway init
+railway up
+```
 
-**detailed migration guide**: see [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for complete step-by-step instructions
+see [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for the full guide.
 
-### alternative: render (backend)
-note: render free tier has cold starts (30-60 second delays)
-1. connect your github repository to render
-2. set environment variables in render dashboard
-3. deploy (requires paid tier for no cold starts)
+## api endpoints
+
+### auth
+- `POST /registerUser` - create account
+- `POST /backendlogin` - login
+- `GET /auth/login` - oauth flow (apple music coming soon)
+- `GET /auth/callback` - oauth callback
+
+### users
+- `GET /getUsers?userId={id}` - get potential matches (sorted by compatibility)
+- `GET /getUserById/:userId` - get user
+- `POST /like` - like someone
+
+### matches
+- `GET /getMatches/:userId` - get your matches
+
+### messages
+- `GET /api/messages/:userId/:recipientId` - get conversation
+- `POST /api/messages` - send message
+- `PUT /api/messages/read/:userId/:recipientId` - mark as read
 
 ## project structure
 
@@ -156,104 +162,53 @@ note: render free tier has cold starts (30-60 second delays)
 MelodyMatch/
 ├── client/                 # react frontend
 │   ├── src/
-│   │   ├── components/    # react components
-│   │   ├── spotify.js     # spotify api configuration
-│   │   └── main.jsx       # app entry point
-│   ├── .env.example       # environment variables template
+│   │   ├── components/    # ui components
+│   │   └── main.jsx       # entry point
 │   └── package.json
 ├── server/                # express backend
-│   ├── controllers/       # route controllers
-│   ├── models/           # mongoose models
+│   ├── controllers/       # route handlers
+│   ├── models/           # mongoose schemas
 │   ├── routes/           # api routes
-│   ├── utils/            # utility functions
-│   │   └── matchingAlgorithm.js  # music compatibility scoring
-│   ├── middlewares/      # custom middleware
-│   ├── socket.js         # socket.io configuration
-│   ├── server.js         # server entry point
-│   ├── .env.example      # environment variables template
-│   └── package.json
+│   ├── utils/            # helpers
+│   │   └── matchingAlgorithm.js
+│   ├── socket.js         # real-time messaging
+│   └── server.js         # entry point
 └── README.md
 ```
 
-## api endpoints
+## socket events
 
-### authentication
-- `POST /registerUser` - register new user
-- `POST /backendlogin` - login with credentials
-- `GET /auth/login` - initiate spotify oauth
-- `GET /auth/spotify/callback` - spotify oauth callback
+**client → server**
+- `user-online` - connect with user id
+- `send-message` - send a message
+- `typing-start` / `typing-stop` - typing indicators
 
-### users
-- `GET /GetUsers?userId={id}` - get sorted list of potential matches
-- `GET /getUserById/:userId` - get user by id
-- `GET /getsingleuser?keyword={email}` - get user by email
-- `GET /databaselookup?keyword={spotifyId}` - check if user exists
-- `POST /addUserInfo` - add user profile information
-- `POST /like` - like another user
+**server → client**
+- `receive-message` - new message
+- `message-sent` - confirmation
+- `user-typing` / `user-stopped-typing` - typing indicators
+- `user-status-change` - online/offline
 
-### matches
-- `GET /getmatches/:userId` - get user's matches
-- `GET /api/matches/:userId` - get matches (alternative endpoint)
+## roadmap
 
-### messaging
-- `GET /api/messages/:userId/:recipientId` - get messages between users
-- `POST /api/messages` - send a message
-- `PUT /api/messages/read/:userId/:recipientId` - mark messages as read
-
-### waitlist
-- `POST /api/waitlist/add-to-waitlist` - add email to waitlist
-- `GET /api/waitlist/check-status/:email` - check waitlist status
-- `POST /api/waitlist/approve-reject` - admin approval
-
-## matching algorithm
-
-the app uses a sophisticated music compatibility algorithm that:
-- calculates genre similarity using jaccard coefficient
-- compares artist preferences
-- generates an overall compatibility score (60% genres, 40% artists)
-- ranks users from highest to lowest compatibility
-- filters out already-liked users
-
-compatibility levels:
-- **80%+**: perfect match
-- **60-79%**: great match
-- **40-59%**: good match
-- **20-39%**: fair match
-- **<20%**: low match
-
-## socket.io events
-
-### client → server
-- `user-online` - user connects with their id
-- `send-message` - send a message to recipient
-- `typing-start` - user starts typing
-- `typing-stop` - user stops typing
-
-### server → client
-- `receive-message` - new message received
-- `message-sent` - confirmation message was sent
-- `user-typing` - recipient is typing
-- `user-stopped-typing` - recipient stopped typing
-- `user-status-change` - user online/offline status changed
+- [x] core matching algorithm
+- [x] real-time messaging
+- [x] user authentication
+- [x] railway deployment
+- [ ] apple music integration
+- [ ] youtube music integration
+- [ ] manual genre/artist entry (fallback)
+- [ ] playlist import
+- [ ] listening history analysis
 
 ## contributing
 
-contributions are welcome! please feel free to submit a pull request.
+prs welcome. open an issue first if it's a big change.
 
 ## license
 
 mit
 
-## support
-
-for issues or questions, please open an issue on github.
-
-## acknowledgments
-
-- spotify web api for music data
-- chakra ui for beautiful components
-- socket.io for real-time features
-
 ---
 
-**note**: this app requires spotify api approval for production use. currently in development mode with extended quota.
+*built because spotify said no. now we're building something better.*

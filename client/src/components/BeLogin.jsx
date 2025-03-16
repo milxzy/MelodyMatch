@@ -23,7 +23,7 @@ import {
   Divider,
   HStack,
 } from "@chakra-ui/react";
-import { FaMusic, FaEye, FaEyeSlash, FaSpotify } from "react-icons/fa";
+import { FaMusic, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
@@ -39,7 +39,7 @@ const BeLogin = () => {
   useEffect(() => {
     const userInfo = localStorage.getItem("userInfo");
     if (userInfo) {
-      navigate("/spotify");
+      navigate("/profile");
     }
   }, [navigate]);
 
@@ -47,8 +47,8 @@ const BeLogin = () => {
     navigate("/beregister");
   };
 
-  const goToSpotifyLogin = () => {
-    navigate("/spotify");
+  const goToMusicPlatform = () => {
+    navigate("/migrate");
   };
 
   const submitHandler = async (e) => {
@@ -89,7 +89,13 @@ const BeLogin = () => {
       });
 
       setLoading(false);
-      navigate("/spotify");
+      
+      // Check if user has completed migration
+      if (data.hasCompletedMigration) {
+        navigate("/profile");
+      } else {
+        navigate("/migrate");
+      }
     } catch (error) {
       console.error("An error occurred:", error);
       setError(
@@ -219,22 +225,22 @@ const BeLogin = () => {
             <Divider borderColor="#6e6a86" />
           </HStack>
 
-          {/* Spotify Login Button */}
+          {/* Music Platform Login Button */}
           <Button
-            onClick={goToSpotifyLogin}
+            onClick={goToMusicPlatform}
             w="full"
             size="lg"
-            bg="#1DB954"
+            bg="#31748F"
             color="white"
-            _hover={{ bg: "#1ed760", transform: "translateY(-2px)" }}
-            _active={{ bg: "#1aa34a" }}
-            leftIcon={<Icon as={FaSpotify} boxSize={5} />}
+            _hover={{ bg: "#286983", transform: "translateY(-2px)" }}
+            _active={{ bg: "#1f5c76" }}
+            leftIcon={<Icon as={FaMusic} boxSize={5} />}
             fontWeight="bold"
             borderRadius="lg"
             transition="all 0.2s"
             boxShadow="md"
           >
-            Continue with Spotify
+            Connect Music Platform
           </Button>
 
           {/* Footer Links */}

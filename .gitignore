@@ -13,6 +13,14 @@ yarn-error.log*
 # Environment files
 .client/.env
 .server.env
+server/.env
+client/.env
+server/python-services/**/.env
+
+# Apple Music private keys (CRITICAL - never commit!)
+*.p8
+server/certs/
+certs/
 
 # Tailwind CSS build output
 .tailwind/

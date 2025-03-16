@@ -68,7 +68,15 @@ class AppleMusicAdapter {
   async makeRequest(endpoint, userToken, options = {}) {
     const developerToken = this.generateDeveloperToken();
     
-    const url = `${this.apiBaseUrl}${endpoint}`;
+    // Handle both full URLs (from pagination) and relative endpoints
+    let url;
+    if (endpoint.startsWith('http')) {
+      // Full URL from pagination
+      url = endpoint;
+    } else {
+      // Relative path - just add to base URL
+      url = `${this.apiBaseUrl}${endpoint}`;
+    }
     
     const headers = {
       'Authorization': `Bearer ${developerToken}`,
@@ -77,6 +85,8 @@ class AppleMusicAdapter {
       ...options.headers
     };
     
+    console.log(`[Apple Music API] Requesting: ${url}`);
+    
     const response = await fetch(url, {
       ...options,
       headers
@@ -84,45 +94,132 @@ class AppleMusicAdapter {
     
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(`Apple Music API error: ${response.status} - ${error.errors?.[0]?.detail || response.statusText}`);
+      const errorDetail = error.errors?.[0]?.detail || error.errors?.[0]?.title || response.statusText;
+      console.error(`[Apple Music API] Error ${response.status}: ${errorDetail}`);
+      throw new Error(`Apple Music API error: ${response.status} - ${errorDetail}`);
     }
     
     return await response.json();
   }
 
   /**
-   * Fetch user's library artists
+   * Get user's storefront (region) and basic profile info
+   * @param {string} userToken - User's music token
+   * @returns {Promise<object>} User storefront data
+   */
+  async getUserStorefront(userToken) {
+    try {
+      const data = await this.makeRequest('/me/storefront', userToken);
+      return data.data?.[0] || null;
+    } catch (error) {
+      console.error('Error fetching Apple Music storefront:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Extract next URL from pagination response
+   * @param {string} nextUrl - Next URL from Apple Music API
+   * @returns {string|null} Processed URL or null
+   */
+  extractNextUrl(nextUrl) {
+    if (!nextUrl) return null;
+    
+    // If it's a full URL (starts with http), parse and extract path
+    if (nextUrl.startsWith('http')) {
+      try {
+        const url = new URL(nextUrl);
+        // Remove /v1 prefix if present to avoid duplication
+        const path = url.pathname.replace(/^\/v1/, '');
+        return path + url.search;
+      } catch (e) {
+        console.error('[Apple Music] Error parsing next URL:', e);
+        return null;
+      }
+    }
+    
+    // If it's a relative path, just strip /v1 prefix if present
+    return nextUrl.replace(/^\/v1/, '');
+  }
+
+  /**
+   * Fetch user's library artists by extracting from songs and albums
    * @param {string} userToken - User's music token
    * @returns {Promise<Array<string>>} Array of artist names
    */
   async fetchUserArtists(userToken) {
     try {
-      const artists = [];
-      let nextUrl = '/me/library/artists';
+      const artists = new Set(); // Use Set for automatic deduplication
       
-      // Apple Music API uses pagination
-      while (nextUrl) {
-        const data = await this.makeRequest(nextUrl, userToken);
-        
-        if (data.data) {
-          const artistNames = data.data.map(artist => 
-            artist.attributes?.name
-          ).filter(Boolean);
+      // 1. Extract artists from library songs (with pagination)
+      console.log('[Apple Music] Fetching artists from library songs...');
+      let nextSongsUrl = '/me/library/songs?limit=100';
+      let songsPageCount = 0;
+      const MAX_PAGES = 50; // Safety limit: 5000 songs max
+      
+      while (nextSongsUrl && songsPageCount < MAX_PAGES) {
+        try {
+          const songsData = await this.makeRequest(nextSongsUrl, userToken);
           
-          artists.push(...artistNames);
+          if (songsData.data) {
+            songsData.data.forEach(song => {
+              const artistName = song.attributes?.artistName;
+              if (artistName) artists.add(artistName);
+            });
+          }
+          
+          // Handle pagination
+          nextSongsUrl = this.extractNextUrl(songsData.next);
+          songsPageCount++;
+          
+          if (songsPageCount % 5 === 0) {
+            console.log(`[Apple Music] Processed ${songsPageCount} pages of songs, found ${artists.size} unique artists so far...`);
+          }
+        } catch (error) {
+          if (error.message.includes('404')) {
+            console.log('[Apple Music] No more songs found in library (404)');
+            break;
+          }
+          throw error;
         }
-        
-        // Check for next page
-        nextUrl = data.next ? data.next : null;
-        
-        // Safety limit: max 500 artists
-        if (artists.length >= 500) break;
       }
       
-      return artists;
+      console.log(`[Apple Music] Extracted ${artists.size} artists from ${songsPageCount} pages of songs`);
+      
+      // 2. Also extract artists from library albums (better coverage)
+      console.log('[Apple Music] Fetching artists from library albums...');
+      let nextAlbumsUrl = '/me/library/albums?limit=100';
+      let albumsPageCount = 0;
+      
+      while (nextAlbumsUrl && albumsPageCount < MAX_PAGES) {
+        try {
+          const albumsData = await this.makeRequest(nextAlbumsUrl, userToken);
+          
+          if (albumsData.data) {
+            albumsData.data.forEach(album => {
+              const artistName = album.attributes?.artistName;
+              if (artistName) artists.add(artistName);
+            });
+          }
+          
+          // Handle pagination
+          nextAlbumsUrl = this.extractNextUrl(albumsData.next);
+          albumsPageCount++;
+        } catch (error) {
+          if (error.message.includes('404')) {
+            console.log('[Apple Music] No more albums found in library (404)');
+            break;
+          }
+          throw error;
+        }
+      }
+      
+      console.log(`[Apple Music] Extracted ${artists.size} total unique artists from ${songsPageCount} pages of songs and ${albumsPageCount} pages of albums`);
+      return Array.from(artists);
     } catch (error) {
       console.error('Error fetching Apple Music artists:', error);
-      throw error;
+      // Return empty array on error instead of throwing
+      return [];
     }
   }
 
@@ -136,30 +233,75 @@ class AppleMusicAdapter {
     try {
       const genres = new Set();
       
-      // Get genres from user's library songs
-      const songsData = await this.makeRequest('/me/library/songs?limit=100', userToken);
+      // Get genres from ALL library songs with pagination
+      console.log('[Apple Music] Fetching genres from library songs...');
+      let nextSongsUrl = '/me/library/songs?limit=100';
+      let songsPageCount = 0;
+      const MAX_PAGES = 50; // Safety limit: 5000 songs max
       
-      if (songsData.data) {
-        songsData.data.forEach(song => {
-          const genreNames = song.attributes?.genreNames || [];
-          genreNames.forEach(g => genres.add(g));
-        });
+      while (nextSongsUrl && songsPageCount < MAX_PAGES) {
+        try {
+          const songsData = await this.makeRequest(nextSongsUrl, userToken);
+          
+          if (songsData.data) {
+            songsData.data.forEach(song => {
+              const genreNames = song.attributes?.genreNames || [];
+              genreNames.forEach(g => genres.add(g));
+            });
+          }
+          
+          // Handle pagination
+          nextSongsUrl = this.extractNextUrl(songsData.next);
+          songsPageCount++;
+          
+          if (songsPageCount % 5 === 0) {
+            console.log(`[Apple Music] Processed ${songsPageCount} pages of songs, found ${genres.size} unique genres so far...`);
+          }
+        } catch (error) {
+          if (error.message.includes('404')) {
+            console.log('[Apple Music] No more songs found in library (404)');
+            break;
+          }
+          throw error;
+        }
       }
       
-      // Also get genres from albums for better coverage
-      const albumsData = await this.makeRequest('/me/library/albums?limit=50', userToken);
+      console.log(`[Apple Music] Extracted ${genres.size} genres from ${songsPageCount} pages of songs`);
       
-      if (albumsData.data) {
-        albumsData.data.forEach(album => {
-          const genreNames = album.attributes?.genreNames || [];
-          genreNames.forEach(g => genres.add(g));
-        });
+      // Also get genres from ALL albums with pagination
+      console.log('[Apple Music] Fetching genres from library albums...');
+      let nextAlbumsUrl = '/me/library/albums?limit=100';
+      let albumsPageCount = 0;
+      
+      while (nextAlbumsUrl && albumsPageCount < MAX_PAGES) {
+        try {
+          const albumsData = await this.makeRequest(nextAlbumsUrl, userToken);
+          
+          if (albumsData.data) {
+            albumsData.data.forEach(album => {
+              const genreNames = album.attributes?.genreNames || [];
+              genreNames.forEach(g => genres.add(g));
+            });
+          }
+          
+          // Handle pagination
+          nextAlbumsUrl = this.extractNextUrl(albumsData.next);
+          albumsPageCount++;
+        } catch (error) {
+          if (error.message.includes('404')) {
+            console.log('[Apple Music] No more albums found in library (404)');
+            break;
+          }
+          throw error;
+        }
       }
       
+      console.log(`[Apple Music] Fetched ${genres.size} total unique genres from ${songsPageCount} pages of songs and ${albumsPageCount} pages of albums`);
       return Array.from(genres);
     } catch (error) {
       console.error('Error fetching Apple Music genres:', error);
-      throw error;
+      // Return empty array on error instead of throwing
+      return [];
     }
   }
 
@@ -251,6 +393,24 @@ class AppleMusicAdapter {
     // Apple Music data is already in a good format
     // This method exists for consistency with other adapters
     return rawData;
+  }
+
+  /**
+   * Alias for fetchUserArtists (for compatibility)
+   * @param {string} userToken - User's music token
+   * @returns {Promise<Array<string>>} Array of artist names
+   */
+  async getTopArtists(userToken) {
+    return this.fetchUserArtists(userToken);
+  }
+
+  /**
+   * Alias for fetchUserGenres (for compatibility)
+   * @param {string} userToken - User's music token
+   * @returns {Promise<Array<string>>} Array of genre names
+   */
+  async getTopGenres(userToken) {
+    return this.fetchUserGenres(userToken);
   }
 }
 

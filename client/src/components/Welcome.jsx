@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-// import { gettokenfromurl } from '../spotify.js'
-import SpotifyWebApi from "spotify-web-api-js";
-import apiClient from "../spotify";
-const _spotify = new SpotifyWebApi();
 import {
   Box,
   Button,
@@ -15,87 +11,21 @@ import {
   Text,
   Flex,
   Center,
-  Spinner,
   Alert,
   AlertIcon,
   VStack,
 } from "@chakra-ui/react";
+import LoadingState from "./LoadingState";
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
 const Welcome = () => {
   const navigate = useNavigate();
-  const [artistState, setArtistState] = useState([]);
-  const [profileState, setProfileState] = useState([]);
-  const [genreState, setGenreState] = useState([]);
-  const [_beState, _setBeState] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [userData, setUserData] = useState(null);
 
-  const [_userData, _setUserData] = useState({
-    userSpotifyData: {},
-    userSpotifyArtists: {},
-    userSpotifyGenres: {},
-  });
-  const [_data, _setData] = useState([]);
-
-  useEffect(() => {
-     const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/");
-      return;
-    }
-    async function fetchData() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const myProfileResponse = await apiClient.get("me");
-        const myProfileData = myProfileResponse.data;
-
-        if (!myProfileData) {
-          throw new Error("Failed to fetch Spotify profile data");
-        }
-
-        const country = myProfileData.country;
-        const email = myProfileData.email;
-        const spotifyId = myProfileData.id;
-        const displayName = myProfileData.display_name;
-        const profilePic = myProfileData.images[0]?.url || "";
-        console.log(profilePic);
-        const profileInfo = [country, email, spotifyId, displayName, profilePic];
-        setProfileState(profileInfo);
-
-        const followedArtistsResponse = await apiClient.get(
-          "me/following?type=artist"
-        );
-        const artistData = followedArtistsResponse.data;
-        const allGenres = [];
-        const followedArtists = [];
-        artistData.artists.items.forEach((artist) => {
-          if (artist.genres && artist.genres.length > 0) {
-            allGenres.push(...artist.genres);
-          }
-        });
-        artistData.artists.items.forEach((artist) => {
-          followedArtists.push(artist.name);
-        });
-        setArtistState(followedArtists);
-        setGenreState(allGenres);
-      } catch (err) {
-        console.error("Error fetching Spotify data:", err);
-        setError("Failed to load Spotify data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, [navigate]);
-
-  const [_text, _setText] = useState({
-    contactInfo: "",
-  });
   const [form, setForm] = useState({
     contactInfo: "",
     preferredName: "",
@@ -103,6 +33,54 @@ const Welcome = () => {
     gender: "",
     beEmail: "",
   });
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem("userInfo");
+    if (!userInfo) {
+      navigate("/belogin");
+      return;
+    }
+
+    fetchUserData();
+  }, [navigate]);
+
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+      const userId = userInfo._id || userInfo.id;
+
+      // Fetch user data from backend (includes aggregated music data)
+      const response = await fetch(`${API_URL}/getUserById/${userId}`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+
+      const data = await response.json();
+      
+      if (!data) {
+        throw new Error("No user data returned");
+      }
+
+      // Check if user has connected platforms
+      if (!data.connectedPlatforms || data.connectedPlatforms.length === 0) {
+        // Redirect to migration wizard
+        navigate("/migrate");
+        return;
+      }
+
+      setUserData(data);
+      
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      setError("Failed to load your music data. Please try again or connect a music platform.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   function updateForm(value) {
     return setForm((prev) => {
@@ -117,13 +95,27 @@ const Welcome = () => {
       setSubmitting(true);
       setError(null);
 
-      const newPerson = { form, artistState, genreState, profileState };
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+      const userId = userInfo._id || userInfo.id;
+
+      const profileData = {
+        userId,
+        contactInfo: form.contactInfo,
+        preferredName: form.preferredName,
+        age: form.age,
+        gender: form.gender,
+        beEmail: form.beEmail,
+        // Music data is already stored in the database from platform connection
+        artists: userData.aggregatedArtists || [],
+        genres: userData.aggregatedGenres || [],
+      };
+
       const response = await fetch(`${API_URL}/addUserInfo`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newPerson),
+        body: JSON.stringify(profileData),
       });
 
       if (!response.ok) {
@@ -131,10 +123,10 @@ const Welcome = () => {
       }
 
       const data = await response.json();
-      console.log(data);
+      console.log("Profile saved:", data);
 
-      setForm({ contactInfo: "", preferredName: "", age: "", gender: "" });
-      navigate("/Profile");
+      setForm({ contactInfo: "", preferredName: "", age: "", gender: "", beEmail: "" });
+      navigate("/profile");
     } catch (error) {
       console.error("Error submitting profile:", error);
       setError(error.message || "Failed to save profile. Please try again.");
@@ -142,21 +134,25 @@ const Welcome = () => {
       setSubmitting(false);
     }
   }
-  async function onDecline() {
-    const token = localStorage.getItem("token");
-    const response = await fetch("https://api.spotify.com/v1/me", {
-      method: "get",
-      headers: {
-        Authorization: "Bearer " + token,
-      },
-    });
-    const data = await response.json();
-    console.log(data);
-  }
 
-  console.log(genreState);
-  console.log(artistState);
-  console.log(profileState);
+  if (loading) {
+    return (
+      <Flex
+        align="center"
+        justify="center"
+        bg="#232136"
+        minHeight="100vh"
+        color="white"
+        px={4}
+      >
+        <LoadingState 
+          variant="spinner" 
+          message="Loading your profile..." 
+          size="large"
+        />
+      </Flex>
+    );
+  }
 
   return (
     <>
@@ -169,18 +165,6 @@ const Welcome = () => {
         px={4}
       >
         <Center>
-          {loading ? (
-            <VStack spacing={4}>
-              <Spinner
-                thickness="4px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="#eb6f92"
-                size="xl"
-              />
-              <Text color="white">Loading your Spotify data...</Text>
-            </VStack>
-          ) : (
           <Box
             bg="#2a273f"
             borderRadius="lg"
@@ -196,7 +180,7 @@ const Welcome = () => {
               textAlign="center"
               color="#eb6f92"
             >
-              Register for MelodyMatch
+              Complete Your Profile
             </Heading>
 
             {error && (
@@ -206,9 +190,23 @@ const Welcome = () => {
               </Alert>
             )}
 
+            {userData && (
+              <Alert status="success" mb={4} borderRadius="md" bg="#31748F20">
+                <AlertIcon color="#31748F" />
+                <VStack align="start" spacing={0} flex={1}>
+                  <Text color="#E0DEF4" fontWeight="bold" fontSize="sm">
+                    Music data imported successfully!
+                  </Text>
+                  <Text color="#908CAA" fontSize="xs">
+                    {userData.aggregatedArtists?.length || 0} artists, {userData.aggregatedGenres?.length || 0} genres
+                  </Text>
+                </VStack>
+              </Alert>
+            )}
+
             <form onSubmit={onSubmit}>
               <Stack spacing={4}>
-                <FormControl>
+                <FormControl isRequired>
                   <FormLabel htmlFor="contactInfo" color="#eb6f92">
                     Contact Info
                   </FormLabel>
@@ -227,7 +225,7 @@ const Welcome = () => {
                   />
                 </FormControl>
 
-                <FormControl>
+                <FormControl isRequired>
                   <FormLabel htmlFor="preferredName" color="#eb6f92">
                     Preferred Name
                   </FormLabel>
@@ -246,7 +244,7 @@ const Welcome = () => {
                   />
                 </FormControl>
 
-                <FormControl>
+                <FormControl isRequired>
                   <FormLabel htmlFor="age" color="#eb6f92">
                     Age
                   </FormLabel>
@@ -264,8 +262,25 @@ const Welcome = () => {
                 </FormControl>
 
                 <FormControl>
+                  <FormLabel htmlFor="gender" color="#eb6f92">
+                    Gender (Optional)
+                  </FormLabel>
+                  <Input
+                    id="gender"
+                    type="text"
+                    placeholder="Gender"
+                    value={form.gender}
+                    onChange={(e) => updateForm({ gender: e.target.value })}
+                    bg="gray.700"
+                    border="none"
+                    focusBorderColor="#eb6f92"
+                    _placeholder={{ color: "gray.400" }}
+                  />
+                </FormControl>
+
+                <FormControl isRequired>
                   <FormLabel htmlFor="email" color="#eb6f92">
-                    Email (Must be same email originally signed up with)
+                    Email
                   </FormLabel>
                   <Input
                     id="email"
@@ -280,38 +295,22 @@ const Welcome = () => {
                   />
                 </FormControl>
 
-
-                <Stack
-                  direction={{ base: "column", sm: "row" }}
-                  spacing={4}
+                <Button
+                  type="submit"
+                  bg="#eb6f92"
+                  color="white"
+                  _hover={{ bg: "#d45879" }}
                   mt={4}
+                  w="full"
+                  size="lg"
+                  isLoading={submitting}
+                  loadingText="Saving..."
                 >
-                  <Button
-                    type="submit"
-                    bg="#eb6f92"
-                    color="white"
-                    _hover={{ bg: "#d45879" }}
-                    flex={1}
-                    isLoading={submitting}
-                    loadingText="Saving..."
-                  >
-                    Submit
-                  </Button>
-                  <Button
-                    onClick={onDecline}
-                    bg="gray.600"
-                    color="white"
-                    _hover={{ bg: "gray.500" }}
-                    flex={1}
-                    isDisabled={submitting}
-                  >
-                    Decline
-                  </Button>
-                </Stack>
+                  Complete Registration
+                </Button>
               </Stack>
             </form>
           </Box>
-          )}
         </Center>
       </Flex>
     </>

@@ -177,6 +177,24 @@ class YouTubeMusicAdapter {
       }))
     };
   }
+
+  /**
+   * Alias for fetchUserArtists (for compatibility)
+   * @param {string} token - Access token
+   * @returns {Promise<Array<string>>} Array of artist names
+   */
+  async getTopArtists(token) {
+    return this.fetchUserArtists(token);
+  }
+
+  /**
+   * Alias for fetchUserGenres (for compatibility)
+   * @param {string} token - Access token
+   * @returns {Promise<Array<string>>} Array of genre names
+   */
+  async getTopGenres(token) {
+    return this.fetchUserGenres(token);
+  }
 }
 
 export default YouTubeMusicAdapter;

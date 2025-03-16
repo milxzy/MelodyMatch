@@ -20,6 +20,7 @@ import User from "./models/user.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 import waitlistRoutes from "./routes/waitlistRoutes.js"
 import authRoutes from "./routes/auth.routes.js"
+import newAuthRoutes from "./routes/auth/index.js"
 import messagesRoute from "./routes/message.js"
 import matchesRoute from "./routes/matches.js"
 import profileViewRoutes from "./routes/profileView.js"
@@ -76,7 +77,8 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/', userRoutes)
 app.use('/api/waitlist', waitlistRoutes);
-app.use('/auth', authRoutes)
+app.use('/auth', authRoutes) // Legacy Spotify auth (deprecated)
+app.use('/auth', newAuthRoutes) // New multi-platform auth (Apple Music, YouTube Music)
 app.use("/api/matches", matchesRoute);
 app.use("/api/messages", messagesRoute);
 app.use("/api/profile-views", profileViewRoutes);

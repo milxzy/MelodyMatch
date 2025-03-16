@@ -44,10 +44,16 @@ const userSchema = new mongoose.Schema({
     default: []
   },
   
-  connectedPlatforms: [{
-    type: Schema.Types.ObjectId,
-    ref: 'UserMusicPlatform'
-  }],
+  connectedPlatforms: {
+    type: [String],
+    default: []
+  },
+  
+  // Store platform-specific data (raw data from each platform)
+  platformData: {
+    type: Schema.Types.Mixed,
+    default: {}
+  },
   
   primaryPlatform: {
     type: String,

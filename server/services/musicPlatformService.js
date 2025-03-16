@@ -3,6 +3,7 @@ import YouTubeMusicAdapter from '../adapters/youtubeMusicAdapter.js';
 import SpotifyAdapter from '../adapters/spotifyAdapter.js';
 import UserMusicPlatform from '../models/userMusicPlatform.js';
 import User from '../models/user.js';
+import { normalizeGenre } from '../utils/genreNormalizer.js';
 
 /**
  * Music Platform Service - Abstraction layer for all music platforms
@@ -88,40 +89,59 @@ class MusicPlatformService {
    * @returns {Promise<Object>} Aggregated artists and genres
    */
   static async mergeUserMusicData(userId) {
-    // Get all active platforms for this user
-    const platforms = await UserMusicPlatform.find({ 
-      userId, 
-      isActive: true 
-    });
-
-    if (platforms.length === 0) {
+    // Get user with platform data
+    const user = await User.findById(userId);
+    
+    if (!user || !user.platformData) {
       return { artists: [], genres: [] };
     }
 
-    // Aggregate artists and genres
-    const aggregatedArtists = this.aggregateArtists(platforms);
-    const aggregatedGenres = this.aggregateGenres(platforms);
+    // Get platform names from connectedPlatforms
+    const connectedPlatforms = user.connectedPlatforms || [];
+    
+    if (connectedPlatforms.length === 0) {
+      return { artists: [], genres: [] };
+    }
+
+    // Aggregate from platformData
+    const allArtists = [];
+    const allGenres = [];
+    
+    for (const platform of connectedPlatforms) {
+      const platformData = user.platformData[platform];
+      if (platformData) {
+        if (platformData.artists) allArtists.push(...platformData.artists);
+        if (platformData.genres) allGenres.push(...platformData.genres);
+      }
+    }
+
+    // Aggregate and deduplicate
+    const aggregatedArtists = this.deduplicateArtists(allArtists);
+    const aggregatedGenres = this.deduplicateGenres(allGenres);
 
     // Update user record with aggregated data
-    await User.findByIdAndUpdate(userId, {
-      aggregatedArtists,
-      aggregatedGenres,
-      connectedPlatforms: platforms.map(p => p._id)
-    });
+    user.aggregatedArtists = aggregatedArtists;
+    user.aggregatedGenres = aggregatedGenres;
+    await user.save();
 
     return { artists: aggregatedArtists, genres: aggregatedGenres };
   }
 
   /**
-   * Aggregate artists from multiple platforms (deduplicate)
-   * @param {Array<Object>} platforms - Array of UserMusicPlatform documents
+   * Alias for mergeUserMusicData for consistency with route calls
+   */
+  static async aggregateUserData(userId) {
+    return await this.mergeUserMusicData(userId);
+  }
+
+  /**
+   * Deduplicate artists (normalize and remove duplicates)
+   * @param {Array<string>} artists - Array of artist names
    * @returns {Array<string>} Unique artist names
    */
-  static aggregateArtists(platforms) {
-    const allArtists = platforms.flatMap(p => p.artists || []);
-    
+  static deduplicateArtists(artists) {
     // Normalize and deduplicate
-    const normalized = allArtists.map(artist => {
+    const normalized = artists.map(artist => {
       return artist.toLowerCase()
         .replace(/^the\s+/i, '')  // Remove "The" prefix
         .replace(/[^\w\s]/g, '')  // Remove special chars
@@ -130,7 +150,7 @@ class MusicPlatformService {
 
     // Create map of normalized -> original
     const artistMap = new Map();
-    allArtists.forEach((artist, index) => {
+    artists.forEach((artist, index) => {
       const norm = normalized[index];
       if (!artistMap.has(norm)) {
         artistMap.set(norm, artist); // Keep first occurrence (original form)
@@ -141,21 +161,36 @@ class MusicPlatformService {
   }
 
   /**
+   * Deduplicate genres with normalization
+   * @param {Array<string>} genres - Array of genre names
+   * @returns {Array<string>} Unique canonical genre names
+   */
+  static deduplicateGenres(genres) {
+    // Normalize all genres to canonical forms
+    const normalized = genres.map(genre => normalizeGenre(genre));
+    
+    // Deduplicate
+    return [...new Set(normalized)];
+  }
+
+  /**
+   * Aggregate artists from multiple platforms (deduplicate)
+   * @param {Array<Object>} platforms - Array of UserMusicPlatform documents
+   * @returns {Array<string>} Unique artist names
+   */
+  static aggregateArtists(platforms) {
+    const allArtists = platforms.flatMap(p => p.artists || []);
+    return this.deduplicateArtists(allArtists);
+  }
+
+  /**
    * Aggregate genres from multiple platforms with smart mapping
    * @param {Array<Object>} platforms - Array of UserMusicPlatform documents
    * @returns {Array<string>} Unique canonical genre names
    */
   static aggregateGenres(platforms) {
     const allGenres = platforms.flatMap(p => p.genres || []);
-    
-    // Import genre normalizer
-    const { normalizeGenre } = require('../utils/genreNormalizer.js');
-    
-    // Normalize all genres to canonical forms
-    const normalized = allGenres.map(genre => normalizeGenre(genre));
-    
-    // Deduplicate
-    return [...new Set(normalized)];
+    return this.deduplicateGenres(allGenres);
   }
 
   /**

@@ -18,7 +18,9 @@ import SignUp from "./components/SignUp.jsx";
 import Messaging from "./components/Messaging.jsx";
 import { setClientToken } from "./spotify";
 import Dashboard from "./components/Dashboard.jsx";
-import Whitelist from "./components/Whitelist.jsx";
+import ConnectSuccess from "./components/ConnectSuccess.jsx";
+import MigrationWizard from "./components/MigrationWizard.jsx";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
 function App() {
   const [, setToken] = useState("");
@@ -40,29 +42,32 @@ function App() {
 
   return (
     <ChakraProvider>
-      <Router>
-        <div className="app">
-          <Routes>
-            {/* public routes */}
-            <Route path="/" element={<Auth />} />
-            <Route path="/belogin" element={<BeLogin />} />
-            <Route path="/beregister" element={<BeRegister />} />
-            <Route path="/spotify" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/standby" element={<Standby />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/whitelist" element={<Whitelist />} />
+      <ErrorBoundary>
+        <Router>
+          <div className="app">
+            <Routes>
+              {/* public routes */}
+              <Route path="/" element={<Auth />} />
+              <Route path="/belogin" element={<BeLogin />} />
+              <Route path="/beregister" element={<BeRegister />} />
+              <Route path="/spotify" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/standby" element={<Standby />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/connect-success" element={<ConnectSuccess />} />
+              <Route path="/migrate" element={<MigrationWizard />} />
 
-            {/* protected routes */}
-            <Route path="/matcheslist" element={<MatchesList />} />
-            <Route path="/welcome" element={<Welcome />} />
-            <Route path="/profilequestion" element={<ProfileQuestion />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/matches" element={<Matches />} />
-            <Route path="/messaging" element={<Messaging />} />
-          </Routes>
-        </div>
-      </Router>
+              {/* protected routes */}
+              <Route path="/matcheslist" element={<MatchesList />} />
+              <Route path="/welcome" element={<Welcome />} />
+              <Route path="/profilequestion" element={<ProfileQuestion />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/matches" element={<Matches />} />
+              <Route path="/messaging" element={<Messaging />} />
+            </Routes>
+          </div>
+        </Router>
+      </ErrorBoundary>
     </ChakraProvider>
   );
 }

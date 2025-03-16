@@ -56,10 +56,10 @@ const Auth = () => {
       <Box position="absolute" top="10%" left="10%" opacity="0.1" animation={`${float} 6s ease-in-out infinite`} display={{ base: "none", md: "block" }}>
         <Icon as={FaMusic} boxSize={32} color="#eb6f92" />
       </Box>
-      <Box position="absolute" bottom="15%" right="15%" opacity="0.1" animation={`${float} 8s ease-in-out infinite`} animationDelay="1s" display={{ base: "none", md: "block" }}>
+      <Box position="absolute" bottom="15%" right="15%" opacity="0.1" animation={`${float} 8s ease-in-out infinite`} sx={{ animationDelay: "1s" }} display={{ base: "none", md: "block" }}>
         <Icon as={FaHeart} boxSize={24} color="#f6c177" />
       </Box>
-      <Box position="absolute" top="50%" right="5%" opacity="0.08" animation={`${float} 7s ease-in-out infinite`} animationDelay="2s" display={{ base: "none", lg: "block" }}>
+      <Box position="absolute" top="50%" right="5%" opacity="0.08" animation={`${float} 7s ease-in-out infinite`} sx={{ animationDelay: "2s" }} display={{ base: "none", lg: "block" }}>
         <Icon as={FaMusic} boxSize={20} color="#9ccfd8" />
       </Box>
 

@@ -56,7 +56,7 @@ export const grantWhitelistAccess = async (req, res, next) => {
     }
 
     // Update allowedAccess
-    user.allowedAccess = approved ? [true] : [false];
+    user.allowedAccess = approved ? true : false;
     await user.save();
 
     res.json({

@@ -331,7 +331,7 @@ if (!likingUser) {
 }
 export const registerUser = asyncHandler(async (req, res) => {
   console.log('42')
-  const { loginName, email, pass, allowedAccess} = req.body;
+  const { loginName, email, pass } = req.body;
   console.log(req.body)
   const userExists = await User.findOne({email})
   if (userExists){
@@ -340,9 +340,10 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.create({
-    loginName, email,
+    loginName, 
+    email,
     password: pass,
-    allowedAccess: allowedAccess,
+    allowedAccess: true, // Auto-approve all new users
   })
   console.log(user)
 
@@ -352,6 +353,8 @@ export const registerUser = asyncHandler(async (req, res) => {
       loginName:user.loginName,
       email:user.email,
       password:user.password,
+      hasCompletedMigration: user.hasCompletedMigration || false,
+      connectedPlatforms: user.connectedPlatforms || [],
       token:generateToken(user._id),
     })
   }
@@ -392,6 +395,8 @@ export const backendLogin = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       pic: user.pic,
+      hasCompletedMigration: user.hasCompletedMigration,
+      connectedPlatforms: user.connectedPlatforms || [],
       token: generateToken(user._id),
     });
   } else {

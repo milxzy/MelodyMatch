@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
     select: false // Don't include password in queries by default
   },
 
+  // DEPRECATED - Legacy Spotify fields (keep for migration)
   spotify_display_name: {
     type:String,
     required: false
@@ -22,14 +23,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  country: {
-    type: String,
-    required: false
-  },
-  email: {
-    type: String,
-    required: false,
-  },
+  
+  // DEPRECATED - Legacy fields (use aggregated* fields instead)
   artists: {
     type:Array,
     required: false
@@ -37,6 +32,47 @@ const userSchema = new mongoose.Schema({
   genres: {
     type: Array,
     required: false
+  },
+  
+  // New multi-platform fields
+  aggregatedArtists: {
+    type: [String],
+    default: []
+  },
+  aggregatedGenres: {
+    type: [String],
+    default: []
+  },
+  
+  connectedPlatforms: [{
+    type: Schema.Types.ObjectId,
+    ref: 'UserMusicPlatform'
+  }],
+  
+  primaryPlatform: {
+    type: String,
+    enum: ['apple_music', 'youtube_music', 'spotify', null],
+    default: null
+  },
+  
+  // Migration tracking
+  hasCompletedMigration: {
+    type: Boolean,
+    default: false
+  },
+  
+  migrationDate: {
+    type: Date,
+    required: false
+  },
+  
+  country: {
+    type: String,
+    required: false
+  },
+  email: {
+    type: String,
+    required: false,
   },
   age: {
     type: String,
@@ -116,6 +152,9 @@ userSchema.index({ email: 1 }, { unique: true, sparse: true });
 userSchema.index({ spotify_id: 1 }, { unique: true, sparse: true });
 userSchema.index({ likedUsers: 1 });
 userSchema.index({ createdAt: -1 });
+userSchema.index({ hasCompletedMigration: 1 });
+userSchema.index({ aggregatedArtists: 1 });
+userSchema.index({ aggregatedGenres: 1 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);

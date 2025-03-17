@@ -14,6 +14,7 @@ import {
   generateCustomMusic,
   getClusterForUser 
 } from './musicGenerator.js';
+import { generateBio, generateMultiplePictures } from './bioGenerator.js';
 
 /**
  * Generate a complete bot user object
@@ -50,6 +51,10 @@ export function generateUser(index, strategy = 'realistic', options = {}) {
       throw new Error(`Unknown strategy: ${strategy}`);
   }
   
+  // Generate bio and multiple pictures
+  const bio = generateBio(demographics, music);
+  const pictures = generateMultiplePictures(index, demographics.gender);
+  
   // Assemble complete user object matching User schema
   return {
     // Credentials
@@ -58,14 +63,17 @@ export function generateUser(index, strategy = 'realistic', options = {}) {
     
     // Profile info
     name: demographics.name,
+    preferred_name: demographics.name, // Add preferred_name for display
     age: demographics.age,
     gender: demographics.gender,
     country: demographics.country,
+    bio: bio,
     
     // Spotify-like data
     spotify_id: generateSpotifyId(index),
     spotify_display_name: demographics.name,
-    profile_pic: generateProfilePicture(index),
+    profile_pic: generateProfilePicture(index, demographics.gender), // Pass gender for gender-specific avatars
+    pictures: pictures, // Multiple profile pictures for swiping
     
     // Music preferences
     genres: music.genres,
@@ -82,7 +90,9 @@ export function generateUser(index, strategy = 'realistic', options = {}) {
     blockedUsers: [],
     
     // Metadata
-    preferences: {},
+    preferences: {
+      interestedIn: [] // Empty preferences for bots
+    },
     isDeleted: false,
     lastActive: new Date()
   };

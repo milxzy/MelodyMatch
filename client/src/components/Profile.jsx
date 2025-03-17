@@ -8,6 +8,7 @@ import {
   AlertIcon,
   Box,
   VStack,
+  HStack,
   Button,
   Tabs,
   TabList,
@@ -234,15 +235,29 @@ const Profile = () => {
                         </Box>
                       )}
 
-                      <Button
-                        bg="#eb6f92"
-                        color="white"
-                        _hover={{ bg: "#d45879" }}
-                        onClick={() => navigate('/matches')}
-                        size="lg"
-                      >
-                        Find Matches
-                      </Button>
+                      <HStack spacing={4} w="full" maxW="500px">
+                        <Button
+                          bg="#eb6f92"
+                          color="white"
+                          _hover={{ bg: "#d45879" }}
+                          onClick={() => navigate('/matches')}
+                          size="lg"
+                          flex="1"
+                        >
+                          Find Matches
+                        </Button>
+                        <Button
+                          variant="outline"
+                          borderColor="#eb6f92"
+                          color="#eb6f92"
+                          _hover={{ bg: "#393552" }}
+                          onClick={() => navigate('/settings')}
+                          size="lg"
+                          flex="1"
+                        >
+                          Edit Profile
+                        </Button>
+                      </HStack>
                     </VStack>
                   </TabPanel>
 

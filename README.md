@@ -12,7 +12,7 @@ a music-based dating app that connects people through their music taste. find yo
 |----------|--------|-------|
 | spotify | **blocked** | requires 250k MAU for api access |
 | apple music | **in progress** | official api, $99/year, no approval needed |
-| youtube music | **planned** | unofficial api (ytmusicapi), free but risky |
+| youtube music | **coming soon** | oauth integration in development |
 
 ## what it does
 

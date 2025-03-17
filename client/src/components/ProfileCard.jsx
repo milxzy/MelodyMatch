@@ -1,6 +1,7 @@
 
+import { useState } from "react";
 import { FaHeart, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { Box, Image, Badge, Text, Flex, IconButton, Heading, Wrap, WrapItem } from "@chakra-ui/react";
+import { Box, Image, Badge, Text, Flex, IconButton, Heading, Wrap, WrapItem, HStack } from "@chakra-ui/react";
 
 const ProfileCard = ({
   name,
@@ -10,12 +11,35 @@ const ProfileCard = ({
   age,
   country,
   profilePic,
+  pictures,
+  bio,
   handleNextMatch,
   handlePreviousMatch,
   handleNextClick,
   handlePrevClick,
   currentIndex,
 }) => {
+  // State for managing current picture index
+  const [currentPictureIndex, setCurrentPictureIndex] = useState(0);
+  
+  // Get all pictures (use pictures array if available, otherwise fallback to single profile pic)
+  const allPictures = pictures && pictures.length > 0 
+    ? pictures 
+    : [profilePic || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"];
+  
+  const handleNextPicture = (e) => {
+    e.stopPropagation();
+    if (currentPictureIndex < allPictures.length - 1) {
+      setCurrentPictureIndex(prev => prev + 1);
+    }
+  };
+  
+  const handlePrevPicture = (e) => {
+    e.stopPropagation();
+    if (currentPictureIndex > 0) {
+      setCurrentPictureIndex(prev => prev - 1);
+    }
+  };
   return (
     <Box
       maxW="md"
@@ -29,15 +53,75 @@ const ProfileCard = ({
       transition="all 0.3s"
       _hover={{ transform: "translateY(-4px)", boxShadow: "0 20px 40px rgba(235, 111, 146, 0.3)" }}
     >
-      {/* profile image section */}
+      {/* profile image section with swipeable pictures */}
       <Box position="relative" bg="#393552">
         <Image
-          src={profilePic || "https://via.placeholder.com/300"}
-          alt={`${name}'s picture`}
+          src={allPictures[currentPictureIndex]}
+          alt={`${name || 'User'}'s picture ${currentPictureIndex + 1}`}
           width="100%"
           height="300px"
           objectFit="cover"
         />
+        
+        {/* Picture navigation buttons */}
+        {allPictures.length > 1 && (
+          <>
+            {currentPictureIndex > 0 && (
+              <IconButton
+                aria-label="Previous picture"
+                icon={<FaChevronLeft />}
+                position="absolute"
+                left="2"
+                top="50%"
+                transform="translateY(-50%)"
+                onClick={handlePrevPicture}
+                size="sm"
+                bg="rgba(42, 39, 63, 0.8)"
+                color="#e0def4"
+                _hover={{ bg: "rgba(42, 39, 63, 0.95)" }}
+                borderRadius="full"
+              />
+            )}
+            
+            {currentPictureIndex < allPictures.length - 1 && (
+              <IconButton
+                aria-label="Next picture"
+                icon={<FaChevronRight />}
+                position="absolute"
+                right="2"
+                top="50%"
+                transform="translateY(-50%)"
+                onClick={handleNextPicture}
+                size="sm"
+                bg="rgba(42, 39, 63, 0.8)"
+                color="#e0def4"
+                _hover={{ bg: "rgba(42, 39, 63, 0.95)" }}
+                borderRadius="full"
+              />
+            )}
+            
+            {/* Picture indicators */}
+            <HStack
+              position="absolute"
+              top="2"
+              left="50%"
+              transform="translateX(-50%)"
+              spacing={1}
+            >
+              {allPictures.map((_, index) => (
+                <Box
+                  key={index}
+                  width="30px"
+                  height="3px"
+                  bg={index === currentPictureIndex ? "#eb6f92" : "rgba(224, 222, 244, 0.3)"}
+                  borderRadius="full"
+                  transition="all 0.2s"
+                />
+              ))}
+            </HStack>
+          </>
+        )}
+        
         <Box
           position="absolute"
           bottom="0"
@@ -47,11 +131,11 @@ const ProfileCard = ({
           p="4"
         >
           <Heading size="lg" color="#e0def4" mb="1">
-            {name}, {age}
+            {name || 'Unknown User'}{age ? `, ${age}` : ''}
           </Heading>
           {country && (
             <Text color="#908caa" fontSize="sm">
-              📍 {country}
+              {country}
             </Text>
           )}
         </Box>
@@ -59,6 +143,15 @@ const ProfileCard = ({
 
       {/* content section */}
       <Box p="6">
+        {/* bio section */}
+        {bio && (
+          <Box mb="4">
+            <Text color="#e0def4" fontSize="sm" lineHeight="1.6">
+              {bio}
+            </Text>
+          </Box>
+        )}
+        
         {/* primary genre badge */}
         {primaryGenre && (
           <Badge

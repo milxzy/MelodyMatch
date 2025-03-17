@@ -9,6 +9,10 @@ from pydantic import BaseModel
 from typing import Optional, List
 import os
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from youtube_auth import YouTubeAuthHandler
 from youtube_data import YouTubeDataFetcher

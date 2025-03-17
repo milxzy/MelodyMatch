@@ -266,10 +266,31 @@ export const getUsers = async (req, res) => {
       ...(currentUser.blockedUsers || [])
     ];
 
-    const allUsers = await User.find({
+    // Build query filter with gender preferences
+    const query = {
       _id: { $nin: excludedIds },
       isDeleted: { $ne: true } // Exclude soft-deleted users
-    }).lean();
+    };
+
+    // Apply gender filter if user has preferences
+    if (currentUser.preferences?.interestedIn && currentUser.preferences.interestedIn.length > 0) {
+      query.gender = { $in: currentUser.preferences.interestedIn };
+    }
+
+    // Apply age filter if user has preferences
+    if (currentUser.preferences?.ageMin || currentUser.preferences?.ageMax) {
+      const ageMin = currentUser.preferences.ageMin || 18;
+      const ageMax = currentUser.preferences.ageMax || 99;
+      // Age is stored as string, so we need to convert for comparison
+      query.$expr = {
+        $and: [
+          { $gte: [{ $toInt: "$age" }, ageMin] },
+          { $lte: [{ $toInt: "$age" }, ageMax] }
+        ]
+      };
+    }
+
+    const allUsers = await User.find(query).lean();
 
     // import matching algorithm
     const { sortUsersByCompatibility } = await import('../utils/matchingAlgorithm.js');
@@ -427,6 +448,67 @@ export const getMatches = async (req, res) => {
     res.status(500).json({ message: 'server error' })
   }
 }
+
+export const updateUserProfile = asyncHandler(async (req, res) => {
+  const { userId, name, age, gender, bio, profile_pic, preferred_name, preferences } = req.body;
+
+  if (!userId) {
+    res.status(400);
+    throw new Error('User ID is required');
+  }
+
+  try {
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    // Update fields if provided
+    if (name !== undefined) user.name = name;
+    if (age !== undefined) user.age = age;
+    if (gender !== undefined) user.gender = gender;
+    if (bio !== undefined) user.bio = bio;
+    if (profile_pic !== undefined) user.profile_pic = profile_pic;
+    if (preferred_name !== undefined) user.preferred_name = preferred_name;
+    
+    // Update preferences if provided
+    if (preferences !== undefined) {
+      if (!user.preferences) user.preferences = {};
+      if (preferences.interestedIn !== undefined) {
+        user.preferences.interestedIn = preferences.interestedIn;
+      }
+      if (preferences.ageMin !== undefined) {
+        user.preferences.ageMin = preferences.ageMin;
+      }
+      if (preferences.ageMax !== undefined) {
+        user.preferences.ageMax = preferences.ageMax;
+      }
+      user.markModified('preferences'); // Mark as modified for nested object
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        age: updatedUser.age,
+        gender: updatedUser.gender,
+        bio: updatedUser.bio,
+        profile_pic: updatedUser.profile_pic,
+        preferred_name: updatedUser.preferred_name,
+      }
+    });
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500);
+    throw new Error('Failed to update profile');
+  }
+});
 
 
 

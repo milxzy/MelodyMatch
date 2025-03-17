@@ -311,6 +311,73 @@ router.delete('/:platform', async (req, res) => {
 });
 
 /**
+ * POST /auth/platforms/:platform/force-disconnect
+ * Force disconnect a platform without validation (for debugging/cleanup)
+ */
+router.post('/:platform/force-disconnect', async (req, res) => {
+  try {
+    const { platform } = req.params;
+    const { userId } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ error: 'Missing userId' });
+    }
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Force remove from connected platforms
+    user.connectedPlatforms = user.connectedPlatforms.filter(
+      p => p !== platform
+    );
+    
+    // Clear primary platform if it was the disconnected one
+    if (user.primaryPlatform === platform) {
+      user.primaryPlatform = user.connectedPlatforms[0] || null;
+    }
+    
+    // Remove platform data
+    if (user.platformData && user.platformData[platform]) {
+      delete user.platformData[platform];
+    }
+    
+    // If no platforms left, clear aggregated data
+    if (user.connectedPlatforms.length === 0) {
+      user.aggregatedArtists = [];
+      user.aggregatedGenres = [];
+      user.hasCompletedMigration = false;
+    }
+    
+    await user.save();
+    
+    // Try to revoke token (don't fail if it doesn't exist)
+    try {
+      await revokeConnection(userId, platform);
+    } catch (err) {
+      console.log(`Token revocation failed (may not exist): ${err.message}`);
+    }
+    
+    console.log(`[Platform Manager] Force disconnected ${platform} for user ${userId}`);
+    
+    res.json({
+      success: true,
+      message: `${platform} force disconnected successfully`,
+      remainingPlatforms: user.connectedPlatforms
+    });
+    
+  } catch (error) {
+    console.error('Error force disconnecting platform:', error);
+    res.status(500).json({ 
+      error: 'Failed to force disconnect platform',
+      message: error.message 
+    });
+  }
+});
+
+/**
  * GET /auth/platforms/status
  * Returns overall platform connection status and migration status
  */

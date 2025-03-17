@@ -44,8 +44,8 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
       setUserId(parsed._id || parsed.id);
     } else if (!userIdProp) {
       // No user logged in, redirect to login
-      navigate('/belogin');
-      return;
+      const timer = setTimeout(() => navigate('/belogin'), 0);
+      return () => clearTimeout(timer);
     }
   }, [userIdProp, navigate]);
 
@@ -185,7 +185,7 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
             We're making MelodyMatch even better!
           </Text>
           <Text color="#908CAA" fontSize="sm">
-            We've added support for Apple Music and YouTube Music. You can now connect multiple platforms for more accurate matching.
+            We've added support for Apple Music, with YouTube Music coming soon! Connect platforms for more accurate matching.
           </Text>
         </VStack>
       </Alert>
@@ -232,7 +232,7 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
           Connect Your Music
         </Heading>
         <Text color="#908CAA">
-          Choose Apple Music, YouTube Music, or both
+          Connect Apple Music to get started
         </Text>
       </VStack>
 

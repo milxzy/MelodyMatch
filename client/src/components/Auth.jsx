@@ -13,7 +13,7 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
-import { FaMusic, FaHeart, FaUserFriends, FaSpotify, FaComments, FaFire, FaYoutube, FaApple } from "react-icons/fa";
+import { FaMusic, FaHeart, FaUserFriends, FaComments, FaFire, FaYoutube, FaApple } from "react-icons/fa";
 
 const float = keyframes`
   0%, 100% { transform: translateY(0px); }
@@ -40,15 +40,11 @@ const Auth = () => {
     navigate("/beregister");
   };
 
-  const goToSpotifyLogin = () => {
-    navigate("/spotify");
-  };
-
   const features = [
-    { icon: FaSpotify, title: "Spotify Integration", description: "Connect your Spotify to showcase your unique music taste", color: "#1DB954" },
-    { icon: FaHeart, title: "Smart Matching", description: "AI-powered algorithm matches you based on music compatibility", color: "#eb6f92" },
-    { icon: FaUserFriends, title: "Find Your Vibe", description: "Discover people who share your musical interests", color: "#f6c177" },
-    { icon: FaComments, title: "Real-time Chat", description: "Connect instantly with your matches and talk about music", color: "#9ccfd8" },
+    { icon: FaMusic, title: "Multi-Platform Support", description: "Connect Apple Music to showcase your unique taste (YouTube Music coming soon!)", color: "#eb6f92" },
+    { icon: FaHeart, title: "Smart Matching", description: "AI-powered algorithm matches you based on music compatibility", color: "#f6c177" },
+    { icon: FaUserFriends, title: "Find Your Vibe", description: "Discover people who share your musical interests", color: "#9ccfd8" },
+    { icon: FaComments, title: "Real-time Chat", description: "Connect instantly with your matches and talk about music", color: "#31748f" },
   ];
 
   return (
@@ -99,7 +95,7 @@ const Auth = () => {
                 maxW="2xl"
                 px={{ base: 6, md: 8 }}
               >
-                Connect with people who share your musical soul. Let your Spotify playlist
+                Connect with people who share your musical soul. Let your music library
                 find your perfect match.
               </Text>
             </VStack>
@@ -147,26 +143,6 @@ const Auth = () => {
               >
                 Sign In
               </Button>
-
-              <Button
-                size={{ base: "md", md: "lg" }}
-                bg="#1DB954"
-                color="white"
-                _hover={{ bg: "#1ed760", transform: "translateY(-2px)", boxShadow: "xl" }}
-                _active={{ bg: "#1aa34a" }}
-                onClick={goToSpotifyLogin}
-                px={{ base: 6, md: 8 }}
-                py={{ base: 6, md: 7 }}
-                fontSize={{ base: "md", md: "lg" }}
-                fontWeight="bold"
-                borderRadius="full"
-                transition="all 0.3s"
-                boxShadow="lg"
-                leftIcon={<Icon as={FaSpotify} />}
-                w={{ base: "full", sm: "auto" }}
-              >
-                Connect Spotify
-              </Button>
             </VStack>
 
             <Box mt={{ base: 6, md: 8 }} p={{ base: 4, md: 6 }} bg="#2a273f" borderRadius="xl" maxW="600px">
@@ -176,22 +152,23 @@ const Auth = () => {
                   fontSize={{ base: "sm", md: "md" }}
                   fontWeight="semibold"
                 >
-                  More Music Services Coming Soon
+                  Supported Music Platforms
                 </Text>
                 <HStack spacing={6} flexWrap="wrap" justifyContent="center">
                   <VStack spacing={2}>
-                    <Box p={3} bg="#393552" borderRadius="lg" opacity={0.6}>
-                      <Icon as={FaYoutube} boxSize={{ base: 6, md: 8 }} color="#FF0000" />
-                    </Box>
-                    <Text color="#908caa" fontSize={{ base: "xs", md: "sm" }}>YouTube Music</Text>
-                    <Text color="#eb6f92" fontSize="xs" fontWeight="bold" textTransform="uppercase">Coming Soon</Text>
-                  </VStack>
-                  <VStack spacing={2}>
-                    <Box p={3} bg="#393552" borderRadius="lg" opacity={0.6}>
+                    <Box p={3} bg="#393552" borderRadius="lg">
                       <Icon as={FaApple} boxSize={{ base: 6, md: 8 }} color="#FC3C44" />
                     </Box>
-                    <Text color="#908caa" fontSize={{ base: "xs", md: "sm" }}>Apple Music</Text>
-                    <Text color="#eb6f92" fontSize="xs" fontWeight="bold" textTransform="uppercase">Coming Soon</Text>
+                    <Text color="#e0def4" fontSize={{ base: "xs", md: "sm" }} fontWeight="semibold">Apple Music</Text>
+                  </VStack>
+                  <VStack spacing={2}>
+                    <Box p={3} bg="#393552" borderRadius="lg" position="relative">
+                      <Icon as={FaYoutube} boxSize={{ base: 6, md: 8 }} color="#FF0000" opacity={0.5} />
+                    </Box>
+                    <VStack spacing={0}>
+                      <Text color="#e0def4" fontSize={{ base: "xs", md: "sm" }} fontWeight="semibold">YouTube Music</Text>
+                      <Text color="#908CAA" fontSize="2xs">Coming Soon</Text>
+                    </VStack>
                   </VStack>
                 </HStack>
               </VStack>

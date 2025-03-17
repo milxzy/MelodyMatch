@@ -21,6 +21,7 @@ import Dashboard from "./components/Dashboard.jsx";
 import ConnectSuccess from "./components/ConnectSuccess.jsx";
 import MigrationWizard from "./components/MigrationWizard.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import Settings from "./components/Settings.jsx";
 
 function App() {
   const [, setToken] = useState("");
@@ -62,6 +63,7 @@ function App() {
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/profilequestion" element={<ProfileQuestion />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/matches" element={<Matches />} />
               <Route path="/messaging" element={<Messaging />} />
             </Routes>

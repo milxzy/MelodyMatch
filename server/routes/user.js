@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { authLimiter, actionLimiter } from '../middlewares/rateLimiter.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
-import { backendLogin,  makeAUser, registerUser, like, getUsers, createUser, getUser, getSingleUser, databaseLookup, addSpotifyArtists, addUserInfo, addSpotifyData, displayDashboard, getMatches } from '../controllers/user.js';
+import { backendLogin,  makeAUser, registerUser, like, getUsers, createUser, getUser, getSingleUser, databaseLookup, addSpotifyArtists, addUserInfo, addSpotifyData, displayDashboard, getMatches, updateUserProfile } from '../controllers/user.js';
 
 const router = express.Router();
 
@@ -47,6 +47,8 @@ router.get('/getUserById/:userId', async (req, res) => {
     res.status(500).json({ error: 'internal server error' });
   }
 })
+
+router.put('/updateUserProfile', actionLimiter, updateUserProfile)
 
 
 

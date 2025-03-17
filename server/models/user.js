@@ -96,6 +96,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  pictures: [{
+    type: String,
+    required: false
+  }],
+  bio: {
+    type: String,
+    required: false,
+    maxlength: 500,
+    default: ''
+  },
+  preferred_name: {
+    type: String,
+    required: false
+  },
   // Deprecated: Use likedUsers instead
   // likes: {
   //   type: String,
@@ -121,8 +135,19 @@ const userSchema = new mongoose.Schema({
     ref: 'User'
   }],
   preferences: {
-    type: Object,
-    default: {}
+    interestedIn: {
+      type: [String],
+      enum: ['male', 'female', 'non-binary'],
+      default: []
+    },
+    ageMin: {
+      type: Number,
+      default: 18
+    },
+    ageMax: {
+      type: Number,
+      default: 99
+    }
   },
   isDeleted: {
     type: Boolean,

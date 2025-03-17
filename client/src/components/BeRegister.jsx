@@ -98,7 +98,9 @@ const submitHandler = async (e) => {
       config
     )
     
+    // Save both userInfo and token separately
     localStorage.setItem("userInfo", JSON.stringify(data))
+    localStorage.setItem("token", data.token)
     
     toast({
       title: 'Registration Successful',

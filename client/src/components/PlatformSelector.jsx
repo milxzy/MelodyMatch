@@ -12,9 +12,19 @@ import {
   AlertIcon,
   useToast,
   Divider,
-  Flex
+  Flex,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Progress,
+  List,
+  ListItem,
+  ListIcon,
 } from '@chakra-ui/react';
-import { FaApple, FaYoutube, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaApple, FaYoutube, FaCheckCircle, FaExclamationCircle, FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import LoadingState from './LoadingState';
 
@@ -24,6 +34,13 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
   const [platforms, setPlatforms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(null);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectionProgress, setConnectionProgress] = useState({
+    step: 1,
+    total: 4,
+    message: 'Initializing...',
+    details: []
+  });
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -58,14 +75,40 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
 
   const handleConnectAppleMusic = async () => {
     try {
+      setIsConnecting(true);
+      setConnectionProgress({
+        step: 1,
+        total: 4,
+        message: 'Authorizing with Apple Music...',
+        details: ['Requesting permission to access your library']
+      });
+      
       // Load MusicKit JS
       await loadMusicKit();
+      
+      setConnectionProgress({
+        step: 2,
+        total: 4,
+        message: 'Connecting to Apple Music...',
+        details: ['Requesting permission to access your library', 'Authorization successful']
+      });
       
       // Configure and authorize
       const music = window.MusicKit.getInstance();
       const musicUserToken = await music.authorize();
       
-      // Send token to backend
+      setConnectionProgress({
+        step: 3,
+        total: 4,
+        message: 'Importing your music library...',
+        details: [
+          'Requesting permission to access your library', 
+          'Authorization successful',
+          'Fetching your songs and albums...'
+        ]
+      });
+      
+      // Send token to backend (this triggers the artist/genre fetching)
       const response = await fetch(`${API_URL}/auth/apple-music/connect`, {
         method: 'POST',
         headers: {
@@ -83,6 +126,21 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
       }
 
       const data = await response.json();
+      
+      setConnectionProgress({
+        step: 4,
+        total: 4,
+        message: 'Finalizing...',
+        details: [
+          'Requesting permission to access your library', 
+          'Authorization successful',
+          'Fetching your songs and albums...',
+          `Imported ${data.data.artistCount} artists and ${data.data.genreCount} genres`
+        ]
+      });
+      
+      // Brief delay to show completion
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast({
         title: 'Success!',
@@ -104,6 +162,8 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
         duration: 5000,
         isClosable: true,
       });
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -561,16 +621,16 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
           ) : (
             <>
               <Text color="#908CAA" mb={4} fontSize="sm">
-                Access your YouTube Music library and listening history
+                YouTube Music integration coming soon! We're working on bringing full support for your YouTube Music library.
               </Text>
               <Button
-                bg={getPlatformColor('youtube_music')}
+                bg="#6E6A86"
                 color="white"
-                _hover={{ opacity: 0.9 }}
-                onClick={handleConnectYouTubeMusic}
+                _hover={{ opacity: 0.8 }}
+                isDisabled={true}
                 leftIcon={<Icon as={FaYoutube} />}
               >
-                Connect YouTube Music
+                Coming Soon
               </Button>
             </>
           )}
@@ -588,6 +648,57 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
           </>
         )}
       </VStack>
+
+      {/* Connection Progress Modal */}
+      <Modal 
+        isOpen={isConnecting} 
+        onClose={() => {}} 
+        closeOnOverlayClick={false}
+        closeOnEsc={false}
+        isCentered
+      >
+        <ModalOverlay bg="blackAlpha.800" />
+        <ModalContent bg="#2A273F" borderColor="#6E6A86" borderWidth="1px">
+          <ModalHeader color="#EB6F92">
+            Connecting to Apple Music
+          </ModalHeader>
+          <ModalBody pb={6}>
+            <VStack spacing={4} align="stretch">
+              <Box>
+                <HStack justify="space-between" mb={2}>
+                  <Text color="#E0DEF4" fontSize="sm" fontWeight="medium">
+                    {connectionProgress.message}
+                  </Text>
+                  <Text color="#908CAA" fontSize="xs">
+                    Step {connectionProgress.step} of {connectionProgress.total}
+                  </Text>
+                </HStack>
+                <Progress 
+                  value={(connectionProgress.step / connectionProgress.total) * 100}
+                  size="sm"
+                  colorScheme="pink"
+                  bg="#393552"
+                  borderRadius="full"
+                />
+              </Box>
+
+              <List spacing={2}>
+                {connectionProgress.details.map((detail, index) => (
+                  <ListItem key={index} color="#E0DEF4" fontSize="sm">
+                    <HStack>
+                      <ListIcon 
+                        as={index < connectionProgress.details.length - 1 || connectionProgress.step === connectionProgress.total ? FaCheckCircle : FaSpinner} 
+                        color={index < connectionProgress.details.length - 1 || connectionProgress.step === connectionProgress.total ? "#31748F" : "#EB6F92"}
+                      />
+                      <Text>{detail}</Text>
+                    </HStack>
+                  </ListItem>
+                ))}
+              </List>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };

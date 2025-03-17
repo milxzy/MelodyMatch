@@ -6,6 +6,7 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Textarea,
   VStack,
   Heading,
   useToast,
@@ -17,7 +18,20 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
+  Avatar,
+  HStack,
+  IconButton,
+  FormHelperText,
+  Checkbox,
+  CheckboxGroup,
+  Stack,
+  Select,
+  RangeSlider,
+  RangeSliderTrack,
+  RangeSliderFilledTrack,
+  RangeSliderThumb,
 } from '@chakra-ui/react';
+import { FaCamera } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 
@@ -26,9 +40,19 @@ const Settings = () => {
     name: '',
     age: '',
     gender: '',
+    bio: '',
+    profile_pic: '',
+    preferred_name: '',
+  });
+  const [preferences, setPreferences] = useState({
+    interestedIn: [],
+    ageMin: 18,
+    ageMax: 99,
   });
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState('');
+  const fileInputRef = useRef();
   const toast = useToast();
   const navigate = useNavigate();
   const cancelRef = useRef();
@@ -41,14 +65,10 @@ const Settings = () => {
 
   const fetchUserData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const userId = localStorage.getItem('userId');
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const userId = userInfo?._id || userInfo?.id;
 
-      const response = await fetch(`${API_URL}/getUserById/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(`${API_URL}/getUserById/${userId}`);
 
       const data = await response.json();
       if (data.user) {
@@ -56,7 +76,16 @@ const Settings = () => {
           name: data.user.name || '',
           age: data.user.age || '',
           gender: data.user.gender || '',
+          bio: data.user.bio || '',
+          profile_pic: data.user.profile_pic || data.user.pic || '',
+          preferred_name: data.user.preferred_name || '',
         });
+        setPreferences({
+          interestedIn: data.user.preferences?.interestedIn || [],
+          ageMin: data.user.preferences?.ageMin || 18,
+          ageMax: data.user.preferences?.ageMax || 99,
+        });
+        setImagePreview(data.user.profile_pic || data.user.pic || '');
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -65,6 +94,7 @@ const Settings = () => {
         description: 'Failed to load user data',
         status: 'error',
         duration: 3000,
+        isClosable: true,
       });
     }
   };
@@ -76,20 +106,63 @@ const Settings = () => {
     });
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: 'Error',
+          description: 'Image size must be less than 5MB',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: 'Error',
+          description: 'Please upload an image file',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+        setFormData({
+          ...formData,
+          profile_pic: reader.result,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const userId = userInfo?._id || userInfo?.id;
 
-      const response = await fetch(`${API_URL}/api/profile/update`, {
+      const response = await fetch(`${API_URL}/updateUserProfile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          userId,
+          ...formData,
+          preferences
+        }),
       });
 
       const data = await response.json();
@@ -100,7 +173,12 @@ const Settings = () => {
           description: 'Profile updated successfully',
           status: 'success',
           duration: 3000,
+          isClosable: true,
         });
+        
+        // Update localStorage with new data
+        const updatedUserInfo = { ...userInfo, ...data.user };
+        localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
       } else {
         throw new Error(data.message || 'Failed to update profile');
       }
@@ -110,6 +188,7 @@ const Settings = () => {
         description: error.message,
         status: 'error',
         duration: 3000,
+        isClosable: true,
       });
     } finally {
       setIsLoading(false);
@@ -163,17 +242,109 @@ const Settings = () => {
             </Heading>
 
             <Box bg="#2a273f" p={6} borderRadius="lg">
+              <Heading size="md" color="#eb6f92" mb={6}>
+                Profile Information
+              </Heading>
               <form onSubmit={handleSubmit}>
-                <VStack spacing={4}>
+                <VStack spacing={6}>
+                  {/* Profile Picture */}
                   <FormControl>
-                    <FormLabel color="#e0def4">Name</FormLabel>
+                    <FormLabel color="#e0def4" textAlign="center">Profile Picture</FormLabel>
+                    <VStack spacing={3}>
+                      <Box position="relative">
+                        <Avatar
+                          size="2xl"
+                          src={imagePreview}
+                          bg="#393552"
+                          color="#e0def4"
+                        />
+                        <IconButton
+                          icon={<FaCamera />}
+                          position="absolute"
+                          bottom="0"
+                          right="0"
+                          borderRadius="full"
+                          bg="#eb6f92"
+                          color="white"
+                          size="sm"
+                          _hover={{ bg: "#d64d73" }}
+                          onClick={() => fileInputRef.current.click()}
+                          aria-label="Upload profile picture"
+                        />
+                      </Box>
+                      <Input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        display="none"
+                      />
+                      <FormHelperText color="#908CAA" textAlign="center">
+                        Click the camera icon to upload a new picture (max 5MB)
+                      </FormHelperText>
+                    </VStack>
+                  </FormControl>
+
+                  {/* Preferred Name */}
+                  <FormControl>
+                    <FormLabel color="#e0def4">Preferred Name</FormLabel>
+                    <Input
+                      name="preferred_name"
+                      value={formData.preferred_name}
+                      onChange={handleChange}
+                      placeholder="What should people call you?"
+                      bg="#393552"
+                      color="#e0def4"
+                      border="1px solid"
+                      borderColor="#6E6A86"
+                      _hover={{ borderColor: "#908CAA" }}
+                      _focus={{ 
+                        borderColor: "#EB6F92", 
+                        boxShadow: "0 0 0 1px #EB6F92" 
+                      }}
+                    />
+                  </FormControl>
+
+                  {/* Bio */}
+                  <FormControl>
+                    <FormLabel color="#e0def4">Bio</FormLabel>
+                    <Textarea
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleChange}
+                      placeholder="Tell others about yourself and your music taste..."
+                      bg="#393552"
+                      color="#e0def4"
+                      border="1px solid"
+                      borderColor="#6E6A86"
+                      rows={4}
+                      maxLength={500}
+                      _hover={{ borderColor: "#908CAA" }}
+                      _focus={{ 
+                        borderColor: "#EB6F92", 
+                        boxShadow: "0 0 0 1px #EB6F92" 
+                      }}
+                    />
+                    <FormHelperText color="#908CAA">
+                      {formData.bio.length}/500 characters
+                    </FormHelperText>
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel color="#e0def4">Full Name</FormLabel>
                     <Input
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
                       bg="#393552"
                       color="#e0def4"
-                      border="none"
+                      border="1px solid"
+                      borderColor="#6E6A86"
+                      _hover={{ borderColor: "#908CAA" }}
+                      _focus={{ 
+                        borderColor: "#EB6F92", 
+                        boxShadow: "0 0 0 1px #EB6F92" 
+                      }}
                     />
                   </FormControl>
 
@@ -186,20 +357,139 @@ const Settings = () => {
                       onChange={handleChange}
                       bg="#393552"
                       color="#e0def4"
-                      border="none"
+                      border="1px solid"
+                      borderColor="#6E6A86"
+                      _hover={{ borderColor: "#908CAA" }}
+                      _focus={{ 
+                        borderColor: "#EB6F92", 
+                        boxShadow: "0 0 0 1px #EB6F92" 
+                      }}
                     />
                   </FormControl>
 
                   <FormControl>
                     <FormLabel color="#e0def4">Gender</FormLabel>
-                    <Input
+                    <Select
                       name="gender"
                       value={formData.gender}
                       onChange={handleChange}
                       bg="#393552"
                       color="#e0def4"
-                      border="none"
-                    />
+                      border="1px solid"
+                      borderColor="#6E6A86"
+                      _hover={{ borderColor: "#908CAA" }}
+                      _focus={{ 
+                        borderColor: "#EB6F92", 
+                        boxShadow: "0 0 0 1px #EB6F92" 
+                      }}
+                    >
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="non-binary">Non-binary</option>
+                    </Select>
+                  </FormControl>
+
+                  <Divider borderColor="#6E6A86" />
+
+                  {/* Matching Preferences Section */}
+                  <Heading size="sm" color="#eb6f92" alignSelf="flex-start">
+                    Matching Preferences
+                  </Heading>
+
+                  <FormControl>
+                    <FormLabel color="#e0def4">Interested In</FormLabel>
+                    <CheckboxGroup
+                      value={preferences.interestedIn}
+                      onChange={(values) => setPreferences({ ...preferences, interestedIn: values })}
+                    >
+                      <Stack spacing={3} direction="column">
+                        <Checkbox
+                          value="male"
+                          colorScheme="pink"
+                          iconColor="white"
+                          sx={{
+                            '.chakra-checkbox__control': {
+                              bg: '#393552',
+                              borderColor: '#6E6A86',
+                              _checked: {
+                                bg: '#EB6F92',
+                                borderColor: '#EB6F92'
+                              }
+                            },
+                            '.chakra-checkbox__label': {
+                              color: '#e0def4'
+                            }
+                          }}
+                        >
+                          Men
+                        </Checkbox>
+                        <Checkbox
+                          value="female"
+                          colorScheme="pink"
+                          iconColor="white"
+                          sx={{
+                            '.chakra-checkbox__control': {
+                              bg: '#393552',
+                              borderColor: '#6E6A86',
+                              _checked: {
+                                bg: '#EB6F92',
+                                borderColor: '#EB6F92'
+                              }
+                            },
+                            '.chakra-checkbox__label': {
+                              color: '#e0def4'
+                            }
+                          }}
+                        >
+                          Women
+                        </Checkbox>
+                        <Checkbox
+                          value="non-binary"
+                          colorScheme="pink"
+                          iconColor="white"
+                          sx={{
+                            '.chakra-checkbox__control': {
+                              bg: '#393552',
+                              borderColor: '#6E6A86',
+                              _checked: {
+                                bg: '#EB6F92',
+                                borderColor: '#EB6F92'
+                              }
+                            },
+                            '.chakra-checkbox__label': {
+                              color: '#e0def4'
+                            }
+                          }}
+                        >
+                          Non-binary
+                        </Checkbox>
+                      </Stack>
+                    </CheckboxGroup>
+                    <FormHelperText color="#908CAA">
+                      Select all that apply. Leave blank to see everyone.
+                    </FormHelperText>
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel color="#e0def4">Age Range: {preferences.ageMin} - {preferences.ageMax}</FormLabel>
+                    <RangeSlider
+                      min={18}
+                      max={99}
+                      step={1}
+                      value={[preferences.ageMin, preferences.ageMax]}
+                      onChange={(values) => setPreferences({ ...preferences, ageMin: values[0], ageMax: values[1] })}
+                      colorScheme="pink"
+                    >
+                      <RangeSliderTrack bg="#393552">
+                        <RangeSliderFilledTrack bg="#EB6F92" />
+                      </RangeSliderTrack>
+                      <RangeSliderThumb index={0} bg="#EB6F92" />
+                      <RangeSliderThumb index={1} bg="#EB6F92" />
+                    </RangeSlider>
+                    <FormHelperText color="#908CAA">
+                      Set your preferred age range for matches
+                    </FormHelperText>
                   </FormControl>
 
                   <Button
@@ -207,8 +497,11 @@ const Settings = () => {
                     bg="#eb6f92"
                     color="white"
                     width="full"
+                    size="lg"
                     isLoading={isLoading}
-                    _hover={{ bg: "#d64d73" }}
+                    _hover={{ bg: "#d64d73", transform: "translateY(-2px)" }}
+                    _active={{ transform: "translateY(0)" }}
+                    transition="all 0.2s"
                   >
                     Save Changes
                   </Button>

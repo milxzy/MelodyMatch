@@ -15,13 +15,8 @@ export function generatePassword() {
   return 'TestPass123!';
 }
 
-export function generateProfilePicture(index) {
-  // 70% of bots get profile pictures, 30% get null
-  if (Math.random() < 0.3) {
-    return null;
-  }
-  
-  // Use pravatar.cc for diverse avatar images (70 unique faces)
-  const avatarNumber = (index % 70) + 1;
-  return `https://i.pravatar.cc/300?img=${avatarNumber}`;
+export function generateProfilePicture(index, gender = 'non-binary') {
+  // All bots get profile pictures (will be first image from pictures array)
+  // Using HD 1000px pravatar for main profile pic
+  return `https://i.pravatar.cc/1000?img=${index}`;
 }

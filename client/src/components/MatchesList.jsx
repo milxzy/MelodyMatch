@@ -10,10 +10,14 @@ import {
   Center,
   Stack,
   IconButton,
+  Button,
+  Icon,
 } from "@chakra-ui/react";
 import {
   FaChevronLeft,
   FaChevronRight,
+  FaHeart,
+  FaMusic,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
@@ -60,6 +64,31 @@ const MatchesList = () => {
     const userInfo = JSON.parse(storedData);
     const userId = userInfo._id;
   
+    // Preload images to eliminate lag
+    const preloadImages = (users) => {
+      users.forEach((user) => {
+        // Preload profile_pic
+        if (user.profile_pic) {
+          const img = new Image();
+          img.src = user.profile_pic;
+        }
+        
+        // Preload pictures array
+        if (user.pictures && Array.isArray(user.pictures)) {
+          user.pictures.forEach((picUrl) => {
+            const img = new Image();
+            img.src = picUrl;
+          });
+        }
+        
+        // Preload fallback pic if exists
+        if (user.pic) {
+          const img = new Image();
+          img.src = user.pic;
+        }
+      });
+    };
+
     const fetchMatches = async () => {
       setLoading(true);
       try {
@@ -75,6 +104,12 @@ const MatchesList = () => {
         const data = await response.json();
   
         console.log(data.matches); // debugging matches data
+        
+        // Preload all match images
+        if (data.matches && data.matches.length > 0) {
+          preloadImages(data.matches);
+        }
+        
         setMatches(data.matches);
   
         if (data.matches.length === 0) {
@@ -97,88 +132,240 @@ const MatchesList = () => {
   return (
     <>
       <Header />
-      <Box bg="#232136" minHeight="100vh">
-        <Heading as="h3" textAlign="center" color="#eb6f92">
-          Matches
+      <Box bg="#232136" minHeight="100vh" py={8}>
+        <Heading as="h3" textAlign="center" color="#eb6f92" mb={8}>
+          Your Matches
         </Heading>
 
         {/* display a message if there are no matches */}
         {noMatches ? (
-          <Center>
-            <Text color="white" fontSize="lg" mt={4}>
-              You don&apos;t have any matches yet. Keep searching!
-            </Text>
+          <Center minH="60vh">
+            <VStack spacing={6} maxW="500px" px={4}>
+              <Box position="relative">
+                <Icon
+                  as={FaMusic}
+                  boxSize={20}
+                  color="#393552"
+                  position="absolute"
+                  top="-10px"
+                  left="-10px"
+                  opacity={0.3}
+                />
+                <Icon
+                  as={FaHeart}
+                  boxSize={24}
+                  color="#eb6f92"
+                />
+                <Icon
+                  as={FaMusic}
+                  boxSize={16}
+                  color="#393552"
+                  position="absolute"
+                  bottom="-8px"
+                  right="-8px"
+                  opacity={0.3}
+                />
+              </Box>
+              
+              <VStack spacing={3}>
+                <Heading size="lg" color="#e0def4" textAlign="center">
+                  No Matches Yet
+                </Heading>
+                <Text color="#908caa" fontSize="lg" textAlign="center">
+                  You haven&apos;t matched with anyone yet. Start swiping to find people who share your music taste!
+                </Text>
+              </VStack>
+
+              <VStack spacing={3} w="full">
+                <Button
+                  bg="#eb6f92"
+                  color="white"
+                  size="lg"
+                  w="full"
+                  _hover={{ bg: "#d45879", transform: "translateY(-2px)" }}
+                  _active={{ transform: "translateY(0)" }}
+                  onClick={() => navigate("/matches")}
+                  leftIcon={<Icon as={FaHeart} />}
+                  transition="all 0.2s"
+                >
+                  Find Matches
+                </Button>
+                
+                <Button
+                  bg="#393552"
+                  color="#e0def4"
+                  size="md"
+                  variant="ghost"
+                  _hover={{ bg: "#524f67" }}
+                  onClick={() => navigate("/profile")}
+                >
+                  View Profile
+                </Button>
+              </VStack>
+
+              <Box
+                bg="#2a273f"
+                p={6}
+                borderRadius="lg"
+                border="1px solid"
+                borderColor="#393552"
+                w="full"
+              >
+                <VStack spacing={3} align="start">
+                  <Heading size="sm" color="#eb6f92">
+                    💡 Tips to get matches:
+                  </Heading>
+                  <VStack align="start" spacing={2} pl={2}>
+                    <Text color="#e0def4" fontSize="sm">
+                      • Like profiles that interest you
+                    </Text>
+                    <Text color="#e0def4" fontSize="sm">
+                      • Connect your music platform for better matches
+                    </Text>
+                    <Text color="#e0def4" fontSize="sm">
+                      • Complete your profile with a bio
+                    </Text>
+                    <Text color="#e0def4" fontSize="sm">
+                      • Be active - check back often!
+                    </Text>
+                  </VStack>
+                </VStack>
+              </Box>
+            </VStack>
           </Center>
         ) : (
-          <VStack spacing={4} p="4">
+          <VStack spacing={6} p="4" maxW="600px" mx="auto" w="full">
             {matches &&
               Array.isArray(matches) &&
               matches.map((match, index) => (
                 <Box
                   key={index}
-                  borderWidth="1px"
-                  borderRadius="lg"
+                  borderWidth="2px"
+                  borderRadius="xl"
                   overflow="hidden"
-                  boxShadow="md"
+                  boxShadow="lg"
                   position="relative"
-                  width="400px"
-                  maxW="sm"
-                  bg="#908caa"
-                  borderColor="#908caa"
+                  w="full"
+                  bg="#2a273f"
+                  borderColor="#393552"
+                  transition="all 0.3s"
+                  _hover={{ transform: "translateY(-4px)", boxShadow: "0 20px 40px rgba(235, 111, 146, 0.2)" }}
+                  p={6}
                 >
-                  <Flex justifyContent="center" alignItems="center" p="2">
-                    <Image
-                      src={match.profile_pic}
-                      alt={`${match.preferred_name}'s picture`}
-                      boxSize="50px"
-                      borderRadius="full"
-                    ></Image>
-                  </Flex>
-
-                  <Flex mt="2" justifyContent="space-between" alignItems="center">
-                    <Box fontWeight="bold" as="h4" lineHeight="tight" isTruncated>
-                      {match.preferred_name}, {match.age}
-                    </Box>
-                  </Flex>
-
-                  <Stack mt="2" spacing={1}>
-                    {Array.isArray(match.genres)
-                      ? match.genres
-                          .slice(currentIndices[index], currentIndices[index] + 5)
-                          .map((genre, index) => (
-                            <Badge
-                              key={index}
-                              borderRadius="full"
-                              px="2"
-                              colorScheme="blue"
-                            >
-                              {genre}
-                            </Badge>
-                          ))
-                      : null}
-                  </Stack>
-
-                  {match.genres.length > 5 && (
-                    <Flex mt="2" justifyContent="space-between">
-                      <IconButton
-                        aria-label="Previous"
-                        icon={<FaChevronLeft />}
-                        onClick={() => handlePrevClick(index)} // pass the index here
-                        isDisabled={currentIndices[index] === 0}
+                  <VStack spacing={4} align="stretch">
+                    {/* Profile Header */}
+                    <Flex alignItems="center" gap={4}>
+                      <Image
+                        src={match.profile_pic || match.pic || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"}
+                        alt={`${match.preferred_name || match.name || 'User'}'s picture`}
+                        boxSize="80px"
+                        borderRadius="full"
+                        border="3px solid"
+                        borderColor="#eb6f92"
+                        objectFit="cover"
                       />
-                      <IconButton
-                        aria-label="Next"
-                        icon={<FaChevronRight />}
-                        onClick={() => handleNextClick(index)} // pass the index here
-                        isDisabled={currentIndices[index] + 5 >= match.genres.length}
-                      />
+                      <Box flex={1}>
+                        <Heading size="md" color="#e0def4" mb={1}>
+                          {match.preferred_name || match.name || 'Unknown User'}, {match.age || '?'}
+                        </Heading>
+                        {match.country && (
+                          <Text color="#908caa" fontSize="sm">
+                            📍 {match.country}
+                          </Text>
+                        )}
+                      </Box>
                     </Flex>
-                  )}
 
-                  <Badge borderRadius="full" px="2" colorScheme="blue" marginBottom="2" marginTop="2" width="full">
-                    Contact Info: {match.contact_info}
-                  </Badge>
-                
+                    {/* Bio */}
+                    {match.bio && (
+                      <Box>
+                        <Text color="#e0def4" fontSize="sm" fontStyle="italic">
+                          &ldquo;{match.bio}&rdquo;
+                        </Text>
+                      </Box>
+                    )}
+
+                    {/* Genres */}
+                    <Box>
+                      <Text color="#908caa" fontSize="sm" fontWeight="bold" mb={2}>
+                        Music Taste:
+                      </Text>
+                      <Flex wrap="wrap" gap={2}>
+                        {(() => {
+                          const userGenres = match.aggregatedGenres || match.genres || [];
+                          return Array.isArray(userGenres) && userGenres.length > 0
+                            ? userGenres
+                                .slice(currentIndices[index], currentIndices[index] + 5)
+                                .map((genre, genreIndex) => (
+                                  <Badge
+                                    key={genreIndex}
+                                    borderRadius="full"
+                                    px="3"
+                                    py="1"
+                                    bg="#393552"
+                                    color="#9ccfd8"
+                                    fontSize="xs"
+                                    textTransform="capitalize"
+                                  >
+                                    {genre}
+                                  </Badge>
+                                ))
+                            : <Text color="#6e6a86" fontSize="sm">No genres listed</Text>;
+                        })()}
+                      </Flex>
+
+                      {/* Genre Navigation */}
+                      {(() => {
+                        const userGenres = match.aggregatedGenres || match.genres || [];
+                        return userGenres.length > 5 && (
+                          <Flex mt="3" justifyContent="center" gap={2}>
+                            <IconButton
+                              aria-label="Previous genres"
+                              icon={<FaChevronLeft />}
+                              onClick={() => handlePrevClick(index)}
+                              isDisabled={currentIndices[index] === 0}
+                              size="sm"
+                              bg="#393552"
+                              color="#e0def4"
+                              _hover={{ bg: "#524f67" }}
+                              _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+                            />
+                            <Text color="#908caa" fontSize="xs" alignSelf="center">
+                              {Math.floor(currentIndices[index] / 5) + 1} / {Math.ceil(userGenres.length / 5)}
+                            </Text>
+                            <IconButton
+                              aria-label="Next genres"
+                              icon={<FaChevronRight />}
+                              onClick={() => handleNextClick(index)}
+                              isDisabled={currentIndices[index] + 5 >= userGenres.length}
+                              size="sm"
+                              bg="#393552"
+                              color="#e0def4"
+                              _hover={{ bg: "#524f67" }}
+                              _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+                            />
+                          </Flex>
+                        );
+                      })()}
+                    </Box>
+
+                    {/* Contact Info */}
+                    {match.contact_info && (
+                      <Box
+                        bg="#393552"
+                        p={3}
+                        borderRadius="md"
+                        textAlign="center"
+                      >
+                        <Text color="#908caa" fontSize="xs" mb={1}>
+                          Contact Info
+                        </Text>
+                        <Text color="#e0def4" fontSize="sm" fontWeight="semibold">
+                          {match.contact_info}
+                        </Text>
+                      </Box>
+                    )}
+                  </VStack>
                 </Box>
               ))}
           </VStack>

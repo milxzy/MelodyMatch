@@ -6,7 +6,7 @@ import fetch from 'node-fetch';
  */
 class YouTubeMusicAdapter {
   constructor() {
-    this.pythonServiceUrl = process.env.YOUTUBE_MUSIC_SERVICE_URL || 'http://localhost:5000';
+    this.pythonServiceUrl = process.env.PYTHON_SERVICE_URL || process.env.YOUTUBE_MUSIC_SERVICE_URL || 'http://localhost:8000';
   }
 
   /**

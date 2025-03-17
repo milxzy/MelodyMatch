@@ -69,6 +69,11 @@ const Dashboard = () => {
       const userResponse = await fetch(`${API_URL}/getUserById/${userId}`);
       const userData = await userResponse.json();
 
+      // Update userInfo with fresh data from server
+      if (userData.user) {
+        setUserInfo(userData.user);
+      }
+
       // fetch matches
       const matchesResponse = await fetch(`${API_URL}/getMatches/${userId}`);
       const matchesData = await matchesResponse.json();
@@ -144,14 +149,14 @@ const Dashboard = () => {
             <HStack spacing={4}>
               <Avatar
                 size="xl"
-                src={userInfo?.profile_pic}
-                name={userInfo?.preferred_name}
+                src={userInfo?.profile_pic || userInfo?.pic}
+                name={userInfo?.preferred_name || userInfo?.name}
                 border="3px solid"
                 borderColor="#eb6f92"
               />
               <Box>
                 <Heading size="xl" color="#e0def4">
-                  welcome back, {userInfo?.preferred_name || "user"}!
+                  welcome back, {userInfo?.preferred_name || userInfo?.name || userInfo?.loginName || "user"}!
                 </Heading>
                 <Text color="#908caa" fontSize="lg" mt={2}>
                   here&apos;s what&apos;s happening with your music connections
@@ -282,7 +287,7 @@ const Dashboard = () => {
                     ))
                   ) : (
                     <Text color="#908caa" textAlign="center" py={4}>
-                      no genres found. update your spotify profile!
+                      no genres found. connect your music platform!
                     </Text>
                   )}
                 </VStack>

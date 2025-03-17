@@ -1,41 +1,50 @@
 """
 YouTube Music Data Fetcher
-Uses ytmusicapi to fetch user library data
+Uses YouTube Data API v3 to fetch user library data
 """
 
-from ytmusicapi import YTMusic
+import requests
 import logging
 
 logger = logging.getLogger(__name__)
 
 class YouTubeDataFetcher:
     """
-    Fetches user library data from YouTube Music
+    Fetches user library data from YouTube using Data API v3
     """
     
     def __init__(self):
-        self.ytmusic = None
+        self.base_url = "https://www.googleapis.com/youtube/v3"
     
-    def authenticate(self, access_token):
+    def _make_request(self, endpoint, access_token, params=None):
         """
-        Initialize YTMusic with user authentication
+        Make authenticated request to YouTube API
         Args:
+            endpoint: API endpoint
             access_token: User's access token
+            params: Query parameters
+        Returns:
+            Response JSON
         """
+        url = f"{self.base_url}/{endpoint}"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/json"
+        }
+        
         try:
-            # YTMusic can use browser headers for authentication
-            # This is a simplified version - in production, use proper OAuth headers
-            headers = {
-                "Authorization": f"Bearer {access_token}"
-            }
-            self.ytmusic = YTMusic(auth=headers)
-        except Exception as e:
-            logger.error(f"Authentication failed: {str(e)}")
-            raise Exception("Failed to authenticate with YouTube Music")
+            response = requests.get(url, headers=headers, params=params or {})
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logger.error(f"API request failed: {str(e)}")
+            if hasattr(e.response, 'text'):
+                logger.error(f"Response: {e.response.text}")
+            raise Exception(f"YouTube API request failed: {str(e)}")
     
     def get_library_artists(self, access_token, limit=100):
         """
-        Fetch user's library artists
+        Fetch user's library artists from subscriptions
         Args:
             access_token: User's access token
             limit: Maximum number of artists to fetch
@@ -43,18 +52,24 @@ class YouTubeDataFetcher:
             List of artist names
         """
         try:
-            self.authenticate(access_token)
+            # Get user's channel subscriptions (music channels they follow)
+            params = {
+                'part': 'snippet',
+                'mine': 'true',
+                'maxResults': min(limit, 50),
+                'order': 'relevance'
+            }
             
-            # Get library artists
-            library_artists = self.ytmusic.get_library_artists(limit=limit)
+            data = self._make_request('subscriptions', access_token, params)
             
             artists = []
-            for artist in library_artists:
-                name = artist.get('artist') or artist.get('name')
-                if name:
-                    artists.append(name)
+            if 'items' in data:
+                for item in data['items']:
+                    channel_title = item.get('snippet', {}).get('title')
+                    if channel_title:
+                        artists.append(channel_title)
             
-            logger.info(f"Fetched {len(artists)} library artists")
+            logger.info(f"Fetched {len(artists)} subscribed channels (artists)")
             return artists
         except Exception as e:
             logger.error(f"Failed to fetch library artists: {str(e)}")
@@ -71,17 +86,22 @@ class YouTubeDataFetcher:
             List of playlist objects
         """
         try:
-            self.authenticate(access_token)
+            params = {
+                'part': 'snippet,contentDetails',
+                'mine': 'true',
+                'maxResults': min(limit, 50)
+            }
             
-            playlists = self.ytmusic.get_library_playlists(limit=limit)
+            data = self._make_request('playlists', access_token, params)
             
             result = []
-            for playlist in playlists:
-                result.append({
-                    "id": playlist.get('playlistId'),
-                    "name": playlist.get('title'),
-                    "trackCount": playlist.get('count', 0)
-                })
+            if 'items' in data:
+                for playlist in data['items']:
+                    result.append({
+                        "id": playlist.get('id'),
+                        "name": playlist.get('snippet', {}).get('title'),
+                        "trackCount": playlist.get('contentDetails', {}).get('itemCount', 0)
+                    })
             
             logger.info(f"Fetched {len(result)} playlists")
             return result
@@ -92,38 +112,24 @@ class YouTubeDataFetcher:
     def extract_genres(self, access_token):
         """
         Extract genres from user's library
-        YouTube Music doesn't have explicit genre API, so we infer from songs/artists
+        YouTube Music doesn't have explicit genre API
         Args:
             access_token: User's access token
         Returns:
-            List of genre names
+            List of genre names (placeholder - YouTube API doesn't provide genres)
         """
         try:
-            self.authenticate(access_token)
+            # YouTube Data API v3 doesn't provide genre information
+            # This would require additional services like:
+            # 1. Last.fm API for artist genres
+            # 2. Spotify API for track/artist genres
+            # 3. MusicBrainz for metadata
             
-            genres = set()
+            # For now, return common music genres as placeholder
+            placeholder_genres = []
             
-            # Get liked songs to extract genres
-            try:
-                liked_songs = self.ytmusic.get_liked_songs(limit=100)
-                
-                if 'tracks' in liked_songs:
-                    for track in liked_songs['tracks']:
-                        # YouTube Music doesn't expose genres directly
-                        # This is a limitation - we'd need to use a separate genre API
-                        # or maintain our own artist-to-genre mapping
-                        pass
-            except Exception as e:
-                logger.warning(f"Could not fetch liked songs: {str(e)}")
-            
-            # For now, return empty genres
-            # In production, you'd want to:
-            # 1. Use a separate music metadata API (like MusicBrainz)
-            # 2. Maintain your own artist-to-genre database
-            # 3. Use ML to classify genres from song titles/artists
-            
-            logger.info(f"Extracted {len(genres)} genres (limited by YouTube Music API)")
-            return list(genres)
+            logger.info(f"Extracted {len(placeholder_genres)} genres (YouTube API limitation)")
+            return placeholder_genres
         except Exception as e:
             logger.error(f"Failed to extract genres: {str(e)}")
             return []
@@ -141,21 +147,28 @@ class YouTubeDataFetcher:
             genres = self.extract_genres(access_token)
             playlists = self.get_library_playlists(access_token, limit=25)
             
-            # Get recently played as "top tracks"
+            # Get liked videos as "top tracks"
             top_tracks = []
             try:
-                self.authenticate(access_token)
-                history = self.ytmusic.get_history()
+                params = {
+                    'part': 'snippet',
+                    'myRating': 'like',
+                    'maxResults': 20,
+                    'type': 'video',
+                    'videoCategoryId': '10'  # Music category
+                }
                 
-                for item in history[:20]:  # Top 20 recent tracks
-                    if 'videoId' in item:
+                data = self._make_request('videos', access_token, params)
+                
+                if 'items' in data:
+                    for item in data['items']:
                         top_tracks.append({
-                            "id": item['videoId'],
-                            "name": item.get('title'),
-                            "artist": item.get('artists', [{}])[0].get('name') if item.get('artists') else None
+                            "id": item.get('id'),
+                            "name": item.get('snippet', {}).get('title'),
+                            "artist": item.get('snippet', {}).get('channelTitle')
                         })
             except Exception as e:
-                logger.warning(f"Could not fetch history: {str(e)}")
+                logger.warning(f"Could not fetch liked videos: {str(e)}")
             
             return {
                 "artists": artists,

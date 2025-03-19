@@ -36,15 +36,15 @@ const Whitelist = () => {
                   Your account has been created successfully
                 </Text>
 
-                <Text color="white" fontSize="md">
+                <Text color="white.pure" fontSize="md">
                   Your account is currently under review. This process typically takes up to 24 hours.
                 </Text>
 
-                <Text color="white" fontSize="md">
+                <Text color="white.pure" fontSize="md">
                   Once approved, you&apos;ll be able to:
                 </Text>
 
-                <VStack align="start" pl={4} color="white" spacing={2}>
+                <VStack align="start" pl={4} color="white.pure" spacing={2}>
                   <Text>• Connect with Spotify and import your music taste</Text>
                   <Text>• Discover users with similar music preferences</Text>
                   <Text>• Match with people who share your musical interests</Text>

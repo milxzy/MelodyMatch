@@ -102,7 +102,7 @@ const Standby = () => {
           <Heading as="h2" size="lg" color="#eb6f92">
             Loading Your Profile...
           </Heading>
-          <Text color="white" fontSize="md">
+          <Text color="white.pure" fontSize="md">
             Please wait while we set up your account
           </Text>
         </VStack>

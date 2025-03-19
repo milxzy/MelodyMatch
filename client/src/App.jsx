@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ChakraProvider } from "@chakra-ui/react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.css";
+import theme from "./theme";
 import "./App.css";
 
 import Login from "./components/Login";
@@ -42,7 +42,7 @@ function App() {
   }, []);
 
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <ErrorBoundary>
         <Router>
           <div className="app">

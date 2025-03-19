@@ -1,13 +1,16 @@
-
+// ProfileCard - Swipe card with Kawaii Cute design
 import { useState } from "react";
-import { FaHeart, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { Box, Image, Badge, Text, Flex, IconButton, Heading, Wrap, WrapItem, HStack } from "@chakra-ui/react";
+import { FiHeart, FiX, FiChevronLeft, FiChevronRight, FiMapPin, FiMusic } from "react-icons/fi";
+import { Box, Image, Text, Flex, IconButton, Heading, Wrap, WrapItem, HStack, VStack, Icon, Circle } from "@chakra-ui/react";
+import { motion } from "framer-motion";
+
+const MotionBox = motion(Box);
+const MotionIconButton = motion(IconButton);
 
 const ProfileCard = ({
   name,
   primaryGenre,
   genres,
-  _subGenres,
   age,
   country,
   profilePic,
@@ -19,10 +22,8 @@ const ProfileCard = ({
   handlePrevClick,
   currentIndex,
 }) => {
-  // State for managing current picture index
   const [currentPictureIndex, setCurrentPictureIndex] = useState(0);
   
-  // Get all pictures (use pictures array if available, otherwise fallback to single profile pic)
   const allPictures = pictures && pictures.length > 0 
     ? pictures 
     : [profilePic || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"];
@@ -40,45 +41,47 @@ const ProfileCard = ({
       setCurrentPictureIndex(prev => prev - 1);
     }
   };
+
   return (
-    <Box
+    <MotionBox
       maxW="md"
-      width={{ base: "90vw", md: "450px" }}
-      borderWidth="2px"
-      borderRadius="2xl"
+      width={{ base: "100%", md: "450px" }}
+      borderRadius="3xl"
       overflow="hidden"
-      boxShadow="2xl"
-      bg="#2a273f"
-      borderColor="#393552"
-      transition="all 0.3s"
-      _hover={{ transform: "translateY(-4px)", boxShadow: "0 20px 40px rgba(235, 111, 146, 0.3)" }}
+      bg="surface.card"
+      border="2px solid"
+      borderColor="rgba(255, 200, 210, 0.1)"
+      boxShadow="0 12px 40px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(0, 0, 0, 0.1)"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
     >
-      {/* profile image section with swipeable pictures */}
-      <Box position="relative" bg="#393552">
+      {/* Profile Image Section */}
+      <Box position="relative" bg="surface.elevated">
         <Image
           src={allPictures[currentPictureIndex]}
           alt={`${name || 'User'}'s picture ${currentPictureIndex + 1}`}
           width="100%"
-          height="300px"
+          height="350px"
           objectFit="cover"
         />
         
-        {/* Picture navigation buttons */}
+        {/* Picture Navigation */}
         {allPictures.length > 1 && (
           <>
             {currentPictureIndex > 0 && (
               <IconButton
                 aria-label="Previous picture"
-                icon={<FaChevronLeft />}
+                icon={<FiChevronLeft />}
                 position="absolute"
-                left="2"
+                left="3"
                 top="50%"
                 transform="translateY(-50%)"
                 onClick={handlePrevPicture}
                 size="sm"
-                bg="rgba(42, 39, 63, 0.8)"
-                color="#e0def4"
-                _hover={{ bg: "rgba(42, 39, 63, 0.95)" }}
+                bg="rgba(26, 26, 46, 0.9)"
+                color="white.pure"
+                _hover={{ bg: "surface.card" }}
                 borderRadius="full"
               />
             )}
@@ -86,24 +89,24 @@ const ProfileCard = ({
             {currentPictureIndex < allPictures.length - 1 && (
               <IconButton
                 aria-label="Next picture"
-                icon={<FaChevronRight />}
+                icon={<FiChevronRight />}
                 position="absolute"
-                right="2"
+                right="3"
                 top="50%"
                 transform="translateY(-50%)"
                 onClick={handleNextPicture}
                 size="sm"
-                bg="rgba(42, 39, 63, 0.8)"
-                color="#e0def4"
-                _hover={{ bg: "rgba(42, 39, 63, 0.95)" }}
+                bg="rgba(26, 26, 46, 0.9)"
+                color="white.pure"
+                _hover={{ bg: "surface.card" }}
                 borderRadius="full"
               />
             )}
             
-            {/* Picture indicators */}
+            {/* Picture Indicators */}
             <HStack
               position="absolute"
-              top="2"
+              top="3"
               left="50%"
               transform="translateX(-50%)"
               spacing={1}
@@ -111,9 +114,12 @@ const ProfileCard = ({
               {allPictures.map((_, index) => (
                 <Box
                   key={index}
-                  width="30px"
-                  height="3px"
-                  bg={index === currentPictureIndex ? "#eb6f92" : "rgba(224, 222, 244, 0.3)"}
+                  width="32px"
+                  height="4px"
+                  bg={index === currentPictureIndex 
+                    ? "kawaii.pink" 
+                    : "rgba(255, 220, 225, 0.5)"
+                  }
                   borderRadius="full"
                   transition="all 0.2s"
                 />
@@ -122,148 +128,204 @@ const ProfileCard = ({
           </>
         )}
         
+        {/* Name/Age Overlay */}
         <Box
           position="absolute"
           bottom="0"
           left="0"
           right="0"
-          bgGradient="linear(to-t, rgba(42, 39, 63, 0.95), transparent)"
-          p="4"
+          bgGradient="linear(to-t, rgba(15, 15, 26, 0.98), rgba(15, 15, 26, 0.7), transparent)"
+          p="5"
+          pt="12"
         >
-          <Heading size="lg" color="#e0def4" mb="1">
-            {name || 'Unknown User'}{age ? `, ${age}` : ''}
-          </Heading>
-          {country && (
-            <Text color="#908caa" fontSize="sm">
-              {country}
-            </Text>
-          )}
+          <HStack justify="space-between" align="flex-end">
+            <VStack align="flex-start" spacing={1}>
+              <Heading 
+                fontFamily="heading"
+                fontSize="2xl"
+                fontWeight="bold"
+                color="text.primary"
+              >
+                {name || 'Unknown User'}{age ? `, ${age}` : ''}
+              </Heading>
+              {country && (
+                <HStack spacing={1} color="text.muted">
+                  <Icon as={FiMapPin} boxSize={3} />
+                  <Text fontFamily="body" fontSize="sm">
+                    {country}
+                  </Text>
+                </HStack>
+              )}
+            </VStack>
+            {primaryGenre && (
+              <Box px={3} py={1.5} bg="kawaii.mint" borderRadius="full">
+                <Text fontFamily="body" fontSize="xs" fontWeight="bold" color="white.pure">
+                  {primaryGenre}
+                </Text>
+              </Box>
+            )}
+          </HStack>
         </Box>
       </Box>
 
-      {/* content section */}
+      {/* Content Section */}
       <Box p="6">
-        {/* bio section */}
+        {/* Bio */}
         {bio && (
-          <Box mb="4">
-            <Text color="#e0def4" fontSize="sm" lineHeight="1.6">
+          <Box 
+            mb="5" 
+            p={4} 
+            bg="surface.muted" 
+            borderRadius="2xl"
+            border="2px solid"
+            borderColor="rgba(255, 200, 210, 0.06)"
+          >
+            <Text fontFamily="body" color="text.secondary" fontSize="sm" lineHeight="1.7">
               {bio}
             </Text>
           </Box>
         )}
-        
-        {/* primary genre badge */}
-        {primaryGenre && (
-          <Badge
-            borderRadius="full"
-            px="4"
-            py="1"
-            bg="#eb6f92"
-            color="#e0def4"
-            fontSize="sm"
-            fontWeight="bold"
-            mb="4"
-          >
-            {primaryGenre}
-          </Badge>
-        )}
 
-        {/* genres section */}
+        {/* Genres Section */}
         <Box>
-          <Text color="#908caa" fontSize="sm" fontWeight="bold" mb="2">
-            music taste:
-          </Text>
+          <HStack mb={3}>
+            <Circle size="28px" bg="kawaii.mint">
+              <Icon as={FiMusic} color="white.pure" boxSize={3} />
+            </Circle>
+            <Text 
+              fontFamily="body"
+              fontSize="sm"
+              fontWeight="semibold"
+              color="text.secondary"
+            >
+              Music Taste
+            </Text>
+          </HStack>
           <Wrap spacing={2} mb="2">
             {Array.isArray(genres) && genres.length > 0
               ? genres.slice(currentIndex, currentIndex + 5).map((genre, index) => (
                   <WrapItem key={index}>
-                    <Badge
+                    <Box
+                      px={3}
+                      py={1.5}
+                      bg="rgba(181, 234, 221, 0.15)"
+                      border="2px solid"
+                      borderColor="rgba(181, 234, 221, 0.4)"
                       borderRadius="full"
-                      px="3"
-                      py="1"
-                      bg="#393552"
-                      color="#9ccfd8"
-                      fontSize="xs"
-                      textTransform="capitalize"
+                      transition="all 0.2s"
+                      _hover={{ 
+                        bg: "rgba(181, 234, 221, 0.25)",
+                        transform: "translateY(-1px)"
+                      }}
                     >
-                      {genre}
-                    </Badge>
+                      <Text 
+                        fontFamily="body"
+                        fontSize="xs"
+                        fontWeight="semibold"
+                        color="kawaii.mint"
+                        textTransform="capitalize"
+                      >
+                        {genre}
+                      </Text>
+                    </Box>
                   </WrapItem>
                 ))
               : (
-                <Text color="#6e6a86" fontSize="sm">
-                  no genres available
+                <Text fontFamily="body" color="text.muted" fontSize="sm">
+                  No genres available
                 </Text>
               )}
           </Wrap>
 
-          {/* genre navigation */}
+          {/* Genre Navigation */}
           {genres && genres.length > 5 && (
-            <Flex justify="center" gap={2} mt="3">
+            <Flex justify="center" gap={3} mt="4">
               <IconButton
-                aria-label="previous genres"
-                icon={<FaChevronLeft />}
+                aria-label="Previous genres"
+                icon={<FiChevronLeft />}
                 onClick={handlePrevClick}
                 isDisabled={currentIndex === 0}
                 size="sm"
-                bg="#393552"
-                color="#e0def4"
-                _hover={{ bg: "#524f67" }}
-                _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+                bg="surface.elevated"
+                color="text.primary"
+                borderRadius="full"
+                _hover={{ bg: "surface.card", color: "kawaii.mint" }}
+                _disabled={{ opacity: 0.3, cursor: "not-allowed" }}
               />
-              <Text color="#908caa" fontSize="xs" alignSelf="center">
+              <Text 
+                fontFamily="body"
+                fontSize="xs"
+                color="text.muted"
+                alignSelf="center"
+              >
                 {Math.floor(currentIndex / 5) + 1} / {Math.ceil(genres.length / 5)}
               </Text>
               <IconButton
-                aria-label="next genres"
-                icon={<FaChevronRight />}
+                aria-label="Next genres"
+                icon={<FiChevronRight />}
                 onClick={handleNextClick}
                 isDisabled={currentIndex + 5 >= genres.length}
                 size="sm"
-                bg="#393552"
-                color="#e0def4"
-                _hover={{ bg: "#524f67" }}
-                _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+                bg="surface.elevated"
+                color="text.primary"
+                borderRadius="full"
+                _hover={{ bg: "surface.card", color: "kawaii.mint" }}
+                _disabled={{ opacity: 0.3, cursor: "not-allowed" }}
               />
             </Flex>
           )}
         </Box>
       </Box>
 
-      {/* action buttons */}
+      {/* Action Buttons */}
       <Flex
         justifyContent="center"
-        gap={6}
+        gap={8}
         p="6"
-        pt="0"
+        pt="2"
         pb="8"
       >
-        <IconButton
+        <MotionIconButton
           onClick={handlePreviousMatch}
-          aria-label="dislike"
-          icon={<FaTimes />}
+          aria-label="Pass"
+          icon={<FiX size={28} />}
           isRound
           size="lg"
-          bg="#393552"
-          color="#e0def4"
-          _hover={{ bg: "#eb6f92", transform: "scale(1.1)" }}
-          transition="all 0.2s"
-          boxShadow="lg"
+          w="64px"
+          h="64px"
+          bg="surface.elevated"
+          color="text.muted"
+          border="3px solid"
+          borderColor="rgba(255, 200, 210, 0.12)"
+          boxShadow="0 4px 16px rgba(0, 0, 0, 0.1)"
+          _hover={{ 
+            bg: "surface.muted",
+            color: "text.secondary",
+            transform: "scale(1.05)"
+          }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
         />
-        <IconButton
+        <MotionIconButton
           onClick={handleNextMatch}
-          aria-label="like"
-          icon={<FaHeart />}
+          aria-label="Like"
+          icon={<FiHeart size={28} />}
           isRound
           size="lg"
-          bg="#eb6f92"
-          color="#e0def4"
-          _hover={{ bg: "#d45879", transform: "scale(1.1)" }}
-          transition="all 0.2s"
-          boxShadow="lg"
+          w="64px"
+          h="64px"
+          bg="kawaii.pink"
+          color="white.pure"
+          boxShadow="0 6px 16px rgba(0, 0, 0, 0.15)"
+          _hover={{ 
+            bg: "#ff9da3",
+            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.18)"
+          }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
         />
       </Flex>
-    </Box>
+    </MotionBox>
   );
 };
 

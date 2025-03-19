@@ -1,48 +1,59 @@
+// MatchesList - Your matches with Kawaii Cute design
 import { useEffect, useState } from "react";
 import {
   Box,
   VStack,
   Heading,
-  Image,
-  Badge,
   Text,
   Flex,
   Center,
-  Stack,
   IconButton,
-  Button,
   Icon,
+  Wrap,
+  WrapItem,
+  HStack,
+  Avatar,
+  Spinner,
+  Circle,
 } from "@chakra-ui/react";
+import { motion } from "framer-motion";
 import {
-  FaChevronLeft,
-  FaChevronRight,
-  FaHeart,
-  FaMusic,
-} from "react-icons/fa";
+  FiChevronLeft,
+  FiChevronRight,
+  FiHeart,
+  FiMusic,
+  FiUser,
+  FiMapPin,
+  FiMessageCircle,
+  FiStar,
+} from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
+import { 
+  ClayCard, 
+  ClayCardBody, 
+  ClayButton, 
+  CyanButton,
+  OutlineButton,
+  CyanBadge,
+  PinkBadge,
+  FloatingShapes 
+} from "./ui";
+
+const MotionBox = motion(Box);
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
 const MatchesList = () => {
   const [matches, setMatches] = useState([]);
-  const [_loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentIndices, setCurrentIndices] = useState([]);
-  const [noMatches, setNoMatches] = useState(false); // new state for no matches message
+  const [noMatches, setNoMatches] = useState(false);
   const navigate = useNavigate();
-
-
-  
-
-  const _goBack = () => {
-    navigate("/profile");
-  };
-
-
 
   const handlePrevClick = (index) => {
     setCurrentIndices((prevIndices) =>
-      prevIndices.map((val, i) => (i === index ? val - 5 : val))
+      prevIndices.map((val, i) => (i === index ? Math.max(0, val - 5) : val))
     );
   };
   
@@ -53,8 +64,7 @@ const MatchesList = () => {
   };
 
   useEffect(() => {
-
- const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
     if (!token) {
       navigate("/");
       return;
@@ -64,24 +74,18 @@ const MatchesList = () => {
     const userInfo = JSON.parse(storedData);
     const userId = userInfo._id;
   
-    // Preload images to eliminate lag
     const preloadImages = (users) => {
       users.forEach((user) => {
-        // Preload profile_pic
         if (user.profile_pic) {
           const img = new Image();
           img.src = user.profile_pic;
         }
-        
-        // Preload pictures array
         if (user.pictures && Array.isArray(user.pictures)) {
           user.pictures.forEach((picUrl) => {
             const img = new Image();
             img.src = picUrl;
           });
         }
-        
-        // Preload fallback pic if exists
         if (user.pic) {
           const img = new Image();
           img.src = user.pic;
@@ -96,280 +100,352 @@ const MatchesList = () => {
           `${API_URL}/getmatches/${userId}`,
           {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
           }
         );
         const data = await response.json();
-  
-        console.log(data.matches); // debugging matches data
         
-        // Preload all match images
-        if (data.matches && data.matches.length > 0) {
-          preloadImages(data.matches);
+        const matchesData = data.matches || [];
+        
+        if (matchesData.length > 0) {
+          preloadImages(matchesData);
         }
         
-        setMatches(data.matches);
-  
-        if (data.matches.length === 0) {
-          setNoMatches(true); // set nomatches to true if there are no matches
-        } else {
-          setNoMatches(false); // otherwise, reset nomatches
-        }
-  
-        // initialize pagination indices for each match
-        setCurrentIndices(new Array(data.matches.length).fill(0)); // fill with 0
+        setMatches(matchesData);
+        setNoMatches(matchesData.length === 0);
+        setCurrentIndices(new Array(matchesData.length).fill(0));
       } catch (error) {
-        console.log("error fetching matches");
+        console.error("Error fetching matches:", error);
+        setMatches([]);
+        setNoMatches(true);
+        setCurrentIndices([]);
       } finally {
         setLoading(false);
       }
     };
     fetchMatches();
-  }, []);
+  }, [navigate]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <Flex minH="100vh" bg="surface.base" align="center" justify="center">
+          <VStack spacing={4}>
+            <Circle size="60px" bg="kawaii.pink">
+              <Spinner size="lg" color="white.pure" thickness="3px" />
+            </Circle>
+            <Text fontFamily="body" color="text.muted">Loading your matches...</Text>
+          </VStack>
+        </Flex>
+      </>
+    );
+  }
 
   return (
     <>
       <Header />
-      <Box bg="#232136" minHeight="100vh" py={8}>
-        <Heading as="h3" textAlign="center" color="#eb6f92" mb={8}>
-          Your Matches
-        </Heading>
-
-        {/* display a message if there are no matches */}
-        {noMatches ? (
-          <Center minH="60vh">
-            <VStack spacing={6} maxW="500px" px={4}>
-              <Box position="relative">
-                <Icon
-                  as={FaMusic}
-                  boxSize={20}
-                  color="#393552"
-                  position="absolute"
-                  top="-10px"
-                  left="-10px"
-                  opacity={0.3}
-                />
-                <Icon
-                  as={FaHeart}
-                  boxSize={24}
-                  color="#eb6f92"
-                />
-                <Icon
-                  as={FaMusic}
-                  boxSize={16}
-                  color="#393552"
-                  position="absolute"
-                  bottom="-8px"
-                  right="-8px"
-                  opacity={0.3}
-                />
-              </Box>
-              
-              <VStack spacing={3}>
-                <Heading size="lg" color="#e0def4" textAlign="center">
-                  No Matches Yet
-                </Heading>
-                <Text color="#908caa" fontSize="lg" textAlign="center">
-                  You haven&apos;t matched with anyone yet. Start swiping to find people who share your music taste!
-                </Text>
-              </VStack>
-
-              <VStack spacing={3} w="full">
-                <Button
-                  bg="#eb6f92"
-                  color="white"
-                  size="lg"
-                  w="full"
-                  _hover={{ bg: "#d45879", transform: "translateY(-2px)" }}
-                  _active={{ transform: "translateY(0)" }}
-                  onClick={() => navigate("/matches")}
-                  leftIcon={<Icon as={FaHeart} />}
-                  transition="all 0.2s"
-                >
-                  Find Matches
-                </Button>
-                
-                <Button
-                  bg="#393552"
-                  color="#e0def4"
-                  size="md"
-                  variant="ghost"
-                  _hover={{ bg: "#524f67" }}
-                  onClick={() => navigate("/profile")}
-                >
-                  View Profile
-                </Button>
-              </VStack>
-
-              <Box
-                bg="#2a273f"
-                p={6}
-                borderRadius="lg"
-                border="1px solid"
-                borderColor="#393552"
-                w="full"
+      <Box bg="surface.base" minH="100vh" position="relative" overflow="hidden" py={8}>
+        <FloatingShapes variant="subtle" />
+        
+        <Box position="relative" zIndex={1} maxW="700px" mx="auto" px={4}>
+          {/* Header */}
+          <MotionBox
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            mb={8}
+          >
+            <HStack justify="center" spacing={3}>
+              <Circle size="40px" bg="kawaii.lilac">
+                <Icon as={FiHeart} boxSize={5} color="white.pure" />
+              </Circle>
+              <Heading
+                fontFamily="heading"
+                fontSize="2xl"
+                fontWeight="bold"
+                textAlign="center"
+                bgGradient="linear(135deg, kawaii.pink, kawaii.lilac)"
+                bgClip="text"
               >
-                <VStack spacing={3} align="start">
-                  <Heading size="sm" color="#eb6f92">
-                    💡 Tips to get matches:
-                  </Heading>
-                  <VStack align="start" spacing={2} pl={2}>
-                    <Text color="#e0def4" fontSize="sm">
-                      • Like profiles that interest you
-                    </Text>
-                    <Text color="#e0def4" fontSize="sm">
-                      • Connect your music platform for better matches
-                    </Text>
-                    <Text color="#e0def4" fontSize="sm">
-                      • Complete your profile with a bio
-                    </Text>
-                    <Text color="#e0def4" fontSize="sm">
-                      • Be active - check back often!
-                    </Text>
-                  </VStack>
-                </VStack>
-              </Box>
-            </VStack>
-          </Center>
-        ) : (
-          <VStack spacing={6} p="4" maxW="600px" mx="auto" w="full">
-            {matches &&
-              Array.isArray(matches) &&
-              matches.map((match, index) => (
-                <Box
-                  key={index}
-                  borderWidth="2px"
-                  borderRadius="xl"
-                  overflow="hidden"
-                  boxShadow="lg"
-                  position="relative"
-                  w="full"
-                  bg="#2a273f"
-                  borderColor="#393552"
-                  transition="all 0.3s"
-                  _hover={{ transform: "translateY(-4px)", boxShadow: "0 20px 40px rgba(235, 111, 146, 0.2)" }}
-                  p={6}
-                >
-                  <VStack spacing={4} align="stretch">
-                    {/* Profile Header */}
-                    <Flex alignItems="center" gap={4}>
-                      <Image
-                        src={match.profile_pic || match.pic || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"}
-                        alt={`${match.preferred_name || match.name || 'User'}'s picture`}
-                        boxSize="80px"
-                        borderRadius="full"
-                        border="3px solid"
-                        borderColor="#eb6f92"
-                        objectFit="cover"
-                      />
-                      <Box flex={1}>
-                        <Heading size="md" color="#e0def4" mb={1}>
-                          {match.preferred_name || match.name || 'Unknown User'}, {match.age || '?'}
+                Your Matches
+              </Heading>
+            </HStack>
+          </MotionBox>
+
+          {noMatches ? (
+            // No Matches State
+            <MotionBox
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <Center minH="60vh">
+                <ClayCard>
+                  <ClayCardBody py={12} px={8}>
+                    <VStack spacing={6} maxW="400px">
+                      {/* Icon */}
+                      <Circle size="80px" bg="kawaii.pink">
+                        <Icon as={FiHeart} boxSize={10} color="white.pure" />
+                      </Circle>
+                      
+                      <VStack spacing={2}>
+                        <Heading
+                          fontFamily="heading"
+                          fontSize="xl"
+                          fontWeight="bold"
+                          color="text.primary"
+                          textAlign="center"
+                        >
+                          No Matches Yet
                         </Heading>
-                        {match.country && (
-                          <Text color="#908caa" fontSize="sm">
-                            📍 {match.country}
-                          </Text>
-                        )}
-                      </Box>
-                    </Flex>
-
-                    {/* Bio */}
-                    {match.bio && (
-                      <Box>
-                        <Text color="#e0def4" fontSize="sm" fontStyle="italic">
-                          &ldquo;{match.bio}&rdquo;
+                        <Text fontFamily="body" color="text.muted" textAlign="center">
+                          Start swiping to find people who share your music taste!
                         </Text>
-                      </Box>
-                    )}
+                      </VStack>
 
-                    {/* Genres */}
-                    <Box>
-                      <Text color="#908caa" fontSize="sm" fontWeight="bold" mb={2}>
-                        Music Taste:
-                      </Text>
-                      <Flex wrap="wrap" gap={2}>
-                        {(() => {
-                          const userGenres = match.aggregatedGenres || match.genres || [];
-                          return Array.isArray(userGenres) && userGenres.length > 0
-                            ? userGenres
-                                .slice(currentIndices[index], currentIndices[index] + 5)
-                                .map((genre, genreIndex) => (
-                                  <Badge
-                                    key={genreIndex}
-                                    borderRadius="full"
-                                    px="3"
-                                    py="1"
-                                    bg="#393552"
-                                    color="#9ccfd8"
-                                    fontSize="xs"
-                                    textTransform="capitalize"
-                                  >
-                                    {genre}
-                                  </Badge>
-                                ))
-                            : <Text color="#6e6a86" fontSize="sm">No genres listed</Text>;
-                        })()}
-                      </Flex>
+                      <VStack spacing={3} w="full">
+                        <ClayButton
+                          w="full"
+                          size="lg"
+                          leftIcon={<Icon as={FiHeart} />}
+                          onClick={() => navigate("/matches")}
+                        >
+                          Find Matches
+                        </ClayButton>
+                        
+                        <OutlineButton
+                          w="full"
+                          onClick={() => navigate("/profile")}
+                          leftIcon={<Icon as={FiUser} />}
+                        >
+                          View Profile
+                        </OutlineButton>
+                      </VStack>
 
-                      {/* Genre Navigation */}
-                      {(() => {
-                        const userGenres = match.aggregatedGenres || match.genres || [];
-                        return userGenres.length > 5 && (
-                          <Flex mt="3" justifyContent="center" gap={2}>
-                            <IconButton
-                              aria-label="Previous genres"
-                              icon={<FaChevronLeft />}
-                              onClick={() => handlePrevClick(index)}
-                              isDisabled={currentIndices[index] === 0}
-                              size="sm"
-                              bg="#393552"
-                              color="#e0def4"
-                              _hover={{ bg: "#524f67" }}
-                              _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
-                            />
-                            <Text color="#908caa" fontSize="xs" alignSelf="center">
-                              {Math.floor(currentIndices[index] / 5) + 1} / {Math.ceil(userGenres.length / 5)}
-                            </Text>
-                            <IconButton
-                              aria-label="Next genres"
-                              icon={<FaChevronRight />}
-                              onClick={() => handleNextClick(index)}
-                              isDisabled={currentIndices[index] + 5 >= userGenres.length}
-                              size="sm"
-                              bg="#393552"
-                              color="#e0def4"
-                              _hover={{ bg: "#524f67" }}
-                              _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
-                            />
-                          </Flex>
-                        );
-                      })()}
-                    </Box>
-
-                    {/* Contact Info */}
-                    {match.contact_info && (
+                      {/* Tips */}
                       <Box
-                        bg="#393552"
-                        p={3}
-                        borderRadius="md"
-                        textAlign="center"
+                        w="full"
+                        p={5}
+                        bg="surface.muted"
+                        borderRadius="2xl"
+                        border="2px solid"
+                        borderColor="rgba(255, 200, 210, 0.08)"
                       >
-                        <Text color="#908caa" fontSize="xs" mb={1}>
-                          Contact Info
-                        </Text>
-                        <Text color="#e0def4" fontSize="sm" fontWeight="semibold">
-                          {match.contact_info}
-                        </Text>
+                        <VStack align="start" spacing={3}>
+                          <HStack>
+                            <Circle size="24px" bg="kawaii.mint">
+                              <Icon as={FiStar} boxSize={3} color="white.pure" />
+                            </Circle>
+                            <Text fontFamily="body" fontWeight="semibold" color="text.secondary">Tips</Text>
+                          </HStack>
+                          <VStack align="start" spacing={2}>
+                            {[
+                              "Like profiles that interest you",
+                              "Connect your music platform",
+                              "Complete your profile with a bio",
+                              "Be active - check back often!"
+                            ].map((tip, i) => (
+                              <Text key={i} fontFamily="body" fontSize="sm" color="text.muted">
+                                {tip}
+                              </Text>
+                            ))}
+                          </VStack>
+                        </VStack>
                       </Box>
-                    )}
-                  </VStack>
-                </Box>
-              ))}
-          </VStack>
-        )}
+                    </VStack>
+                  </ClayCardBody>
+                </ClayCard>
+              </Center>
+            </MotionBox>
+          ) : (
+            // Matches List
+            <MotionBox
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <VStack spacing={4}>
+                {matches.map((match, index) => (
+                  <MotionBox
+                    key={match._id || index}
+                    variants={itemVariants}
+                    w="full"
+                    whileHover={{ scale: 1.01, y: -2 }}
+                  >
+                    <ClayCard>
+                      <ClayCardBody>
+                        <VStack spacing={5} align="stretch">
+                          {/* Profile Header */}
+                          <Flex alignItems="center" gap={4}>
+                            <Avatar
+                              src={match.profile_pic || match.pic}
+                              name={match.preferred_name || match.name}
+                              size="lg"
+                              border="4px solid"
+                              borderColor="kawaii.pink"
+                              boxShadow="0 6px 16px rgba(0, 0, 0, 0.15)"
+                            />
+                            <Box flex={1}>
+                              <HStack justify="space-between" align="flex-start">
+                                <VStack align="flex-start" spacing={0}>
+                                  <Heading
+                                    fontFamily="heading"
+                                    fontSize="lg"
+                                    fontWeight="bold"
+                                    color="text.primary"
+                                  >
+                                    {match.preferred_name || match.name || 'Unknown User'}, {match.age || '?'}
+                                  </Heading>
+                                  {match.country && (
+                                    <HStack spacing={1} color="text.muted">
+                                      <Icon as={FiMapPin} boxSize={3} />
+                                      <Text fontFamily="body" fontSize="sm">
+                                        {match.country}
+                                      </Text>
+                                    </HStack>
+                                  )}
+                                </VStack>
+                                <Circle size="28px" bg="kawaii.lilac">
+                                  <Icon as={FiHeart} boxSize={3} color="white.pure" />
+                                </Circle>
+                              </HStack>
+                            </Box>
+                          </Flex>
+
+                          {/* Bio */}
+                          {match.bio && (
+                            <Box 
+                              p={4} 
+                              bg="surface.muted" 
+                              borderRadius="2xl"
+                              border="2px solid"
+                              borderColor="rgba(255, 200, 210, 0.08)"
+                            >
+                              <Text fontFamily="body" fontSize="sm" color="text.secondary" fontStyle="italic">
+                                &ldquo;{match.bio}&rdquo;
+                              </Text>
+                            </Box>
+                          )}
+
+                          {/* Genres */}
+                          <Box>
+                            <HStack mb={3}>
+                              <Circle size="28px" bg="kawaii.mint">
+                                <Icon as={FiMusic} color="white.pure" boxSize={3} />
+                              </Circle>
+                              <Text 
+                                fontFamily="body"
+                                fontSize="sm"
+                                fontWeight="semibold"
+                                color="text.secondary"
+                              >
+                                Music Taste
+                              </Text>
+                            </HStack>
+                            <Wrap spacing={2}>
+                              {(() => {
+                                const userGenres = match.aggregatedGenres || match.genres || [];
+                                const currentIndex = currentIndices[index] || 0;
+                                
+                                return Array.isArray(userGenres) && userGenres.length > 0
+                                  ? userGenres
+                                      .slice(currentIndex, currentIndex + 5)
+                                      .map((genre, genreIndex) => (
+                                        <WrapItem key={genreIndex}>
+                                          <Box
+                                            px={4}
+                                            py={1.5}
+                                            bg="rgba(181, 234, 221, 0.15)"
+                                            border="2px solid"
+                                            borderColor="rgba(181, 234, 221, 0.4)"
+                                            borderRadius="full"
+                                          >
+                                            <Text 
+                                              fontFamily="body"
+                                              fontSize="xs"
+                                              fontWeight="semibold"
+                                              color="kawaii.mint"
+                                              textTransform="capitalize"
+                                            >
+                                              {genre}
+                                            </Text>
+                                          </Box>
+                                        </WrapItem>
+                                      ))
+                                  : <Text fontFamily="body" color="text.muted" fontSize="sm">No genres listed</Text>;
+                              })()}
+                            </Wrap>
+
+                            {/* Genre Navigation */}
+                            {(() => {
+                              const userGenres = match.aggregatedGenres || match.genres || [];
+                              const currentIndex = currentIndices[index] || 0;
+                              
+                              return userGenres.length > 5 && (
+                                <Flex mt="3" justifyContent="center" gap={2}>
+                                  <IconButton
+                                    aria-label="Previous genres"
+                                    icon={<FiChevronLeft />}
+                                    onClick={() => handlePrevClick(index)}
+                                    isDisabled={currentIndex === 0}
+                                    size="sm"
+                                    bg="surface.elevated"
+                                    color="text.primary"
+                                    borderRadius="full"
+                                    _hover={{ bg: "surface.card", transform: "scale(1.05)" }}
+                                    _disabled={{ opacity: 0.3, cursor: "not-allowed" }}
+                                    transition="all 0.2s"
+                                  />
+                                  <Text fontFamily="body" fontSize="xs" color="text.muted" alignSelf="center">
+                                    {Math.floor(currentIndex / 5) + 1} / {Math.ceil(userGenres.length / 5)}
+                                  </Text>
+                                  <IconButton
+                                    aria-label="Next genres"
+                                    icon={<FiChevronRight />}
+                                    onClick={() => handleNextClick(index)}
+                                    isDisabled={currentIndex + 5 >= userGenres.length}
+                                    size="sm"
+                                    bg="surface.elevated"
+                                    color="text.primary"
+                                    borderRadius="full"
+                                    _hover={{ bg: "surface.card", transform: "scale(1.05)" }}
+                                    _disabled={{ opacity: 0.3, cursor: "not-allowed" }}
+                                    transition="all 0.2s"
+                                  />
+                                </Flex>
+                              );
+                            })()}
+                          </Box>
+
+                          {/* Message Button */}
+                          <CyanButton
+                            w="full"
+                            leftIcon={<Icon as={FiMessageCircle} />}
+                            onClick={() => navigate("/messaging")}
+                          >
+                            Send Message
+                          </CyanButton>
+                        </VStack>
+                      </ClayCardBody>
+                    </ClayCard>
+                  </MotionBox>
+                ))}
+              </VStack>
+            </MotionBox>
+          )}
+        </Box>
       </Box>
     </>
   );

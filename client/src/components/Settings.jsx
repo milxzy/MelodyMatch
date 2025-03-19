@@ -1,16 +1,13 @@
+// Settings - Settings page with Kawaii Cute design
 import { useState, useEffect, useRef } from 'react';
 import {
   Box,
-  Button,
   Container,
   FormControl,
   FormLabel,
-  Input,
-  Textarea,
   VStack,
   Heading,
   useToast,
-  Divider,
   Text,
   AlertDialog,
   AlertDialogBody,
@@ -30,10 +27,25 @@ import {
   RangeSliderTrack,
   RangeSliderFilledTrack,
   RangeSliderThumb,
+  Icon,
+  Input,
+  Circle,
 } from '@chakra-ui/react';
-import { FaCamera } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { FiCamera, FiUser, FiHeart, FiAlertTriangle, FiSave, FiSettings } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
+import { 
+  ClayCard, 
+  ClayCardBody, 
+  ClayButton,
+  DangerButton,
+  GhostButton,
+  FloatingShapes 
+} from './ui';
+import { GlowInput, GlowTextarea } from './ui/GlowInput';
+
+const MotionBox = motion(Box);
 
 const Settings = () => {
   const [formData, setFormData] = useState({
@@ -69,8 +81,8 @@ const Settings = () => {
       const userId = userInfo?._id || userInfo?.id;
 
       const response = await fetch(`${API_URL}/getUserById/${userId}`);
-
       const data = await response.json();
+      
       if (data.user) {
         setFormData({
           name: data.user.name || '',
@@ -100,16 +112,12 @@ const Settings = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: 'Error',
@@ -121,7 +129,6 @@ const Settings = () => {
         return;
       }
 
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         toast({
           title: 'Error',
@@ -136,10 +143,7 @@ const Settings = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
-        setFormData({
-          ...formData,
-          profile_pic: reader.result,
-        });
+        setFormData({ ...formData, profile_pic: reader.result });
       };
       reader.readAsDataURL(file);
     }
@@ -155,14 +159,8 @@ const Settings = () => {
 
       const response = await fetch(`${API_URL}/updateUserProfile`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          ...formData,
-          preferences
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, ...formData, preferences }),
       });
 
       const data = await response.json();
@@ -176,7 +174,6 @@ const Settings = () => {
           isClosable: true,
         });
         
-        // Update localStorage with new data
         const updatedUserInfo = { ...userInfo, ...data.user };
         localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
       } else {
@@ -234,323 +231,307 @@ const Settings = () => {
   return (
     <>
       <Header />
-      <Box bg="#232136" minH="100vh" py={8}>
-        <Container maxW="container.md">
-          <VStack spacing={6} align="stretch">
-            <Heading color="#eb6f92" size="xl">
-              Settings
-            </Heading>
+      <Box bg="surface.base" minH="100vh" position="relative" overflow="hidden" py={8}>
+        <FloatingShapes variant="subtle" />
+        
+        <Container maxW="container.md" position="relative" zIndex={1}>
+          <MotionBox
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <VStack spacing={6} align="stretch">
+              <HStack spacing={3} justify="center">
+                <Circle size="40px" bg="kawaii.pink">
+                  <Icon as={FiSettings} boxSize={5} color="white.pure" />
+                </Circle>
+                <Heading
+                  fontFamily="heading"
+                  fontSize="2xl"
+                  fontWeight="bold"
+                  bgGradient="linear(135deg, kawaii.pink, kawaii.lilac)"
+                  bgClip="text"
+                >
+                  Settings
+                </Heading>
+              </HStack>
 
-            <Box bg="#2a273f" p={6} borderRadius="lg">
-              <Heading size="md" color="#eb6f92" mb={6}>
-                Profile Information
-              </Heading>
-              <form onSubmit={handleSubmit}>
-                <VStack spacing={6}>
-                  {/* Profile Picture */}
-                  <FormControl>
-                    <FormLabel color="#e0def4" textAlign="center">Profile Picture</FormLabel>
-                    <VStack spacing={3}>
-                      <Box position="relative">
-                        <Avatar
-                          size="2xl"
-                          src={imagePreview}
-                          bg="#393552"
-                          color="#e0def4"
+              {/* Profile Information */}
+              <ClayCard>
+                <ClayCardBody>
+                  <HStack mb={6}>
+                    <Circle size="36px" bg="kawaii.pink">
+                      <Icon as={FiUser} color="white.pure" boxSize={4} />
+                    </Circle>
+                    <Heading
+                      fontFamily="heading"
+                      fontSize="md"
+                      fontWeight="bold"
+                      color="text.primary"
+                    >
+                      Profile Information
+                    </Heading>
+                  </HStack>
+
+                  <form onSubmit={handleSubmit}>
+                    <VStack spacing={6}>
+                      {/* Profile Picture */}
+                      <FormControl>
+                        <FormLabel textAlign="center">Profile Picture</FormLabel>
+                        <VStack spacing={3}>
+                          <Box position="relative">
+                            <Avatar
+                              size="2xl"
+                              src={imagePreview}
+                              bg="surface.elevated"
+                              border="4px solid"
+                              borderColor="kawaii.pink"
+                              boxShadow="0 6px 20px rgba(0, 0, 0, 0.15)"
+                            />
+                            <IconButton
+                              icon={<FiCamera />}
+                              position="absolute"
+                              bottom="0"
+                              right="0"
+                              borderRadius="full"
+                              bg="kawaii.lilac"
+                              color="white.pure"
+                              size="sm"
+                              _hover={{ bg: "kawaii.pink" }}
+                              onClick={() => fileInputRef.current.click()}
+                              aria-label="Upload profile picture"
+                            />
+                          </Box>
+                          <Input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            display="none"
+                          />
+                          <FormHelperText textAlign="center">
+                            Click the camera icon to upload (max 5MB)
+                          </FormHelperText>
+                        </VStack>
+                      </FormControl>
+
+                      {/* Preferred Name */}
+                      <FormControl>
+                        <FormLabel fontFamily="body" fontWeight="semibold">Preferred Name</FormLabel>
+                        <GlowInput
+                          name="preferred_name"
+                          value={formData.preferred_name}
+                          onChange={handleChange}
+                          placeholder="What should people call you?"
                         />
-                        <IconButton
-                          icon={<FaCamera />}
-                          position="absolute"
-                          bottom="0"
-                          right="0"
-                          borderRadius="full"
-                          bg="#eb6f92"
-                          color="white"
-                          size="sm"
-                          _hover={{ bg: "#d64d73" }}
-                          onClick={() => fileInputRef.current.click()}
-                          aria-label="Upload profile picture"
+                      </FormControl>
+
+                      {/* Bio */}
+                      <FormControl>
+                        <FormLabel fontFamily="body" fontWeight="semibold">Bio</FormLabel>
+                        <GlowTextarea
+                          name="bio"
+                          value={formData.bio}
+                          onChange={handleChange}
+                          placeholder="Tell others about yourself and your music taste..."
+                          rows={4}
+                          maxLength={500}
                         />
-                      </Box>
-                      <Input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        display="none"
-                      />
-                      <FormHelperText color="#908CAA" textAlign="center">
-                        Click the camera icon to upload a new picture (max 5MB)
-                      </FormHelperText>
+                        <FormHelperText>
+                          {formData.bio.length}/500 characters
+                        </FormHelperText>
+                      </FormControl>
+
+                      {/* Full Name */}
+                      <FormControl>
+                        <FormLabel fontFamily="body" fontWeight="semibold">Full Name</FormLabel>
+                        <GlowInput
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                        />
+                      </FormControl>
+
+                      {/* Age */}
+                      <FormControl>
+                        <FormLabel fontFamily="body" fontWeight="semibold">Age</FormLabel>
+                        <GlowInput
+                          name="age"
+                          type="number"
+                          value={formData.age}
+                          onChange={handleChange}
+                        />
+                      </FormControl>
+
+                      {/* Gender */}
+                      <FormControl>
+                        <FormLabel fontFamily="body" fontWeight="semibold">Gender</FormLabel>
+                        <Select
+                          name="gender"
+                          value={formData.gender}
+                          onChange={handleChange}
+                          bg="surface.muted"
+                          border="2px solid"
+                          borderColor="rgba(255, 200, 210, 0.12)"
+                          borderRadius="2xl"
+                          color="text.primary"
+                          _hover={{ borderColor: "rgba(255, 200, 210, 0.2)" }}
+                          _focus={{ borderColor: "kawaii.lilac", boxShadow: "0 0 0 1px rgba(212, 191, 255, 0.5)" }}
+                        >
+                          <option value="" style={{ background: '#1A1A2E' }}>Select gender</option>
+                          <option value="male" style={{ background: '#1A1A2E' }}>Male</option>
+                          <option value="female" style={{ background: '#1A1A2E' }}>Female</option>
+                          <option value="non-binary" style={{ background: '#1A1A2E' }}>Non-binary</option>
+                        </Select>
+                      </FormControl>
                     </VStack>
-                  </FormControl>
+                  </form>
+                </ClayCardBody>
+              </ClayCard>
 
-                  {/* Preferred Name */}
-                  <FormControl>
-                    <FormLabel color="#e0def4">Preferred Name</FormLabel>
-                    <Input
-                      name="preferred_name"
-                      value={formData.preferred_name}
-                      onChange={handleChange}
-                      placeholder="What should people call you?"
-                      bg="#393552"
-                      color="#e0def4"
-                      border="1px solid"
-                      borderColor="#6E6A86"
-                      _hover={{ borderColor: "#908CAA" }}
-                      _focus={{ 
-                        borderColor: "#EB6F92", 
-                        boxShadow: "0 0 0 1px #EB6F92" 
-                      }}
-                    />
-                  </FormControl>
-
-                  {/* Bio */}
-                  <FormControl>
-                    <FormLabel color="#e0def4">Bio</FormLabel>
-                    <Textarea
-                      name="bio"
-                      value={formData.bio}
-                      onChange={handleChange}
-                      placeholder="Tell others about yourself and your music taste..."
-                      bg="#393552"
-                      color="#e0def4"
-                      border="1px solid"
-                      borderColor="#6E6A86"
-                      rows={4}
-                      maxLength={500}
-                      _hover={{ borderColor: "#908CAA" }}
-                      _focus={{ 
-                        borderColor: "#EB6F92", 
-                        boxShadow: "0 0 0 1px #EB6F92" 
-                      }}
-                    />
-                    <FormHelperText color="#908CAA">
-                      {formData.bio.length}/500 characters
-                    </FormHelperText>
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel color="#e0def4">Full Name</FormLabel>
-                    <Input
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      bg="#393552"
-                      color="#e0def4"
-                      border="1px solid"
-                      borderColor="#6E6A86"
-                      _hover={{ borderColor: "#908CAA" }}
-                      _focus={{ 
-                        borderColor: "#EB6F92", 
-                        boxShadow: "0 0 0 1px #EB6F92" 
-                      }}
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel color="#e0def4">Age</FormLabel>
-                    <Input
-                      name="age"
-                      type="number"
-                      value={formData.age}
-                      onChange={handleChange}
-                      bg="#393552"
-                      color="#e0def4"
-                      border="1px solid"
-                      borderColor="#6E6A86"
-                      _hover={{ borderColor: "#908CAA" }}
-                      _focus={{ 
-                        borderColor: "#EB6F92", 
-                        boxShadow: "0 0 0 1px #EB6F92" 
-                      }}
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel color="#e0def4">Gender</FormLabel>
-                    <Select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                      bg="#393552"
-                      color="#e0def4"
-                      border="1px solid"
-                      borderColor="#6E6A86"
-                      _hover={{ borderColor: "#908CAA" }}
-                      _focus={{ 
-                        borderColor: "#EB6F92", 
-                        boxShadow: "0 0 0 1px #EB6F92" 
-                      }}
+              {/* Matching Preferences */}
+              <ClayCard>
+                <ClayCardBody>
+                  <HStack mb={6}>
+                    <Circle size="36px" bg="kawaii.lilac">
+                      <Icon as={FiHeart} color="white.pure" boxSize={4} />
+                    </Circle>
+                    <Heading
+                      fontFamily="heading"
+                      fontSize="md"
+                      fontWeight="bold"
+                      color="text.primary"
                     >
-                      <option value="">Select gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="non-binary">Non-binary</option>
-                    </Select>
-                  </FormControl>
+                      Matching Preferences
+                    </Heading>
+                  </HStack>
 
-                  <Divider borderColor="#6E6A86" />
+                  <VStack spacing={6} align="stretch">
+                    {/* Interested In */}
+                    <FormControl>
+                      <FormLabel fontFamily="body" fontWeight="semibold">Interested In</FormLabel>
+                      <CheckboxGroup
+                        value={preferences.interestedIn}
+                        onChange={(values) => setPreferences({ ...preferences, interestedIn: values })}
+                      >
+                        <Stack spacing={3}>
+                          {['male', 'female', 'non-binary'].map((value) => (
+                            <Checkbox
+                              key={value}
+                              value={value}
+                              sx={{
+                                '.chakra-checkbox__control': {
+                                  bg: 'surface.muted',
+                                  borderColor: 'rgba(255, 200, 210, 0.2)',
+                                  borderRadius: 'lg',
+                                  _checked: { bg: 'kawaii.pink', borderColor: 'kawaii.pink' }
+                                },
+                                '.chakra-checkbox__label': { color: 'text.secondary', fontFamily: 'body' }
+                              }}
+                            >
+                              {value === 'male' ? 'Men' : value === 'female' ? 'Women' : 'Non-binary'}
+                            </Checkbox>
+                          ))}
+                        </Stack>
+                      </CheckboxGroup>
+                      <FormHelperText>
+                        Select all that apply. Leave blank to see everyone.
+                      </FormHelperText>
+                    </FormControl>
 
-                  {/* Matching Preferences Section */}
-                  <Heading size="sm" color="#eb6f92" alignSelf="flex-start">
-                    Matching Preferences
-                  </Heading>
+                    {/* Age Range */}
+                    <FormControl>
+                      <FormLabel fontFamily="body" fontWeight="semibold">
+                        Age Range: {preferences.ageMin} - {preferences.ageMax}
+                      </FormLabel>
+                      <RangeSlider
+                        min={18}
+                        max={99}
+                        step={1}
+                        value={[preferences.ageMin, preferences.ageMax]}
+                        onChange={(values) => setPreferences({ ...preferences, ageMin: values[0], ageMax: values[1] })}
+                      >
+                        <RangeSliderTrack bg="surface.muted" h="8px" borderRadius="full">
+                          <RangeSliderFilledTrack bgGradient="linear(90deg, kawaii.pink, kawaii.lilac)" />
+                        </RangeSliderTrack>
+                        <RangeSliderThumb 
+                          index={0} 
+                          bg="kawaii.pink" 
+                          boxSize={5} 
+                          boxShadow="0 3px 8px rgba(0, 0, 0, 0.15)" 
+                        />
+                        <RangeSliderThumb 
+                          index={1} 
+                          bg="kawaii.lilac" 
+                          boxSize={5} 
+                          boxShadow="0 3px 8px rgba(0, 0, 0, 0.15)" 
+                        />
+                      </RangeSlider>
+                    </FormControl>
 
-                  <FormControl>
-                    <FormLabel color="#e0def4">Interested In</FormLabel>
-                    <CheckboxGroup
-                      value={preferences.interestedIn}
-                      onChange={(values) => setPreferences({ ...preferences, interestedIn: values })}
+                    <ClayButton
+                      type="submit"
+                      w="full"
+                      size="lg"
+                      leftIcon={<Icon as={FiSave} />}
+                      isLoading={isLoading}
+                      onClick={handleSubmit}
                     >
-                      <Stack spacing={3} direction="column">
-                        <Checkbox
-                          value="male"
-                          colorScheme="pink"
-                          iconColor="white"
-                          sx={{
-                            '.chakra-checkbox__control': {
-                              bg: '#393552',
-                              borderColor: '#6E6A86',
-                              _checked: {
-                                bg: '#EB6F92',
-                                borderColor: '#EB6F92'
-                              }
-                            },
-                            '.chakra-checkbox__label': {
-                              color: '#e0def4'
-                            }
-                          }}
-                        >
-                          Men
-                        </Checkbox>
-                        <Checkbox
-                          value="female"
-                          colorScheme="pink"
-                          iconColor="white"
-                          sx={{
-                            '.chakra-checkbox__control': {
-                              bg: '#393552',
-                              borderColor: '#6E6A86',
-                              _checked: {
-                                bg: '#EB6F92',
-                                borderColor: '#EB6F92'
-                              }
-                            },
-                            '.chakra-checkbox__label': {
-                              color: '#e0def4'
-                            }
-                          }}
-                        >
-                          Women
-                        </Checkbox>
-                        <Checkbox
-                          value="non-binary"
-                          colorScheme="pink"
-                          iconColor="white"
-                          sx={{
-                            '.chakra-checkbox__control': {
-                              bg: '#393552',
-                              borderColor: '#6E6A86',
-                              _checked: {
-                                bg: '#EB6F92',
-                                borderColor: '#EB6F92'
-                              }
-                            },
-                            '.chakra-checkbox__label': {
-                              color: '#e0def4'
-                            }
-                          }}
-                        >
-                          Non-binary
-                        </Checkbox>
-                      </Stack>
-                    </CheckboxGroup>
-                    <FormHelperText color="#908CAA">
-                      Select all that apply. Leave blank to see everyone.
-                    </FormHelperText>
-                  </FormControl>
+                      Save Changes
+                    </ClayButton>
+                  </VStack>
+                </ClayCardBody>
+              </ClayCard>
 
-                  <FormControl>
-                    <FormLabel color="#e0def4">Age Range: {preferences.ageMin} - {preferences.ageMax}</FormLabel>
-                    <RangeSlider
-                      min={18}
-                      max={99}
-                      step={1}
-                      value={[preferences.ageMin, preferences.ageMax]}
-                      onChange={(values) => setPreferences({ ...preferences, ageMin: values[0], ageMax: values[1] })}
-                      colorScheme="pink"
+              {/* Danger Zone */}
+              <ClayCard>
+                <ClayCardBody>
+                  <HStack mb={4}>
+                    <Circle size="36px" bg="error">
+                      <Icon as={FiAlertTriangle} color="white.pure" boxSize={4} />
+                    </Circle>
+                    <Heading
+                      fontFamily="heading"
+                      fontSize="md"
+                      fontWeight="bold"
+                      color="error"
                     >
-                      <RangeSliderTrack bg="#393552">
-                        <RangeSliderFilledTrack bg="#EB6F92" />
-                      </RangeSliderTrack>
-                      <RangeSliderThumb index={0} bg="#EB6F92" />
-                      <RangeSliderThumb index={1} bg="#EB6F92" />
-                    </RangeSlider>
-                    <FormHelperText color="#908CAA">
-                      Set your preferred age range for matches
-                    </FormHelperText>
-                  </FormControl>
-
-                  <Button
-                    type="submit"
-                    bg="#eb6f92"
-                    color="white"
-                    width="full"
-                    size="lg"
-                    isLoading={isLoading}
-                    _hover={{ bg: "#d64d73", transform: "translateY(-2px)" }}
-                    _active={{ transform: "translateY(0)" }}
-                    transition="all 0.2s"
-                  >
-                    Save Changes
-                  </Button>
-                </VStack>
-              </form>
-            </Box>
-
-            <Divider />
-
-            <Box bg="#2a273f" p={6} borderRadius="lg">
-              <Heading size="md" color="#eb6f92" mb={4}>
-                Danger Zone
-              </Heading>
-              <Text color="#e0def4" mb={4}>
-                Once you delete your account, there is no going back. Please be certain.
-              </Text>
-              <Button
-                colorScheme="red"
-                onClick={() => setIsDeleteOpen(true)}
-              >
-                Delete Account
-              </Button>
-            </Box>
-          </VStack>
+                      Danger Zone
+                    </Heading>
+                  </HStack>
+                  <Text fontFamily="body" color="text.muted" mb={4}>
+                    Once you delete your account, there is no going back. Please be certain.
+                  </Text>
+                  <DangerButton onClick={() => setIsDeleteOpen(true)}>
+                    Delete Account
+                  </DangerButton>
+                </ClayCardBody>
+              </ClayCard>
+            </VStack>
+          </MotionBox>
         </Container>
       </Box>
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog
         isOpen={isDeleteOpen}
         leastDestructiveRef={cancelRef}
         onClose={() => setIsDeleteOpen(false)}
       >
-        <AlertDialogOverlay>
-          <AlertDialogContent bg="#2a273f">
-            <AlertDialogHeader color="#eb6f92">
+        <AlertDialogOverlay bg="rgba(15, 15, 26, 0.9)" backdropFilter="blur(10px)">
+          <AlertDialogContent bg="surface.elevated" borderRadius="3xl" border="2px solid" borderColor="error">
+            <AlertDialogHeader fontFamily="heading" fontWeight="bold" color="error">
               Delete Account
             </AlertDialogHeader>
-
-            <AlertDialogBody color="#e0def4">
+            <AlertDialogBody fontFamily="body" color="text.secondary">
               Are you sure? This action cannot be undone.
             </AlertDialogBody>
-
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={() => setIsDeleteOpen(false)}>
+              <GhostButton ref={cancelRef} onClick={() => setIsDeleteOpen(false)}>
                 Cancel
-              </Button>
-              <Button colorScheme="red" onClick={handleDeleteAccount} ml={3}>
+              </GhostButton>
+              <DangerButton onClick={handleDeleteAccount} ml={3}>
                 Delete
-              </Button>
+              </DangerButton>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>

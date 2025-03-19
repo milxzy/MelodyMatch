@@ -93,7 +93,7 @@ class ErrorBoundary extends Component {
               <VStack spacing={3} w="full">
                 <Button
                   bg="#EB6F92"
-                  color="white"
+                  color="white.pure"
                   _hover={{ bg: "#D45879" }}
                   onClick={this.handleReset}
                   w="full"

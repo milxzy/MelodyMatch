@@ -29,7 +29,7 @@ const Login = () => {
       <Center bg="#232136" h="100vh">
         <VStack spacing={4}>
           <Spinner size="xl" color="#eb6f92" thickness="4px" />
-          <Text color="white">Preparing login...</Text>
+          <Text color="white.pure">Preparing login...</Text>
         </VStack>
       </Center>
     );
@@ -76,7 +76,7 @@ const Login = () => {
             href={loginUrl}
             size="lg"
             bg="#1DB954"
-            color="white"
+            color="white.pure"
             _hover={{ bg: "#1ed760", transform: "scale(1.05)" }}
             _active={{ bg: "#1aa34a" }}
             leftIcon={<Icon as={FaSpotify} boxSize={6} />}

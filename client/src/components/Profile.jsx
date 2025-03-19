@@ -1,3 +1,4 @@
+// Profile - Main profile page with Kawaii Cute design
 import { useEffect, useState } from "react";
 import { 
   Center, 
@@ -9,20 +10,32 @@ import {
   Box,
   VStack,
   HStack,
-  Button,
   Tabs,
   TabList,
   TabPanels,
   Tab,
   TabPanel,
-  Divider
+  Icon,
+  Circle,
 } from '@chakra-ui/react';
+import { motion } from 'framer-motion';
 import { useNavigate } from "react-router-dom";
+import { FiUser, FiMusic, FiDatabase, FiHeart, FiSettings, FiCheckCircle } from 'react-icons/fi';
 import Header from "./Header";
 import UserProfileCard from "./UserProfileCard";
 import PlatformSelector from "./PlatformSelector";
 import MigrationWizard from "./MigrationWizard";
 import MusicDataBreakdown from "./MusicDataBreakdown";
+import { 
+  ClayCard, 
+  ClayCardBody, 
+  ClayButton, 
+  OutlineButton,
+  CyanBadge,
+  FloatingShapes 
+} from "./ui";
+
+const MotionBox = motion(Box);
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
@@ -44,6 +57,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dataRefreshKey, setDataRefreshKey] = useState(0);
+  const [tabIndex, setTabIndex] = useState(0);
 
   const navigate = useNavigate();
 
@@ -60,9 +74,7 @@ const Profile = () => {
         `${API_URL}/getsingleuser?keyword=${userData.email}`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
@@ -71,7 +83,6 @@ const Profile = () => {
       }
 
       const data = await api.json();
-      console.log("User data:", data);
 
       if (!data.searchedUser) {
         throw new Error("User data not found");
@@ -81,7 +92,6 @@ const Profile = () => {
 
       setUser({
         age: searchedUser.age || "",
-        // Use aggregated data if available, fallback to legacy
         artists: searchedUser.aggregatedArtists || searchedUser.artists || [],
         genres: searchedUser.aggregatedGenres || searchedUser.genres || [],
         contactInfo: searchedUser.contact_info || "",
@@ -108,15 +118,11 @@ const Profile = () => {
       navigate("/belogin");
       return;
     }
-
     getMainUser();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePlatformUpdate = () => {
-    // Refresh user data after platform changes
     getMainUser();
-    // Force MusicDataBreakdown to refresh
     setDataRefreshKey(prev => prev + 1);
   };
 
@@ -129,6 +135,52 @@ const Profile = () => {
     return names[platform] || platform;
   };
 
+  const tabs = [
+    { label: 'Profile', icon: FiUser, color: 'kawaii.pink' },
+    { label: 'Platforms', icon: FiMusic, color: 'kawaii.lilac' },
+    { label: 'Music Data', icon: FiDatabase, color: 'kawaii.mint' },
+  ];
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <Center minH="100vh" bg="surface.base">
+          <VStack spacing={4}>
+            <Circle size="60px" bg="kawaii.pink">
+              <Spinner size="lg" color="white.pure" thickness="3px" />
+            </Circle>
+            <Text fontFamily="body" color="text.muted">Loading profile...</Text>
+          </VStack>
+        </Center>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <Center minH="100vh" bg="surface.base">
+          <VStack spacing={4}>
+            <Alert 
+              status="error" 
+              borderRadius="2xl" 
+              maxW="500px"
+              bg="rgba(255, 71, 87, 0.15)"
+              border="2px solid"
+              borderColor="error"
+            >
+              <AlertIcon color="error" />
+              <Text fontFamily="body" color="error">{error}</Text>
+            </Alert>
+            <ClayButton onClick={getMainUser}>Try Again</ClayButton>
+          </VStack>
+        </Center>
+      </>
+    );
+  }
+
   return (
     <>
       <Header />
@@ -136,163 +188,211 @@ const Profile = () => {
         userId={user.userId} 
         onComplete={handlePlatformUpdate}
       />
-      <Center bg='#232136' minHeight="100vh" py={8}>
-        {loading ? (
-          <VStack spacing={4}>
-            <Spinner
-              thickness="4px"
-              speed="0.65s"
-              emptyColor="gray.200"
-              color="#eb6f92"
-              size="xl"
-            />
-            <Text color="white">Loading profile...</Text>
-          </VStack>
-        ) : error ? (
-          <VStack spacing={4}>
-            <Alert status="error" borderRadius="md" maxW="500px">
-              <AlertIcon />
-              {error}
-            </Alert>
-            <Button bg="#eb6f92" color="white" _hover={{ bg: "#d45879" }} onClick={getMainUser}>
-              Try Again
-            </Button>
-          </VStack>
-        ) : (
+      <Box bg="surface.base" minH="100vh" position="relative" overflow="hidden" py={8}>
+        <FloatingShapes variant="subtle" />
+        
+        <Center position="relative" zIndex={1}>
           <Box maxW="1200px" w="full" px={4}>
-            <VStack spacing={6}>
-              <Heading as='h3' color="#eb6f92" textAlign="center">
-                My Profile
-              </Heading>
-
-              <Tabs 
-                variant="soft-rounded" 
-                colorScheme="pink" 
-                w="full"
-                isFitted
-              >
-                <TabList mb={6} bg="#2a273f" p={2} borderRadius="lg">
-                  <Tab 
-                    color="#908caa" 
-                    _selected={{ color: "white", bg: "#eb6f92" }}
+            <MotionBox
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <VStack spacing={6}>
+                {/* Header */}
+                <HStack spacing={3}>
+                  <Circle size="40px" bg="kawaii.pink">
+                    <Icon as={FiUser} boxSize={5} color="white.pure" />
+                  </Circle>
+                  <Heading
+                    fontFamily="heading"
+                    fontSize="2xl"
+                    fontWeight="bold"
+                    bgGradient="linear(135deg, kawaii.pink, kawaii.lilac)"
+                    bgClip="text"
                   >
-                    Profile
-                  </Tab>
-                  <Tab 
-                    color="#908caa" 
-                    _selected={{ color: "white", bg: "#eb6f92" }}
+                    My Profile
+                  </Heading>
+                </HStack>
+
+                {/* Tabs */}
+                <Tabs 
+                  index={tabIndex}
+                  onChange={setTabIndex}
+                  w="full"
+                  variant="unstyled"
+                >
+                  <TabList 
+                    mb={6} 
+                    bg="surface.muted" 
+                    p={1.5} 
+                    borderRadius="full"
+                    justifyContent="center"
+                    flexWrap="wrap"
+                    gap={1}
                   >
-                    Music Platforms
-                  </Tab>
-                  <Tab 
-                    color="#908caa" 
-                    _selected={{ color: "white", bg: "#eb6f92" }}
-                  >
-                    My Music Data
-                  </Tab>
-                </TabList>
+                    {tabs.map((tab, index) => (
+                      <Tab 
+                        key={tab.label}
+                        fontFamily="body"
+                        fontWeight="semibold"
+                        fontSize="sm"
+                        color={tabIndex === index ? tab.color : "text.muted"}
+                        bg={tabIndex === index ? "surface.card" : "transparent"}
+                        boxShadow={tabIndex === index ? "0 4px 12px rgba(0, 0, 0, 0.1)" : "none"}
+                        borderRadius="full"
+                        px={6}
+                        py={3}
+                        transition="all 0.2s"
+                        _hover={{ color: tabIndex === index ? tab.color : "text.primary" }}
+                        _focus={{ outline: "none" }}
+                      >
+                        <HStack spacing={2}>
+                          <Icon as={tab.icon} />
+                          <Text display={{ base: 'none', sm: 'block' }}>{tab.label}</Text>
+                        </HStack>
+                      </Tab>
+                    ))}
+                  </TabList>
 
-                <TabPanels>
-                  {/* Profile Tab */}
-                  <TabPanel>
-                    <VStack spacing={6}>
-                      <UserProfileCard
-                        name={user.preferredName}
-                        genres={user.genres}
-                        age={user.age}
-                        country={user.country}
-                        profilePic={user.profilePic}
-                      />
+                  <TabPanels>
+                    {/* Profile Tab */}
+                    <TabPanel p={0}>
+                      <VStack spacing={6}>
+                        <UserProfileCard
+                          name={user.preferredName}
+                          genres={user.genres}
+                          age={user.age}
+                          country={user.country}
+                          profilePic={user.profilePic}
+                        />
 
-                      {/* Connected Platforms Display */}
-                      {user.connectedPlatforms.length > 0 && (
-                        <Box
-                          bg="#2a273f"
-                          p={6}
-                          borderRadius="lg"
-                          w="full"
-                          maxW="500px"
-                        >
-                          <Heading size="sm" color="#eb6f92" mb={4}>
-                            Connected Music Platforms
-                          </Heading>
-                          <VStack align="start" spacing={2}>
-                            {user.connectedPlatforms.map((platform) => (
-                              <Text key={platform} color="#e0def4">
-                                • {getPlatformDisplayName(platform)}
-                                {user.primaryPlatform === platform && (
-                                  <Text as="span" color="#31748f" fontSize="sm" ml={2}>
-                                    (Primary)
-                                  </Text>
-                                )}
-                              </Text>
-                            ))}
-                          </VStack>
-                          <Divider my={4} borderColor="#6e6a86" />
-                          <Text color="#908caa" fontSize="sm">
-                            {user.artists.length} artists • {user.genres.length} genres
-                          </Text>
-                        </Box>
-                      )}
+                        {/* Connected Platforms Display */}
+                        {user.connectedPlatforms.length > 0 && (
+                          <ClayCard w="full" maxW="500px">
+                            <ClayCardBody>
+                              <VStack align="stretch" spacing={4}>
+                                <HStack>
+                                  <Circle size="36px" bg="kawaii.lilac">
+                                    <Icon as={FiMusic} color="white.pure" boxSize={4} />
+                                  </Circle>
+                                  <Heading
+                                    fontFamily="heading"
+                                    fontSize="md"
+                                    fontWeight="bold"
+                                    color="text.primary"
+                                  >
+                                    Connected Platforms
+                                  </Heading>
+                                </HStack>
 
-                      <HStack spacing={4} w="full" maxW="500px">
-                        <Button
-                          bg="#eb6f92"
-                          color="white"
-                          _hover={{ bg: "#d45879" }}
-                          onClick={() => navigate('/matches')}
-                          size="lg"
-                          flex="1"
-                        >
-                          Find Matches
-                        </Button>
-                        <Button
-                          variant="outline"
-                          borderColor="#eb6f92"
-                          color="#eb6f92"
-                          _hover={{ bg: "#393552" }}
-                          onClick={() => navigate('/settings')}
-                          size="lg"
-                          flex="1"
-                        >
-                          Edit Profile
-                        </Button>
-                      </HStack>
-                    </VStack>
-                  </TabPanel>
+                                <VStack align="start" spacing={2}>
+                                  {user.connectedPlatforms.map((platform) => (
+                                    <HStack key={platform} spacing={2}>
+                                      <Circle size="24px" bg="kawaii.mint">
+                                        <Icon as={FiCheckCircle} color="white.pure" boxSize={3} />
+                                      </Circle>
+                                      <Text fontFamily="body" color="text.secondary">
+                                        {getPlatformDisplayName(platform)}
+                                      </Text>
+                                      {user.primaryPlatform === platform && (
+                                        <Box
+                                          px={2}
+                                          py={0.5}
+                                          bg="kawaii.peach"
+                                          borderRadius="full"
+                                        >
+                                          <Text fontFamily="body" fontSize="xs" fontWeight="bold" color="white.pure">
+                                            Primary
+                                          </Text>
+                                        </Box>
+                                      )}
+                                    </HStack>
+                                  ))}
+                                </VStack>
 
-                  {/* Music Platforms Tab */}
-                  <TabPanel>
-                    <VStack spacing={6}>
-                      <Text color="#908caa" textAlign="center" maxW="600px">
-                        Manage your connected music platforms. Connect multiple platforms
-                        for more accurate matching!
-                      </Text>
-                      
+                                <Box 
+                                  pt={3} 
+                                  borderTop="2px solid" 
+                                  borderColor="rgba(255, 200, 210, 0.06)"
+                                >
+                                  <HStack spacing={4}>
+                                    <HStack spacing={1}>
+                                      <Circle size="20px" bg="kawaii.pink">
+                                        <Text fontFamily="body" fontSize="xs" color="white.pure">{user.artists.length}</Text>
+                                      </Circle>
+                                      <Text fontFamily="body" fontSize="sm" color="text.muted">artists</Text>
+                                    </HStack>
+                                    <HStack spacing={1}>
+                                      <Circle size="20px" bg="kawaii.lilac">
+                                        <Text fontFamily="body" fontSize="xs" color="white.pure">{user.genres.length}</Text>
+                                      </Circle>
+                                      <Text fontFamily="body" fontSize="sm" color="text.muted">genres</Text>
+                                    </HStack>
+                                  </HStack>
+                                </Box>
+                              </VStack>
+                            </ClayCardBody>
+                          </ClayCard>
+                        )}
+
+                        <HStack spacing={4} w="full" maxW="500px">
+                          <ClayButton
+                            flex="1"
+                            size="lg"
+                            leftIcon={<Icon as={FiHeart} />}
+                            onClick={() => navigate('/matches')}
+                          >
+                            Find Matches
+                          </ClayButton>
+                          <OutlineButton
+                            flex="1"
+                            size="lg"
+                            leftIcon={<Icon as={FiSettings} />}
+                            onClick={() => navigate('/settings')}
+                          >
+                            Edit Profile
+                          </OutlineButton>
+                        </HStack>
+                      </VStack>
+                    </TabPanel>
+
+                    {/* Music Platforms Tab */}
+                    <TabPanel p={0}>
+                      <VStack spacing={6}>
+                        <ClayCard maxW="600px" mx="auto" w="full">
+                          <ClayCardBody>
+                            <Text fontFamily="body" color="text.muted" textAlign="center">
+                              Manage your connected music platforms. Connect multiple platforms
+                              for more accurate matching!
+                            </Text>
+                          </ClayCardBody>
+                        </ClayCard>
+                        
+                        {user.userId && (
+                          <PlatformSelector 
+                            userId={user.userId}
+                            onPlatformConnected={handlePlatformUpdate}
+                          />
+                        )}
+                      </VStack>
+                    </TabPanel>
+
+                    {/* My Music Data Tab */}
+                    <TabPanel p={0}>
                       {user.userId && (
-                        <PlatformSelector 
-                          userId={user.userId}
-                          onPlatformConnected={handlePlatformUpdate}
+                        <MusicDataBreakdown 
+                          key={dataRefreshKey}
+                          userId={user.userId} 
                         />
                       )}
-                    </VStack>
-                  </TabPanel>
-
-                  {/* My Music Data Tab */}
-                  <TabPanel>
-                    {user.userId && (
-                      <MusicDataBreakdown 
-                        key={dataRefreshKey}
-                        userId={user.userId} 
-                      />
-                    )}
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
-            </VStack>
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
+              </VStack>
+            </MotionBox>
           </Box>
-        )}
-      </Center>
+        </Center>
+      </Box>
     </>
   );
 };

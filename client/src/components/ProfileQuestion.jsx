@@ -46,7 +46,7 @@ const ProfileQuestion = () => {
             </Text>
 
             <Box bg="#232136" p={6} borderRadius="md" w="full">
-              <VStack spacing={3} color="white">
+              <VStack spacing={3} color="white.pure">
                 <Text fontSize="md">
                   Your music preferences have been imported
                 </Text>
@@ -64,7 +64,7 @@ const ProfileQuestion = () => {
                 flex={1}
                 size="lg"
                 bg="#eb6f92"
-                color="white"
+                color="white.pure"
                 _hover={{ bg: "#d45879" }}
                 onClick={handleViewProfile}
               >

@@ -1,7 +1,7 @@
+// MigrationWizard - Platform migration wizard with Kawaii Cute design
 import { useState, useEffect } from 'react';
 import {
   Box,
-  Button,
   Heading,
   Text,
   VStack,
@@ -15,16 +15,18 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
-  ModalCloseButton,
-  useDisclosure,
-  Flex,
   Divider,
   Spinner,
   Center,
+  Circle,
 } from '@chakra-ui/react';
-import { FaMusic, FaArrowRight, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { FiMusic, FiArrowRight, FiCheckCircle, FiAlertTriangle, FiHeart } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import PlatformSelector from './PlatformSelector';
+import { ClayCard, ClayCardBody, ClayButton, CyanButton, FloatingShapes } from './ui';
+
+const MotionBox = motion(Box);
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
@@ -34,16 +36,14 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(userIdProp);
   const navigate = useNavigate();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Get userId from props or localStorage
     const userInfo = localStorage.getItem('userInfo');
     if (userInfo) {
       const parsed = JSON.parse(userInfo);
       setUserId(parsed._id || parsed.id);
     } else if (!userIdProp) {
-      // No user logged in, redirect to login
       const timer = setTimeout(() => navigate('/belogin'), 0);
       return () => clearTimeout(timer);
     }
@@ -65,13 +65,10 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/auth/platforms/status?userId=${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (!response.ok) {
-        // Silently fail if not logged in or endpoint not available
         if (response.status === 401 || response.status === 404) {
           setLoading(false);
           return;
@@ -82,25 +79,21 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
       const data = await response.json();
       setMigrationStatus(data.status);
 
-      // If already migrated, skip wizard
       if (data.status.hasCompletedMigration) {
         if (onComplete) {
           onComplete();
         } else {
-          // No callback provided, navigate to profile
           navigate('/profile');
         }
         return;
       }
 
-      // Auto-open modal if migration needed
       if (data.status.needsMigration) {
-        onOpen();
+        setIsOpen(true);
       }
       
     } catch (error) {
       console.error('Error checking migration status:', error);
-      // Don't show error to user - this is optional functionality
     } finally {
       setLoading(false);
     }
@@ -108,31 +101,21 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
 
   const handlePlatformConnected = async (platform) => {
     try {
-      // Trigger sync to aggregate data
       const response = await fetch(`${API_URL}/auth/platforms/sync`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          userId,
-          platform // Only sync the platform that was just connected
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, platform }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to sync platform data');
       }
 
-      // Refresh migration status to get updated aggregated data
       await checkMigrationStatus();
-      
-      // Move to next step when platform is connected and synced
       setStep(3);
       
     } catch (error) {
       console.error('Error syncing after platform connection:', error);
-      // Still move to step 3 even if sync fails
       setStep(3);
       await checkMigrationStatus();
     }
@@ -142,9 +125,7 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
     try {
       const response = await fetch(`${API_URL}/auth/platforms/complete-migration`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }),
       });
 
@@ -154,9 +135,8 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
 
       setStep(4);
       
-      // Close modal and redirect after a delay
       setTimeout(() => {
-        onClose();
+        setIsOpen(false);
         onComplete?.();
         navigate('/profile');
       }, 2000);
@@ -168,58 +148,67 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
 
   const renderStep1 = () => (
     <VStack spacing={6} textAlign="center">
-      <Icon as={FaExclamationTriangle} boxSize={16} color="#F6C177" />
+      <Circle size="80px" bg="kawaii.peach">
+        <Icon as={FiHeart} boxSize={10} color="white.pure" />
+      </Circle>
       
-      <Heading size="lg" color="#EB6F92">
+      <Heading
+        fontFamily="heading"
+        fontSize="xl"
+        fontWeight="bold"
+        bgGradient="linear(135deg, kawaii.pink, kawaii.lilac)"
+        bgClip="text"
+      >
         Important Update
       </Heading>
       
-      <Text color="#E0DEF4" fontSize="lg">
+      <Text fontFamily="body" color="text.secondary" fontSize="md">
         Spotify recently changed their API policy and now requires 250,000 monthly active users for access.
       </Text>
       
-      <Alert status="info" bg="#393552" borderRadius="lg">
-        <AlertIcon color="#9CCFD8" />
-        <VStack align="start" spacing={2}>
-          <Text color="#E0DEF4" fontWeight="bold">
+      <Alert 
+        status="info" 
+        borderRadius="2xl"
+        bg="rgba(181, 234, 221, 0.15)"
+        border="2px solid"
+        borderColor="kawaii.mint"
+      >
+        <AlertIcon color="kawaii.mint" />
+        <VStack align="start" spacing={1}>
+          <Text fontFamily="body" fontWeight="bold" color="text.primary" fontSize="sm">
             We're making MelodyMatch even better!
           </Text>
-          <Text color="#908CAA" fontSize="sm">
-            We've added support for Apple Music, with YouTube Music coming soon! Connect platforms for more accurate matching.
+          <Text fontFamily="body" fontSize="xs" color="text.muted">
+            We've added support for Apple Music, with YouTube Music coming soon!
           </Text>
         </VStack>
       </Alert>
       
       <VStack spacing={3} align="start" w="full" pl={4}>
-        <HStack>
-          <Icon as={FaCheckCircle} color="#31748F" />
-          <Text color="#E0DEF4">More music platforms to choose from</Text>
-        </HStack>
-        <HStack>
-          <Icon as={FaCheckCircle} color="#31748F" />
-          <Text color="#E0DEF4">Connect multiple platforms for better matching</Text>
-        </HStack>
-        <HStack>
-          <Icon as={FaCheckCircle} color="#31748F" />
-          <Text color="#E0DEF4">Your preferences stay with you</Text>
-        </HStack>
+        {[
+          'More music platforms to choose from',
+          'Connect multiple platforms for better matching',
+          'Your preferences stay with you'
+        ].map((text, i) => (
+          <HStack key={i}>
+            <Icon as={FiCheckCircle} color="success" />
+            <Text fontFamily="body" color="text.secondary" fontSize="sm">{text}</Text>
+          </HStack>
+        ))}
       </VStack>
       
-      <Divider borderColor="#6E6A86" />
+      <Divider borderColor="rgba(255, 200, 210, 0.12)" />
       
-      <Button
+      <ClayButton
         size="lg"
-        bg="#EB6F92"
-        color="white"
-        _hover={{ bg: "#D45879" }}
-        rightIcon={<Icon as={FaArrowRight} />}
-        onClick={() => setStep(2)}
         w="full"
+        rightIcon={<Icon as={FiArrowRight} />}
+        onClick={() => setStep(2)}
       >
         Get Started
-      </Button>
+      </ClayButton>
       
-      <Text color="#908CAA" fontSize="sm">
+      <Text fontFamily="body" fontSize="xs" color="text.muted">
         This will only take 2 minutes
       </Text>
     </VStack>
@@ -228,10 +217,16 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
   const renderStep2 = () => (
     <VStack spacing={6}>
       <VStack spacing={2} textAlign="center">
-        <Heading size="lg" color="#EB6F92">
+        <Heading
+          fontFamily="heading"
+          fontSize="xl"
+          fontWeight="bold"
+          bgGradient="linear(135deg, kawaii.pink, kawaii.lilac)"
+          bgClip="text"
+        >
           Connect Your Music
         </Heading>
-        <Text color="#908CAA">
+        <Text fontFamily="body" color="text.muted" fontSize="sm">
           Connect Apple Music to get started
         </Text>
       </VStack>
@@ -247,121 +242,149 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
 
   const renderStep3 = () => (
     <VStack spacing={6} textAlign="center">
-      <Icon as={FaCheckCircle} boxSize={16} color="#31748F" />
+      <Circle size="80px" bg="kawaii.mint">
+        <Icon as={FiCheckCircle} boxSize={10} color="white.pure" />
+      </Circle>
       
-      <Heading size="lg" color="#EB6F92">
+      <Heading
+        fontFamily="heading"
+        fontSize="xl"
+        fontWeight="bold"
+        bgGradient="linear(135deg, kawaii.pink, kawaii.lilac)"
+        bgClip="text"
+      >
         Platform Connected!
       </Heading>
       
-      <Text color="#E0DEF4">
+      <Text fontFamily="body" color="text.secondary">
         Your music data has been imported successfully
       </Text>
       
       {migrationStatus && (
-        <Box
-          bg="#393552"
-          p={6}
-          borderRadius="lg"
-          w="full"
-        >
-          <VStack spacing={3}>
+        <ClayCard w="full">
+          <ClayCardBody py={6}>
             <HStack spacing={8} justify="center">
               <VStack>
-                <Text color="#908CAA" fontSize="sm">Artists</Text>
-                <Text color="#E0DEF4" fontSize="2xl" fontWeight="bold">
+                <Text fontFamily="body" fontSize="xs" color="text.muted" textTransform="uppercase" letterSpacing="wide">
+                  Artists
+                </Text>
+                <Text 
+                  fontFamily="heading" 
+                  fontSize="3xl" 
+                  fontWeight="bold"
+                  color="kawaii.pink"
+                >
                   {migrationStatus.aggregatedData?.artistCount || 0}
                 </Text>
               </VStack>
               <VStack>
-                <Text color="#908CAA" fontSize="sm">Genres</Text>
-                <Text color="#E0DEF4" fontSize="2xl" fontWeight="bold">
+                <Text fontFamily="body" fontSize="xs" color="text.muted">
+                  Genres
+                </Text>
+                <Text 
+                  fontFamily="heading" 
+                  fontSize="3xl" 
+                  fontWeight="bold"
+                  color="kawaii.lilac"
+                >
                   {migrationStatus.aggregatedData?.genreCount || 0}
                 </Text>
               </VStack>
             </HStack>
-          </VStack>
-        </Box>
+          </ClayCardBody>
+        </ClayCard>
       )}
       
-      <Alert status="success" bg="#31748F20" borderRadius="lg">
-        <AlertIcon color="#31748F" />
-        <Text color="#E0DEF4" fontSize="sm">
+      <Alert 
+        status="success" 
+        borderRadius="2xl"
+        bg="rgba(181, 234, 221, 0.15)"
+        border="2px solid"
+        borderColor="kawaii.mint"
+      >
+        <AlertIcon color="kawaii.mint" />
+        <Text fontFamily="body" fontSize="sm" color="text.secondary">
           You can connect additional platforms anytime from your profile settings
         </Text>
       </Alert>
       
-      <Button
-        size="lg"
-        bg="#EB6F92"
-        color="white"
-        _hover={{ bg: "#D45879" }}
-        onClick={handleCompleteMigration}
-        w="full"
-      >
+      <CyanButton size="lg" w="full" onClick={handleCompleteMigration}>
         Continue to MelodyMatch
-      </Button>
+      </CyanButton>
     </VStack>
   );
 
   const renderStep4 = () => (
     <VStack spacing={6} textAlign="center">
-      <Icon as={FaCheckCircle} boxSize={20} color="#31748F" />
+      <MotionBox
+        animate={{ scale: [1, 1.1, 1] }}
+        transition={{ duration: 1, repeat: Infinity }}
+      >
+        <Circle size="90px" bg="kawaii.mint">
+          <Icon as={FiCheckCircle} boxSize={12} color="white.pure" />
+        </Circle>
+      </MotionBox>
       
-      <Heading size="xl" color="#EB6F92">
+      <Heading
+        fontFamily="heading"
+        fontSize="2xl"
+        fontWeight="bold"
+        bgGradient="linear(135deg, kawaii.pink, kawaii.lilac)"
+        bgClip="text"
+      >
         Welcome Back!
       </Heading>
       
-      <Text color="#E0DEF4" fontSize="lg">
+      <Text fontFamily="body" fontSize="lg" color="text.secondary">
         Your migration is complete. Redirecting...
       </Text>
       
       <Progress 
         size="sm" 
         isIndeterminate 
-        colorScheme="pink" 
         w="full" 
         borderRadius="full"
+        bg="surface.muted"
+        sx={{
+          '& > div': {
+            bgGradient: 'linear(90deg, kawaii.pink, kawaii.lilac)',
+          }
+        }}
       />
     </VStack>
   );
 
   const getStepContent = () => {
     switch (step) {
-      case 1:
-        return renderStep1();
-      case 2:
-        return renderStep2();
-      case 3:
-        return renderStep3();
-      case 4:
-        return renderStep4();
-      default:
-        return renderStep1();
+      case 1: return renderStep1();
+      case 2: return renderStep2();
+      case 3: return renderStep3();
+      case 4: return renderStep4();
+      default: return renderStep1();
     }
-  };
-
-  const getStepProgress = () => {
-    return (step / 4) * 100;
   };
 
   if (loading) {
     return (
-      <Center minH="100vh" bg="#191724">
-        <VStack spacing={4}>
-          <Spinner size="xl" color="#EB6F92" thickness="4px" />
-          <Text color="#908CAA">Checking migration status...</Text>
-        </VStack>
-      </Center>
+      <Box bg="surface.base" minH="100vh" position="relative" overflow="hidden">
+        <FloatingShapes variant="subtle" />
+        <Center minH="100vh" position="relative" zIndex={1}>
+          <VStack spacing={4}>
+            <Circle size="60px" bg="kawaii.pink">
+              <Spinner size="lg" color="white.pure" thickness="3px" />
+            </Circle>
+            <Text fontFamily="body" color="text.muted">Checking migration status...</Text>
+          </VStack>
+        </Center>
+      </Box>
     );
   }
 
-  // If no userId, redirect to login
   if (!userId) {
     navigate('/belogin');
     return null;
   }
 
-  // If no migration needed, redirect to profile immediately
   if (migrationStatus && !migrationStatus.needsMigration) {
     navigate('/profile');
     return null;
@@ -369,63 +392,81 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
 
   return (
     <>
-      {/* Full-screen blocking modal for migration */}
       <Modal 
         isOpen={isOpen} 
-        onClose={() => {}} // Prevent closing until migration complete
+        onClose={() => {}}
         closeOnOverlayClick={false}
         closeOnEsc={false}
         size="2xl"
         isCentered
       >
-        <ModalOverlay bg="blackAlpha.800" backdropFilter="blur(10px)" />
-        <ModalContent bg="#2A273F" color="#E0DEF4" maxW="900px">
+        <ModalOverlay bg="rgba(15, 15, 26, 0.95)" backdropFilter="blur(10px)" />
+        <ModalContent 
+          bg="surface.card" 
+          borderRadius="3xl"
+          border="2px solid"
+          borderColor="rgba(255, 200, 210, 0.1)"
+          boxShadow="0 25px 50px rgba(0, 0, 0, 0.3)"
+          maxW="600px"
+          mx={4}
+        >
           {step < 4 && (
-            <ModalHeader>
+            <ModalHeader borderBottom="1px solid" borderColor="rgba(255, 200, 210, 0.06)" pb={4}>
               <Progress 
-                value={getStepProgress()} 
+                value={(step / 4) * 100} 
                 size="sm" 
-                colorScheme="pink"
                 borderRadius="full"
-                mb={2}
+                mb={4}
+                bg="surface.muted"
+                sx={{
+                  '& > div': {
+                    bgGradient: 'linear(90deg, kawaii.pink, kawaii.lilac)',
+                  }
+                }}
               />
               <HStack justify="space-between">
                 <HStack spacing={2}>
-                  <Icon as={FaMusic} color="#EB6F92" />
-                  <Text>MelodyMatch Migration</Text>
+                  <Circle size="32px" bg="kawaii.pink">
+                    <Icon as={FiMusic} color="white.pure" boxSize={4} />
+                  </Circle>
+                  <Text fontFamily="heading" fontWeight="bold" fontSize="sm" color="text.primary">
+                    MelodyMatch Migration
+                  </Text>
                 </HStack>
-                <Text fontSize="sm" color="#908CAA">
+                <Text fontFamily="body" fontSize="xs" color="text.muted">
                   Step {step} of 3
                 </Text>
               </HStack>
             </ModalHeader>
           )}
           
-          <ModalBody pb={8}>
+          <ModalBody py={8} px={6}>
             {getStepContent()}
           </ModalBody>
         </ModalContent>
       </Modal>
 
-      {/* Inline version for settings page */}
       {!isOpen && migrationStatus?.needsMigration && (
-        <Alert status="warning" mb={4} borderRadius="lg">
-          <AlertIcon />
-          <VStack align="start" spacing={1} flex={1}>
-            <Text fontWeight="bold">Migration Required</Text>
-            <Text fontSize="sm">
+        <Alert 
+          status="warning" 
+          mb={4} 
+          borderRadius="2xl"
+          bg="rgba(255, 207, 181, 0.15)"
+          border="2px solid"
+          borderColor="kawaii.peach"
+        >
+          <AlertIcon color="kawaii.peach" />
+          <VStack align="start" spacing={0} flex={1}>
+            <Text fontFamily="body" fontWeight="bold" fontSize="sm" color="text.primary">
+              Migration Required
+            </Text>
+            <Text fontFamily="body" fontSize="xs" color="text.muted">
               Please connect a music platform to continue using MelodyMatch
             </Text>
           </VStack>
-          <Button
-            size="sm"
-            bg="#EB6F92"
-            color="white"
-            _hover={{ bg: "#D45879" }}
-            onClick={onOpen}
-          >
+          <ClayButton size="sm" onClick={() => setIsOpen(true)}>
             Start Migration
-          </Button>
+          </ClayButton>
         </Alert>
       )}
     </>

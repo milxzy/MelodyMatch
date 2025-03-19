@@ -1,12 +1,11 @@
+// Welcome - Profile completion with Kawaii Cute design
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import {
   Box,
-  Button,
   FormControl,
   FormLabel,
   Heading,
-  Input,
   Stack,
   Text,
   Flex,
@@ -14,8 +13,23 @@ import {
   Alert,
   AlertIcon,
   VStack,
+  Icon,
+  Select,
+  Circle,
+  HStack,
 } from "@chakra-ui/react";
+import { motion } from "framer-motion";
+import { FiCheck, FiMusic, FiUser, FiStar } from "react-icons/fi";
 import LoadingState from "./LoadingState";
+import { 
+  ClayCard, 
+  ClayCardBody, 
+  ClayButton,
+  FloatingShapes 
+} from "./ui";
+import { GlowInput } from "./ui/GlowInput";
+
+const MotionBox = motion(Box);
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
@@ -40,7 +54,6 @@ const Welcome = () => {
       navigate("/belogin");
       return;
     }
-
     fetchUserData();
   }, [navigate]);
 
@@ -52,7 +65,6 @@ const Welcome = () => {
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
       const userId = userInfo._id || userInfo.id;
 
-      // Fetch user data from backend (includes aggregated music data)
       const response = await fetch(`${API_URL}/getUserById/${userId}`);
       
       if (!response.ok) {
@@ -65,9 +77,7 @@ const Welcome = () => {
         throw new Error("No user data returned");
       }
 
-      // Check if user has connected platforms
       if (!data.connectedPlatforms || data.connectedPlatforms.length === 0) {
-        // Redirect to migration wizard
         navigate("/migrate");
         return;
       }
@@ -83,9 +93,7 @@ const Welcome = () => {
   };
 
   function updateForm(value) {
-    return setForm((prev) => {
-      return { ...prev, ...value };
-    });
+    return setForm((prev) => ({ ...prev, ...value }));
   }
 
   async function onSubmit(e) {
@@ -105,25 +113,19 @@ const Welcome = () => {
         age: form.age,
         gender: form.gender,
         beEmail: form.beEmail,
-        // Music data is already stored in the database from platform connection
         artists: userData.aggregatedArtists || [],
         genres: userData.aggregatedGenres || [],
       };
 
       const response = await fetch(`${API_URL}/addUserInfo`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profileData),
       });
 
       if (!response.ok) {
         throw new Error("Failed to save profile information");
       }
-
-      const data = await response.json();
-      console.log("Profile saved:", data);
 
       setForm({ contactInfo: "", preferredName: "", age: "", gender: "", beEmail: "" });
       navigate("/profile");
@@ -137,183 +139,176 @@ const Welcome = () => {
 
   if (loading) {
     return (
-      <Flex
-        align="center"
-        justify="center"
-        bg="#232136"
-        minHeight="100vh"
-        color="white"
-        px={4}
-      >
-        <LoadingState 
-          variant="spinner" 
-          message="Loading your profile..." 
-          size="large"
-        />
-      </Flex>
+      <Box bg="surface.base" minH="100vh" position="relative" overflow="hidden">
+        <FloatingShapes variant="subtle" />
+        <Flex align="center" justify="center" minH="100vh" position="relative" zIndex={1}>
+          <LoadingState 
+            variant="spinner" 
+            message="Loading your profile..." 
+            size="large"
+          />
+        </Flex>
+      </Box>
     );
   }
 
   return (
-    <>
-      <Flex
-        align="center"
-        justify="center"
-        bg="#232136"
-        minHeight="100vh"
-        color="white"
-        px={4}
-      >
+    <Box bg="surface.base" minH="100vh" position="relative" overflow="hidden">
+      <FloatingShapes variant="subtle" />
+      
+      <Flex align="center" justify="center" minH="100vh" px={4} position="relative" zIndex={1}>
         <Center>
-          <Box
-            bg="#2a273f"
-            borderRadius="lg"
-            p={8}
-            width="100%"
+          <MotionBox
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            w="full"
             maxW="500px"
-            boxShadow="lg"
           >
-            <Heading
-              as="h1"
-              size="lg"
-              mb={6}
-              textAlign="center"
-              color="#eb6f92"
-            >
-              Complete Your Profile
-            </Heading>
+            <ClayCard>
+              <ClayCardBody p={8}>
+                <VStack spacing={6} align="stretch">
+                  {/* Header */}
+                  <VStack spacing={3} textAlign="center">
+                    <Circle size="70px" bg="kawaii.pink">
+                      <Icon as={FiUser} boxSize={8} color="white.pure" />
+                    </Circle>
+                    <Heading
+                      fontFamily="heading"
+                      fontSize="xl"
+                      fontWeight="bold"
+                      color="text.primary"
+                    >
+                      Complete Your Profile
+                    </Heading>
+                    <HStack spacing={2}>
+                      {['kawaii.pink', 'kawaii.lilac', 'kawaii.mint'].map((color, i) => (
+                        <Circle key={i} size="8px" bg={color} />
+                      ))}
+                    </HStack>
+                  </VStack>
 
-            {error && (
-              <Alert status="error" mb={4} borderRadius="md">
-                <AlertIcon />
-                {error}
-              </Alert>
-            )}
+                  {/* Error Alert */}
+                  {error && (
+                    <Alert 
+                      status="error" 
+                      borderRadius="2xl"
+                      bg="rgba(255, 71, 87, 0.15)"
+                      border="2px solid"
+                      borderColor="error"
+                    >
+                      <AlertIcon color="error" />
+                      <Text fontFamily="body" fontSize="sm" color="error">{error}</Text>
+                    </Alert>
+                  )}
 
-            {userData && (
-              <Alert status="success" mb={4} borderRadius="md" bg="#31748F20">
-                <AlertIcon color="#31748F" />
-                <VStack align="start" spacing={0} flex={1}>
-                  <Text color="#E0DEF4" fontWeight="bold" fontSize="sm">
-                    Music data imported successfully!
-                  </Text>
-                  <Text color="#908CAA" fontSize="xs">
-                    {userData.aggregatedArtists?.length || 0} artists, {userData.aggregatedGenres?.length || 0} genres
-                  </Text>
+                  {/* Success Alert */}
+                  {userData && (
+                    <Alert 
+                      status="success" 
+                      borderRadius="2xl"
+                      bg="rgba(181, 234, 221, 0.15)"
+                      border="2px solid"
+                      borderColor="kawaii.mint"
+                    >
+                      <Circle size="32px" bg="kawaii.mint" mr={3}>
+                        <Icon as={FiMusic} color="white.pure" boxSize={4} />
+                      </Circle>
+                      <VStack align="start" spacing={0} flex={1}>
+                        <Text fontFamily="body" fontWeight="bold" fontSize="sm" color="text.primary">
+                          Music data imported!
+                        </Text>
+                        <Text fontFamily="body" fontSize="xs" color="text.muted">
+                          {userData.aggregatedArtists?.length || 0} artists, {userData.aggregatedGenres?.length || 0} genres
+                        </Text>
+                      </VStack>
+                      <Circle size="24px" bg="kawaii.mint">
+                        <Icon as={FiCheck} color="white.pure" boxSize={3} />
+                      </Circle>
+                    </Alert>
+                  )}
+
+                  {/* Form */}
+                  <form onSubmit={onSubmit}>
+                    <Stack spacing={4}>
+                      <FormControl isRequired>
+                        <FormLabel fontFamily="body" fontWeight="semibold">Contact Info</FormLabel>
+                        <GlowInput
+                          placeholder="Snapchat / Phone Number / Etc..."
+                          value={form.contactInfo}
+                          onChange={(e) => updateForm({ contactInfo: e.target.value })}
+                        />
+                      </FormControl>
+
+                      <FormControl isRequired>
+                        <FormLabel fontFamily="body" fontWeight="semibold">Preferred Name</FormLabel>
+                        <GlowInput
+                          placeholder="What should people call you?"
+                          value={form.preferredName}
+                          onChange={(e) => updateForm({ preferredName: e.target.value })}
+                        />
+                      </FormControl>
+
+                      <FormControl isRequired>
+                        <FormLabel fontFamily="body" fontWeight="semibold">Age</FormLabel>
+                        <GlowInput
+                          type="number"
+                          placeholder="18+"
+                          value={form.age}
+                          onChange={(e) => updateForm({ age: e.target.value })}
+                        />
+                      </FormControl>
+
+                      <FormControl>
+                        <FormLabel fontFamily="body" fontWeight="semibold">Gender (Optional)</FormLabel>
+                        <Select
+                          value={form.gender}
+                          onChange={(e) => updateForm({ gender: e.target.value })}
+                          bg="surface.muted"
+                          border="2px solid"
+                          borderColor="rgba(255, 200, 210, 0.12)"
+                          borderRadius="2xl"
+                          color="text.primary"
+                          h="48px"
+                          _hover={{ borderColor: "rgba(255, 200, 210, 0.2)" }}
+                          _focus={{ borderColor: "kawaii.lilac", boxShadow: "0 0 0 1px rgba(212, 191, 255, 0.5)" }}
+                        >
+                          <option value="" style={{ background: '#1A1A2E' }}>Select gender</option>
+                          <option value="male" style={{ background: '#1A1A2E' }}>Male</option>
+                          <option value="female" style={{ background: '#1A1A2E' }}>Female</option>
+                          <option value="non-binary" style={{ background: '#1A1A2E' }}>Non-binary</option>
+                        </Select>
+                      </FormControl>
+
+                      <FormControl isRequired>
+                        <FormLabel fontFamily="body" fontWeight="semibold">Email</FormLabel>
+                        <GlowInput
+                          type="email"
+                          placeholder="you@example.com"
+                          value={form.beEmail}
+                          onChange={(e) => updateForm({ beEmail: e.target.value })}
+                        />
+                      </FormControl>
+
+                      <ClayButton
+                        type="submit"
+                        w="full"
+                        size="lg"
+                        isLoading={submitting}
+                        loadingText="Saving..."
+                        mt={2}
+                        rightIcon={<Icon as={FiStar} />}
+                      >
+                        Complete Registration
+                      </ClayButton>
+                    </Stack>
+                  </form>
                 </VStack>
-              </Alert>
-            )}
-
-            <form onSubmit={onSubmit}>
-              <Stack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel htmlFor="contactInfo" color="#eb6f92">
-                    Contact Info
-                  </FormLabel>
-                  <Input
-                    id="contactInfo"
-                    type="text"
-                    placeholder="Snapchat / Phone Number / Etc..."
-                    value={form.contactInfo}
-                    onChange={(e) =>
-                      updateForm({ contactInfo: e.target.value })
-                    }
-                    bg="gray.700"
-                    border="none"
-                    focusBorderColor="#eb6f92"
-                    _placeholder={{ color: "gray.400" }}
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel htmlFor="preferredName" color="#eb6f92">
-                    Preferred Name
-                  </FormLabel>
-                  <Input
-                    id="preferredName"
-                    type="text"
-                    placeholder="Preferred Name"
-                    value={form.preferredName}
-                    onChange={(e) =>
-                      updateForm({ preferredName: e.target.value })
-                    }
-                    bg="gray.700"
-                    border="none"
-                    focusBorderColor="#eb6f92"
-                    _placeholder={{ color: "gray.400" }}
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel htmlFor="age" color="#eb6f92">
-                    Age
-                  </FormLabel>
-                  <Input
-                    id="age"
-                    type="text"
-                    placeholder="18+"
-                    value={form.age}
-                    onChange={(e) => updateForm({ age: e.target.value })}
-                    bg="gray.700"
-                    border="none"
-                    focusBorderColor="#eb6f92"
-                    _placeholder={{ color: "gray.400" }}
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel htmlFor="gender" color="#eb6f92">
-                    Gender (Optional)
-                  </FormLabel>
-                  <Input
-                    id="gender"
-                    type="text"
-                    placeholder="Gender"
-                    value={form.gender}
-                    onChange={(e) => updateForm({ gender: e.target.value })}
-                    bg="gray.700"
-                    border="none"
-                    focusBorderColor="#eb6f92"
-                    _placeholder={{ color: "gray.400" }}
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel htmlFor="email" color="#eb6f92">
-                    Email
-                  </FormLabel>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Email"
-                    value={form.beEmail}
-                    onChange={(e) => updateForm({ beEmail: e.target.value })}
-                    bg="gray.700"
-                    border="none"
-                    focusBorderColor="#eb6f92"
-                    _placeholder={{ color: "gray.400" }}
-                  />
-                </FormControl>
-
-                <Button
-                  type="submit"
-                  bg="#eb6f92"
-                  color="white"
-                  _hover={{ bg: "#d45879" }}
-                  mt={4}
-                  w="full"
-                  size="lg"
-                  isLoading={submitting}
-                  loadingText="Saving..."
-                >
-                  Complete Registration
-                </Button>
-              </Stack>
-            </form>
-          </Box>
+              </ClayCardBody>
+            </ClayCard>
+          </MotionBox>
         </Center>
       </Flex>
-    </>
+    </Box>
   );
 };
 

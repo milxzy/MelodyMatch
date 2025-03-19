@@ -7,7 +7,6 @@ import {
   Text,
   Divider,
   Icon,
-  Badge,
   Accordion,
   AccordionItem,
   AccordionButton,
@@ -18,10 +17,18 @@ import {
   IconButton,
   Tooltip,
 } from '@chakra-ui/react';
+import { keyframes } from '@emotion/react';
 import { FaApple, FaYoutube, FaMusic, FaSyncAlt } from 'react-icons/fa';
 import LoadingState from './LoadingState';
+import { ClayCard, NeonBadge } from './ui';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
+
+// Spin animation for refresh button
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
 
 const platformIcons = {
   apple_music: FaApple,
@@ -31,6 +38,11 @@ const platformIcons = {
 const platformNames = {
   apple_music: 'Apple Music',
   youtube_music: 'YouTube Music',
+};
+
+const platformColors = {
+  apple_music: '#FC3C44',
+  youtube_music: '#FF0000',
 };
 
 const MusicDataBreakdown = ({ userId }) => {
@@ -76,9 +88,12 @@ const MusicDataBreakdown = ({ userId }) => {
 
   if (!userData || !userData.platformData) {
     return (
-      <Box p={6} textAlign="center">
-        <Text color="#908CAA">No music data available. Connect a platform to get started.</Text>
-      </Box>
+      <ClayCard variant="flat" p={8} textAlign="center">
+        <Icon as={FaMusic} boxSize={12} color="text.muted" mb={4} />
+        <Text color="text.muted" fontFamily="body">
+          No music data available. Connect a platform to get started.
+        </Text>
+      </ClayCard>
     );
   }
 
@@ -86,37 +101,68 @@ const MusicDataBreakdown = ({ userId }) => {
   
   if (platforms.length === 0) {
     return (
-      <Box p={6} textAlign="center">
-        <Text color="#908CAA">No music data available. Connect a platform to get started.</Text>
-      </Box>
+      <ClayCard variant="flat" p={8} textAlign="center">
+        <Icon as={FaMusic} boxSize={12} color="text.muted" mb={4} />
+        <Text color="text.muted" fontFamily="body">
+          No music data available. Connect a platform to get started.
+        </Text>
+      </ClayCard>
     );
   }
 
   return (
     <Box w="full">
       <VStack spacing={6} align="stretch">
+        {/* Header */}
         <Flex justify="space-between" align="center">
           <Box>
-            <Heading size="lg" color="#EB6F92" mb={2}>
+            <Heading 
+              fontFamily="heading"
+              fontSize={{ base: "2xl", md: "3xl" }}
+              bgGradient="linear(to-r, accent.pink, accent.cyan)"
+              bgClip="text"
+              mb={2}
+            >
               Your Music Data
             </Heading>
-            <Text color="#908CAA" fontSize="sm">
+            <Text color="text.muted" fontSize="sm" fontFamily="body">
               View your imported artists and genres from each connected platform
             </Text>
           </Box>
-          <Tooltip label="Refresh data" placement="left">
+          <Tooltip 
+            label="Refresh data" 
+            placement="left"
+            bg="clay.medium"
+            color="text.primary"
+            fontFamily="body"
+          >
             <IconButton
               icon={<FaSyncAlt />}
               onClick={handleRefresh}
               isLoading={refreshing}
               variant="ghost"
-              color="#EB6F92"
-              _hover={{ bg: "#393552" }}
+              color="accent.pink"
+              bg="clay.medium"
+              borderRadius="xl"
+              _hover={{ 
+                bg: 'clay.light',
+                transform: 'scale(1.05)',
+              }}
+              _active={{
+                transform: 'scale(0.95)',
+              }}
+              transition="all 0.2s"
               aria-label="Refresh music data"
+              sx={{
+                '&[data-loading]': {
+                  animation: `${spin} 1s linear infinite`,
+                }
+              }}
             />
           </Tooltip>
         </Flex>
 
+        {/* Platform Accordions */}
         <Accordion allowMultiple defaultIndex={[0]}>
           {platforms.map((platform) => {
             const platformData = userData.platformData[platform];
@@ -127,168 +173,239 @@ const MusicDataBreakdown = ({ userId }) => {
             return (
               <AccordionItem
                 key={platform}
-                border="1px solid"
-                borderColor="#6E6A86"
-                borderRadius="lg"
+                border="none"
                 mb={4}
-                bg="#232136"
               >
-                <AccordionButton
-                  _hover={{ bg: "#393552" }}
-                  borderRadius="lg"
-                  p={4}
-                >
-                  <Flex flex="1" align="center" justify="space-between">
-                    <HStack spacing={3}>
-                      <Icon
-                        as={platformIcons[platform] || FaMusic}
-                        boxSize={6}
-                        color="#EB6F92"
-                      />
-                      <VStack align="start" spacing={0}>
-                        <HStack>
-                          <Text color="#E0DEF4" fontWeight="bold">
-                            {platformNames[platform] || platform}
-                          </Text>
-                          {isPrimary && (
-                            <Badge colorScheme="pink" fontSize="xs">
-                              Primary
-                            </Badge>
-                          )}
-                        </HStack>
-                        <HStack spacing={4} fontSize="sm" color="#908CAA">
-                          <Text>{artists.length} artists</Text>
-                          <Text>•</Text>
-                          <Text>{genres.length} genres</Text>
-                        </HStack>
-                      </VStack>
-                    </HStack>
-                    <AccordionIcon color="#908CAA" />
-                  </Flex>
-                </AccordionButton>
+                <ClayCard variant="elevated" overflow="hidden">
+                  <AccordionButton
+                    _hover={{ bg: 'clay.light' }}
+                    borderRadius="xl"
+                    p={5}
+                    transition="all 0.2s"
+                  >
+                    <Flex flex="1" align="center" justify="space-between">
+                      <HStack spacing={4}>
+                        {/* Platform Icon */}
+                        <Box
+                          w={12}
+                          h={12}
+                          borderRadius="xl"
+                          bg="linear-gradient(145deg, #1a1a2e 0%, #0f0f1a 100%)"
+                          boxShadow="inset 2px 2px 4px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(255,255,255,0.05)"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          <Icon
+                            as={platformIcons[platform] || FaMusic}
+                            boxSize={6}
+                            color={platformColors[platform] || 'accent.pink'}
+                          />
+                        </Box>
+                        
+                        <VStack align="start" spacing={1}>
+                          <HStack spacing={2}>
+                            <Text color="text.primary" fontWeight="bold" fontFamily="heading">
+                              {platformNames[platform] || platform}
+                            </Text>
+                            {isPrimary && (
+                              <NeonBadge variant="pink" size="sm">Primary</NeonBadge>
+                            )}
+                          </HStack>
+                          <HStack spacing={4} fontSize="sm" color="text.muted" fontFamily="body">
+                            <HStack spacing={1}>
+                              <Text color="accent.pink" fontWeight="bold">{artists.length}</Text>
+                              <Text>artists</Text>
+                            </HStack>
+                            <Text color="clay.border">|</Text>
+                            <HStack spacing={1}>
+                              <Text color="accent.cyan" fontWeight="bold">{genres.length}</Text>
+                              <Text>genres</Text>
+                            </HStack>
+                          </HStack>
+                        </VStack>
+                      </HStack>
+                      <AccordionIcon color="text.muted" />
+                    </Flex>
+                  </AccordionButton>
 
-                <AccordionPanel pb={4} pt={2}>
-                  <VStack spacing={4} align="stretch">
-                    {/* Artists Section */}
-                    <Box>
-                      <Flex
-                        align="center"
-                        justify="space-between"
-                        mb={3}
-                        pb={2}
-                        borderBottom="1px solid"
-                        borderColor="#6E6A86"
-                      >
-                        <Heading size="sm" color="#9CCFD8">
-                          Artists ({artists.length})
-                        </Heading>
-                      </Flex>
-                      
-                      {artists.length === 0 ? (
-                        <Text color="#908CAA" fontSize="sm" fontStyle="italic">
-                          No artists found
-                        </Text>
-                      ) : (
-                        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={2}>
-                          {artists.map((artist, idx) => (
-                            <Box
-                              key={idx}
-                              p={2}
-                              bg="#393552"
-                              borderRadius="md"
-                              _hover={{ bg: "#6E6A86" }}
-                              transition="all 0.2s"
-                            >
-                              <Text color="#E0DEF4" fontSize="sm" noOfLines={1}>
-                                {artist}
-                              </Text>
-                            </Box>
-                          ))}
-                        </SimpleGrid>
-                      )}
-                    </Box>
-
-                    <Divider borderColor="#6E6A86" />
-
-                    {/* Genres Section */}
-                    <Box>
-                      <Flex
-                        align="center"
-                        justify="space-between"
-                        mb={3}
-                        pb={2}
-                        borderBottom="1px solid"
-                        borderColor="#6E6A86"
-                      >
-                        <Heading size="sm" color="#9CCFD8">
-                          Genres ({genres.length})
-                        </Heading>
-                      </Flex>
-                      
-                      {genres.length === 0 ? (
-                        <Text color="#908CAA" fontSize="sm" fontStyle="italic">
-                          No genres found
-                        </Text>
-                      ) : (
-                        <Flex flexWrap="wrap" gap={2}>
-                          {genres.map((genre, idx) => (
-                            <Badge
-                              key={idx}
-                              colorScheme="purple"
-                              px={3}
-                              py={1}
-                              borderRadius="full"
-                              fontSize="sm"
-                            >
-                              {genre}
-                            </Badge>
-                          ))}
+                  <AccordionPanel pb={5} pt={2} px={5}>
+                    <VStack spacing={5} align="stretch">
+                      {/* Artists Section */}
+                      <Box>
+                        <Flex
+                          align="center"
+                          justify="space-between"
+                          mb={4}
+                          pb={2}
+                          borderBottom="1px solid"
+                          borderColor="clay.border"
+                        >
+                          <Heading 
+                            size="sm" 
+                            fontFamily="heading"
+                            color="accent.cyan"
+                          >
+                            Artists ({artists.length})
+                          </Heading>
                         </Flex>
-                      )}
-                    </Box>
-                  </VStack>
-                </AccordionPanel>
+                        
+                        {artists.length === 0 ? (
+                          <Text color="text.muted" fontSize="sm" fontStyle="italic" fontFamily="body">
+                            No artists found
+                          </Text>
+                        ) : (
+                          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={2}>
+                            {artists.map((artist, idx) => (
+                              <Box
+                                key={idx}
+                                p={3}
+                                bg="clay.medium"
+                                borderRadius="lg"
+                                borderWidth="1px"
+                                borderColor="transparent"
+                                _hover={{ 
+                                  bg: 'clay.light',
+                                  borderColor: 'kawaii.pink',
+                                  transform: 'translateY(-2px)',
+                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                }}
+                                transition="all 0.2s"
+                                cursor="default"
+                              >
+                                <Text 
+                                  color="text.primary" 
+                                  fontSize="sm" 
+                                  noOfLines={1}
+                                  fontFamily="body"
+                                >
+                                  {artist}
+                                </Text>
+                              </Box>
+                            ))}
+                          </SimpleGrid>
+                        )}
+                      </Box>
+
+                      <Divider borderColor="clay.border" opacity={0.3} />
+
+                      {/* Genres Section */}
+                      <Box>
+                        <Flex
+                          align="center"
+                          justify="space-between"
+                          mb={4}
+                          pb={2}
+                          borderBottom="1px solid"
+                          borderColor="clay.border"
+                        >
+                          <Heading 
+                            size="sm" 
+                            fontFamily="heading"
+                            color="accent.cyan"
+                          >
+                            Genres ({genres.length})
+                          </Heading>
+                        </Flex>
+                        
+                        {genres.length === 0 ? (
+                          <Text color="text.muted" fontSize="sm" fontStyle="italic" fontFamily="body">
+                            No genres found
+                          </Text>
+                        ) : (
+                          <Flex flexWrap="wrap" gap={2}>
+                            {genres.map((genre, idx) => (
+                              <NeonBadge key={idx} variant="purple">
+                                {genre}
+                              </NeonBadge>
+                            ))}
+                          </Flex>
+                        )}
+                      </Box>
+                    </VStack>
+                  </AccordionPanel>
+                </ClayCard>
               </AccordionItem>
             );
           })}
         </Accordion>
 
         {/* Summary Section */}
-        <Box
-          p={4}
-          bg="#393552"
-          borderRadius="lg"
-          border="1px solid"
-          borderColor="#6E6A86"
-        >
-          <VStack spacing={3}>
-            <Heading size="sm" color="#EB6F92">
+        <ClayCard variant="elevated" p={6} position="relative" overflow="hidden">
+          {/* Decorative gradient line */}
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            h="3px"
+            bgGradient="linear(to-r, accent.pink, accent.cyan)"
+          />
+          
+          <VStack spacing={4}>
+            <Heading 
+              size="md" 
+              fontFamily="heading"
+              bgGradient="linear(to-r, accent.pink, accent.cyan)"
+              bgClip="text"
+            >
               Combined Total
             </Heading>
-            <HStack spacing={8}>
-              <VStack>
-                <Text color="#908CAA" fontSize="sm">
-                  Artists
-                </Text>
-                <Text color="#E0DEF4" fontSize="2xl" fontWeight="bold">
+            
+            <HStack spacing={12}>
+              {/* Artists Count */}
+              <VStack spacing={1}>
+                <Text 
+                  fontFamily="heading"
+                  fontSize="4xl" 
+                  fontWeight="bold"
+                  bgGradient="linear(to-r, accent.pink, #ff8ec4)"
+                  bgClip="text"
+                  lineHeight={1}
+                >
                   {userData.aggregatedArtists?.length || 0}
                 </Text>
-              </VStack>
-              <Divider orientation="vertical" h="50px" borderColor="#6E6A86" />
-              <VStack>
-                <Text color="#908CAA" fontSize="sm">
-                  Genres
+                <Text color="text.muted" fontSize="sm" fontFamily="body">
+                  Artists
                 </Text>
-                <Text color="#E0DEF4" fontSize="2xl" fontWeight="bold">
+              </VStack>
+              
+              {/* Divider */}
+              <Box
+                w="1px"
+                h="60px"
+                bgGradient="linear(to-b, transparent, clay.border, transparent)"
+              />
+              
+              {/* Genres Count */}
+              <VStack spacing={1}>
+                <Text 
+                  fontFamily="heading"
+                  fontSize="4xl" 
+                  fontWeight="bold"
+                  bgGradient="linear(to-r, accent.cyan, #7fffff)"
+                  bgClip="text"
+                  lineHeight={1}
+                >
                   {userData.aggregatedGenres?.length || 0}
+                </Text>
+                <Text color="text.muted" fontSize="sm" fontFamily="body">
+                  Genres
                 </Text>
               </VStack>
             </HStack>
-            <Text color="#908CAA" fontSize="xs" textAlign="center">
+            
+            <Text 
+              color="text.muted" 
+              fontSize="xs" 
+              textAlign="center"
+              fontFamily="body"
+              maxW="300px"
+            >
               Deduplicated and combined from all connected platforms
             </Text>
           </VStack>
-        </Box>
+        </ClayCard>
       </VStack>
     </Box>
   );

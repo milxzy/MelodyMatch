@@ -1,5 +1,5 @@
 // Auth - Landing page with Kawaii Cute design
-import { useEffect } from "react";
+import { useEffect, useState, useMemo, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -26,23 +26,71 @@ const MotionFlex = motion(Flex);
 const Auth = () => {
   const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
+  const [isScrolling, setIsScrolling] = useState(false);
 
   useEffect(() => {
     localStorage.clear();
   }, []);
 
+  // Detect scrolling for performance optimization
+  useEffect(() => {
+    let scrollTimeout;
+    const handleScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        startTransition(() => {
+          setIsScrolling(false);
+        });
+      }, 150);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
+
   const goToLogin = () => navigate("/belogin");
   const goToRegister = () => navigate("/beregister");
 
-  // Cute bouncy animation
-  const bounceTransition = {
-    y: {
-      duration: 2,
-      repeat: Infinity,
-      repeatType: "reverse",
-      ease: "easeInOut"
-    }
+  // Simpler animation for better performance
+  const floatAnimation = shouldReduceMotion || isScrolling ? {} : {
+    y: [0, -8, 0]
   };
+
+  const floatTransition = {
+    duration: 3,
+    repeat: Infinity,
+    repeatType: "reverse",
+    ease: "easeInOut"
+  };
+
+  // Memoize static content to prevent recreating on every render
+  const howItWorksSteps = useMemo(() => [
+    { 
+      num: "01", 
+      title: "Connect your music", 
+      desc: "Link your Apple Music to share your taste",
+      color: "kawaii.pink",
+      icon: FaApple
+    },
+    { 
+      num: "02", 
+      title: "Get matched", 
+      desc: "Our algorithm finds your musical soulmates",
+      color: "kawaii.lilac",
+      icon: FiHeart
+    },
+    { 
+      num: "03", 
+      title: "Start chatting", 
+      desc: "Connect and bond over shared favorites",
+      color: "kawaii.mint",
+      icon: FiMessageCircle
+    },
+  ], []);
 
   return (
     <Box bg="surface.base" minHeight="100vh" position="relative" overflow="hidden">
@@ -208,8 +256,8 @@ const Auth = () => {
                 top="50%"
                 left="50%"
                 transform="translate(-50%, -50%)"
-                animate={shouldReduceMotion ? {} : { y: [0, -10, 0] }}
-                transition={bounceTransition}
+                animate={floatAnimation}
+                transition={floatTransition}
               >
                 <ClayCard w="280px">
                   <ClayCardBody p={5}>
@@ -250,8 +298,8 @@ const Auth = () => {
                 position="absolute"
                 top="20px"
                 left="0"
-                animate={shouldReduceMotion ? {} : { y: [0, -8, 0], rotate: [0, 2, 0] }}
-                transition={{ ...bounceTransition, delay: 0.3 }}
+                animate={floatAnimation}
+                transition={{ ...floatTransition, delay: 0.5 }}
               >
                 <ClayCard w="140px">
                   <ClayCardBody p={3}>
@@ -271,8 +319,8 @@ const Auth = () => {
                 position="absolute"
                 bottom="30px"
                 right="10px"
-                animate={shouldReduceMotion ? {} : { y: [0, -6, 0], rotate: [0, -2, 0] }}
-                transition={{ ...bounceTransition, delay: 0.5 }}
+                animate={floatAnimation}
+                transition={{ ...floatTransition, delay: 1 }}
               >
                 <ClayCard w="160px">
                   <ClayCardBody p={3}>
@@ -313,35 +361,13 @@ const Auth = () => {
             templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }}
             gap={6}
           >
-            {[
-              { 
-                num: "01", 
-                title: "Connect your music", 
-                desc: "Link your Apple Music to share your taste",
-                color: "kawaii.pink",
-                icon: FaApple
-              },
-              { 
-                num: "02", 
-                title: "Get matched", 
-                desc: "Our algorithm finds your musical soulmates",
-                color: "kawaii.lilac",
-                icon: FiHeart
-              },
-              { 
-                num: "03", 
-                title: "Start chatting", 
-                desc: "Connect and bond over shared favorites",
-                color: "kawaii.mint",
-                icon: FiMessageCircle
-              },
-            ].map((step, idx) => (
+            {howItWorksSteps.map((step, idx) => (
               <MotionBox
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: "100px" }}
+                transition={{ duration: 0.3, delay: idx * 0.08 }}
               >
                 <ClayCard h="full">
                   <ClayCardBody p={6}>

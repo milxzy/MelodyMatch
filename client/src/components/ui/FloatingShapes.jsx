@@ -1,4 +1,5 @@
 // FloatingCuties - Kawaii floating hearts, stars, and sparkles
+import { memo } from 'react';
 import { Box } from '@chakra-ui/react';
 import { motion, useReducedMotion } from 'framer-motion';
 
@@ -25,11 +26,10 @@ const FloatingHeart = ({
       height={`${size}px`}
       opacity={opacity}
       pointerEvents="none"
+      willChange="transform"
+      transform="translateZ(0)"
       animate={shouldReduceMotion ? {} : {
-        y: [0, -20, 0, 10, 0],
-        x: [0, 8, -5, 3, 0],
-        rotate: [0, 10, -10, 5, 0],
-        scale: [1, 1.1, 0.95, 1.05, 1],
+        y: [0, -15, 0],
       }}
       transition={{
         duration: duration,
@@ -67,10 +67,11 @@ const FloatingStar = ({
       height={`${size}px`}
       opacity={opacity}
       pointerEvents="none"
+      willChange="transform"
+      transform="translateZ(0)"
       animate={shouldReduceMotion ? {} : {
-        y: [0, -15, 0, 8, 0],
-        rotate: [0, 180, 360],
-        scale: [1, 1.2, 0.9, 1.1, 1],
+        rotate: [0, 360],
+        scale: [1, 1.15, 1],
       }}
       transition={{
         duration: duration,
@@ -106,9 +107,10 @@ const Sparkle = ({
       width={`${size}px`}
       height={`${size}px`}
       pointerEvents="none"
+      willChange="transform"
+      transform="translateZ(0)"
       animate={shouldReduceMotion ? {} : {
         opacity: [0.3, 1, 0.3],
-        scale: [0.8, 1.3, 0.8],
         rotate: [0, 180, 360],
       }}
       transition={{
@@ -151,10 +153,10 @@ const SoftBlob = ({
       opacity={opacity}
       pointerEvents="none"
       borderRadius="full"
+      willChange="transform"
+      transform="translateZ(0)"
       animate={shouldReduceMotion ? {} : {
-        y: [0, -20, 0, 15, 0],
-        x: [0, 10, -8, 5, 0],
-        scale: [1, 1.05, 0.98, 1.02, 1],
+        y: [0, -15, 0],
       }}
       transition={{
         duration: duration,
@@ -168,7 +170,7 @@ const SoftBlob = ({
 };
 
 // Main FloatingShapes container
-const FloatingShapes = ({ 
+const FloatingShapes = memo(({ 
   variant = 'default', // 'default' | 'hero' | 'subtle'
   ...props 
 }) => {
@@ -201,33 +203,22 @@ const FloatingShapes = ({
     },
     hero: {
       blobs: [
-        { size: 450, color: 'rgba(255, 181, 186, 0.45)', initialX: '0%', initialY: '5%', duration: 30, blur: 120 },
-        { size: 400, color: 'rgba(212, 191, 255, 0.4)', initialX: '55%', initialY: '40%', duration: 26, delay: 2, blur: 110 },
-        { size: 350, color: 'rgba(181, 234, 221, 0.35)', initialX: '70%', initialY: '0%', duration: 32, delay: 5, blur: 100 },
-        { size: 280, color: 'rgba(255, 207, 181, 0.35)', initialX: '10%', initialY: '60%', duration: 24, delay: 1, blur: 90 },
-        { size: 200, color: 'rgba(181, 217, 255, 0.3)', initialX: '40%', initialY: '75%', duration: 28, delay: 3, blur: 80 },
+        { size: 400, color: 'rgba(255, 181, 186, 0.4)', initialX: '0%', initialY: '5%', duration: 30, blur: 80 },
+        { size: 350, color: 'rgba(212, 191, 255, 0.35)', initialX: '60%', initialY: '40%', duration: 28, delay: 3, blur: 70 },
+        { size: 300, color: 'rgba(181, 234, 221, 0.3)', initialX: '15%', initialY: '65%', duration: 32, delay: 5, blur: 75 },
       ],
       hearts: [
-        { size: 28, color: 'rgba(255, 181, 186, 0.7)', initialX: '12%', initialY: '18%', duration: 8, delay: 0 },
-        { size: 22, color: 'rgba(255, 181, 186, 0.6)', initialX: '78%', initialY: '25%', duration: 10, delay: 2 },
-        { size: 18, color: 'rgba(255, 181, 186, 0.55)', initialX: '20%', initialY: '72%', duration: 9, delay: 1 },
-        { size: 24, color: 'rgba(255, 181, 186, 0.5)', initialX: '88%', initialY: '65%', duration: 11, delay: 3 },
-        { size: 16, color: 'rgba(255, 181, 186, 0.6)', initialX: '50%', initialY: '10%', duration: 7, delay: 4 },
+        { size: 24, color: 'rgba(255, 181, 186, 0.65)', initialX: '15%', initialY: '20%', duration: 9, delay: 0 },
+        { size: 20, color: 'rgba(255, 181, 186, 0.55)', initialX: '75%', initialY: '30%', duration: 11, delay: 2 },
+        { size: 18, color: 'rgba(255, 181, 186, 0.6)', initialX: '25%', initialY: '75%', duration: 10, delay: 1 },
       ],
       stars: [
-        { size: 22, color: 'rgba(255, 242, 181, 0.8)', initialX: '28%', initialY: '12%', duration: 7, delay: 0.5 },
-        { size: 16, color: 'rgba(255, 242, 181, 0.7)', initialX: '82%', initialY: '48%', duration: 9, delay: 2.5 },
-        { size: 20, color: 'rgba(255, 242, 181, 0.75)', initialX: '52%', initialY: '82%', duration: 8, delay: 1.5 },
-        { size: 14, color: 'rgba(255, 242, 181, 0.65)', initialX: '8%', initialY: '45%', duration: 10, delay: 3.5 },
+        { size: 18, color: 'rgba(255, 242, 181, 0.75)', initialX: '30%', initialY: '15%', duration: 8, delay: 0.5 },
+        { size: 16, color: 'rgba(255, 242, 181, 0.7)', initialX: '80%', initialY: '50%', duration: 10, delay: 2.5 },
       ],
       sparkles: [
-        { size: 14, color: 'rgba(255, 248, 249, 0.8)', initialX: '18%', initialY: '35%', duration: 3, delay: 0 },
-        { size: 10, color: 'rgba(255, 240, 242, 0.7)', initialX: '72%', initialY: '20%', duration: 4, delay: 1 },
-        { size: 16, color: 'rgba(255, 248, 249, 0.75)', initialX: '58%', initialY: '60%', duration: 3.5, delay: 2 },
-        { size: 12, color: 'rgba(255, 240, 242, 0.65)', initialX: '38%', initialY: '78%', duration: 4.5, delay: 0.5 },
-        { size: 15, color: 'rgba(255, 248, 249, 0.8)', initialX: '8%', initialY: '52%', duration: 3, delay: 1.5 },
-        { size: 11, color: 'rgba(255, 240, 242, 0.7)', initialX: '92%', initialY: '38%', duration: 4, delay: 2.5 },
-        { size: 13, color: 'rgba(255, 248, 249, 0.75)', initialX: '45%', initialY: '5%', duration: 3.5, delay: 3 },
+        { size: 12, color: 'rgba(255, 248, 249, 0.75)', initialX: '20%', initialY: '40%', duration: 4, delay: 0 },
+        { size: 10, color: 'rgba(255, 240, 242, 0.65)', initialX: '70%', initialY: '65%', duration: 4.5, delay: 1.5 },
       ],
     },
     subtle: {
@@ -287,6 +278,8 @@ const FloatingShapes = ({
       ))}
     </Box>
   );
-};
+});
+
+FloatingShapes.displayName = 'FloatingShapes';
 
 export default FloatingShapes;

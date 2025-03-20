@@ -1,4 +1,5 @@
 import User from '../models/user.js';
+import logger from '../utils/logger.js';
 
 // Middleware to check if user has whitelist access
 export const checkWhitelistAccess = async (req, res, next) => {
@@ -34,7 +35,7 @@ export const checkWhitelistAccess = async (req, res, next) => {
     // User has access, continue to next middleware
     next();
   } catch (error) {
-    console.error('Whitelist middleware error:', error);
+    logger.error('Whitelist middleware error:', error);
     res.status(500).json({
       message: 'Server error checking access permissions'
     });
@@ -68,7 +69,7 @@ export const grantWhitelistAccess = async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Grant whitelist error:', error);
+    logger.error('Grant whitelist error:', error);
     res.status(500).json({
       message: 'Server error updating access permissions'
     });

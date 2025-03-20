@@ -3,6 +3,7 @@ import cors from "cors";
 import Message from "../models/message.js";
 import User from "../models/user.js";
 import { corsOptions } from "../config/security.js";
+import logger from "../utils/logger.js";
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.get("/:userId/:recipientId", async (req, res) => {
 
     res.json({ messages });
   } catch (error) {
-    console.error("error fetching messages:", error);
+    logger.error("error fetching messages:", error);
     res.status(500).json({ message: "server error" });
   }
 });
@@ -50,7 +51,7 @@ router.post("/", async (req, res) => {
 
     res.status(201).json({ message });
   } catch (error) {
-    console.error("error sending message:", error);
+    logger.error("error sending message:", error);
     res.status(500).json({ message: "server error" });
   }
 });
@@ -67,7 +68,7 @@ router.put("/read/:userId/:recipientId", async (req, res) => {
 
     res.json({ message: "messages marked as read" });
   } catch (error) {
-    console.error("error marking messages as read:", error);
+    logger.error("error marking messages as read:", error);
     res.status(500).json({ message: "server error" });
   }
 });

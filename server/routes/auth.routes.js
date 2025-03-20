@@ -1,10 +1,8 @@
-// in your backend (assuming express)
-// auth.routes.js or similar
 import express from "express"
 const router = express.Router();
-import querystring  from 'querystring';
 import crypto from 'crypto';
 import dotenv from 'dotenv'
+import logger from '../utils/logger.js'
 dotenv.config()
 
 // your spotify api credentials
@@ -20,9 +18,8 @@ if (BACKEND_URL && !BACKEND_URL.startsWith('http://') && !BACKEND_URL.startsWith
 const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || `${BACKEND_URL}/auth/spotify/callback`;
 const FRONTEND_URI = process.env.FRONTEND_URL || 'https://melody-match-flax.vercel.app';
 
-// Log configuration on startup (remove sensitive data)
-console.log('[Auth Config] REDIRECT_URI:', REDIRECT_URI);
-console.log('[Auth Config] FRONTEND_URI:', FRONTEND_URI);
+logger.info(`[Auth Config] REDIRECT_URI: ${REDIRECT_URI}`);
+logger.info(`[Auth Config] FRONTEND_URI: ${FRONTEND_URI}`);
 
 
 router.get('/login', (req, res) => {
@@ -50,13 +47,13 @@ router.get('/login', (req, res) => {
 
 
 
-// Spotify OAuth callback handler
+// Spotify OAuth callback handler (deprecated — Spotify requires 250k MAU)
 router.get('/spotify/callback', async (req, res) => {
-  console.log('spotify callback received');
+  logger.info('Spotify callback received');
   const code = req.query.code;
-  
+
   if (!code) {
-    console.error('No authorization code received');
+    logger.error('No authorization code received in Spotify callback');
     return res.redirect(`${FRONTEND_URI}/error?message=no_code`);
   }
 
@@ -77,37 +74,35 @@ router.get('/spotify/callback', async (req, res) => {
     });
 
     const data = await tokenResponse.json();
-    console.log('Spotify token response received');
-    
+
     if (data.access_token) {
       res.redirect(`${FRONTEND_URI}/standby?token=${data.access_token}`);
     } else {
-      console.error('No access token in response:', data);
+      logger.error('No access token in Spotify response');
       res.redirect(`${FRONTEND_URI}/error?message=token_error`);
     }
   } catch (error) {
-    console.error('Spotify callback error:', error);
+    logger.error('Spotify callback error:', error);
     res.redirect(`${FRONTEND_URI}/error?message=callback_error`);
   }
 });
 
 router.get('/callback', async (req, res) => {
-  console.log('spotify callback')
-    const code = req.query.code;
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Basic ' + Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64')
-        },
-        body: new URLSearchParams({
-            code: code,
-            redirect_uri: REDIRECT_URI,
-            grant_type: 'authorization_code'
-        })
-    });
-    const data = await response.json();
-    res.redirect(`${FRONTEND_URI}/standby?token=${data.access_token}`);
+  const code = req.query.code;
+  const response = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic ' + Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64')
+    },
+    body: new URLSearchParams({
+      code: code,
+      redirect_uri: REDIRECT_URI,
+      grant_type: 'authorization_code'
+    })
+  });
+  const data = await response.json();
+  res.redirect(`${FRONTEND_URI}/standby?token=${data.access_token}`);
 });
 
 

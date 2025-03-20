@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import User from '../../models/user.js';
 import { storeTokens } from '../../services/tokenManagementService.js';
 import YouTubeMusicAdapter from '../../adapters/youtubeMusicAdapter.js';
+import logger from '../../utils/logger.js';
 import MusicPlatformService from '../../services/musicPlatformService.js';
 
 const router = express.Router();
@@ -55,11 +56,11 @@ router.get('/login', (req, res) => {
         prompt: 'consent' // Force consent screen to always get refresh token
       });
     
-    console.log(`[YouTube Music Auth] Redirecting user ${userId} to OAuth flow`);
+    logger.info(`[YouTube Music Auth] Redirecting user ${userId} to OAuth flow`);
     res.redirect(authUrl);
     
   } catch (error) {
-    console.error('Error initiating YouTube Music OAuth:', error);
+    logger.error('Error initiating YouTube Music OAuth:', error);
     res.redirect(`${FRONTEND_URL}/error?message=youtube_auth_init_failed`);
   }
 });
@@ -74,12 +75,12 @@ router.get('/callback', async (req, res) => {
     
     // Handle OAuth errors
     if (error) {
-      console.error('YouTube Music OAuth error:', error);
+      logger.error('YouTube Music OAuth error:', error);
       return res.redirect(`${FRONTEND_URL}/error?message=youtube_auth_denied`);
     }
     
     if (!code || !state) {
-      console.error('Missing code or state in callback');
+      logger.error('Missing code or state in callback');
       return res.redirect(`${FRONTEND_URL}/error?message=youtube_auth_invalid`);
     }
     
@@ -88,7 +89,7 @@ router.get('/callback', async (req, res) => {
     try {
       stateData = JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
     } catch (e) {
-      console.error('Invalid state parameter:', e);
+      logger.error('Invalid state parameter:', e);
       return res.redirect(`${FRONTEND_URL}/error?message=youtube_auth_invalid_state`);
     }
     
@@ -96,12 +97,12 @@ router.get('/callback', async (req, res) => {
     
     // Verify state is not too old (10 minutes max)
     if (Date.now() - timestamp > 10 * 60 * 1000) {
-      console.error('State parameter expired');
+      logger.error('State parameter expired');
       return res.redirect(`${FRONTEND_URL}/error?message=youtube_auth_expired`);
     }
     
     // Exchange authorization code for tokens
-    console.log(`[YouTube Music Auth] Exchanging code for tokens for user ${userId}`);
+    logger.info(`[YouTube Music Auth] Exchanging code for tokens for user ${userId}`);
     
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -119,7 +120,7 @@ router.get('/callback', async (req, res) => {
     
     if (!tokenResponse.ok) {
       const errorData = await tokenResponse.text();
-      console.error('Token exchange failed:', errorData);
+      logger.error('Token exchange failed:', errorData);
       return res.redirect(`${FRONTEND_URL}/error?message=youtube_token_exchange_failed`);
     }
     
@@ -148,7 +149,7 @@ router.get('/callback', async (req, res) => {
         }
       }
     } catch (error) {
-      console.warn('Could not fetch YouTube channel info:', error.message);
+      logger.warn('Could not fetch YouTube channel info:', error.message);
     }
     
     // Store tokens securely
@@ -160,7 +161,7 @@ router.get('/callback', async (req, res) => {
       platformDisplayName: platformDisplayName
     });
     
-    console.log(`[YouTube Music Auth] Tokens stored for user ${userId}`);
+    logger.info(`[YouTube Music Auth] Tokens stored for user ${userId}`);
     
     // Fetch user's music data
     try {
@@ -170,12 +171,12 @@ router.get('/callback', async (req, res) => {
         adapter.getTopGenres(tokenData.access_token)
       ]);
       
-      console.log(`[YouTube Music] Found ${artists.length} artists and ${genres.length} genres`);
+      logger.info(`[YouTube Music] Found ${artists.length} artists and ${genres.length} genres`);
       
       // Update user's connected platforms
       const user = await User.findById(userId);
       if (!user) {
-        console.error('User not found:', userId);
+        logger.error('User not found:', userId);
         return res.redirect(`${FRONTEND_URL}/error?message=user_not_found`);
       }
       
@@ -202,23 +203,23 @@ router.get('/callback', async (req, res) => {
       await user.save();
       
       // Aggregate music data from all connected platforms
-      console.log(`[YouTube Music Auth] Aggregating music data for user ${userId}`);
+      logger.info(`[YouTube Music Auth] Aggregating music data for user ${userId}`);
       const aggregated = await MusicPlatformService.mergeUserMusicData(userId);
-      console.log(`[YouTube Music Auth] Aggregated ${aggregated.artists.length} artists and ${aggregated.genres.length} genres`);
+      logger.info(`[YouTube Music Auth] Aggregated ${aggregated.artists.length} artists and ${aggregated.genres.length} genres`);
       
-      console.log(`[YouTube Music Auth] Successfully connected for user ${userId}`);
+      logger.info(`[YouTube Music Auth] Successfully connected for user ${userId}`);
       
       // Redirect to success page
       res.redirect(`${FRONTEND_URL}/connect-success?platform=youtube_music`);
       
     } catch (dataError) {
-      console.error('Error fetching YouTube Music data:', dataError);
+      logger.error('Error fetching YouTube Music data:', dataError);
       // Tokens are stored, but data fetch failed - user can retry sync
       res.redirect(`${FRONTEND_URL}/connect-success?platform=youtube_music&warning=sync_failed`);
     }
     
   } catch (error) {
-    console.error('Error in YouTube Music callback:', error);
+    logger.error('Error in YouTube Music callback:', error);
     res.redirect(`${FRONTEND_URL}/error?message=youtube_callback_error`);
   }
 });
@@ -267,7 +268,7 @@ router.post('/disconnect', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error disconnecting YouTube Music:', error);
+    logger.error('Error disconnecting YouTube Music:', error);
     res.status(500).json({ 
       error: 'Failed to disconnect YouTube Music',
       message: error.message 
@@ -319,9 +320,9 @@ router.post('/sync', async (req, res) => {
     await user.save();
     
     // Aggregate music data from all connected platforms
-    console.log(`[YouTube Music Sync] Aggregating music data for user ${userId}`);
+    logger.info(`[YouTube Music Sync] Aggregating music data for user ${userId}`);
     const aggregated = await MusicPlatformService.mergeUserMusicData(userId);
-    console.log(`[YouTube Music Sync] Aggregated ${aggregated.artists.length} artists and ${aggregated.genres.length} genres`);
+    logger.info(`[YouTube Music Sync] Aggregated ${aggregated.artists.length} artists and ${aggregated.genres.length} genres`);
     
     res.json({
       success: true,
@@ -333,7 +334,7 @@ router.post('/sync', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error syncing YouTube Music:', error);
+    logger.error('Error syncing YouTube Music:', error);
     res.status(500).json({ 
       error: 'Failed to sync YouTube Music data',
       message: error.message 

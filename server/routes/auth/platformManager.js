@@ -3,6 +3,7 @@ import User from '../../models/user.js';
 import UserMusicPlatform from '../../models/userMusicPlatform.js';
 import { getUserPlatforms, getTokens, revokeConnection } from '../../services/tokenManagementService.js';
 import MusicPlatformService from '../../services/musicPlatformService.js';
+import logger from '../../utils/logger.js';
 
 const router = express.Router();
 
@@ -49,7 +50,7 @@ router.get('/connected', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error fetching connected platforms:', error);
+    logger.error('Error fetching connected platforms:', error);
     res.status(500).json({ 
       error: 'Failed to fetch connected platforms',
       message: error.message 
@@ -84,8 +85,8 @@ router.post('/set-primary', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    console.log(`[Set Primary] User ${userId} has connected platforms:`, user.connectedPlatforms);
-    console.log(`[Set Primary] Attempting to set ${platform} as primary`);
+    logger.info(`[Set Primary] User ${userId} has connected platforms:`, user.connectedPlatforms);
+    logger.info(`[Set Primary] Attempting to set ${platform} as primary`);
     
     // Check if platform is connected
     if (!user.connectedPlatforms.includes(platform)) {
@@ -99,7 +100,7 @@ router.post('/set-primary', async (req, res) => {
     user.primaryPlatform = platform;
     await user.save();
     
-    console.log(`[Platform Manager] User ${userId} set ${platform} as primary`);
+    logger.info(`[Platform Manager] User ${userId} set ${platform} as primary`);
     
     res.json({
       success: true,
@@ -108,7 +109,7 @@ router.post('/set-primary', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error setting primary platform:', error);
+    logger.error('Error setting primary platform:', error);
     res.status(500).json({ 
       error: 'Failed to set primary platform',
       message: error.message 
@@ -152,7 +153,7 @@ router.post('/sync', async (req, res) => {
     // Sync each platform
     for (const platformName of platformsToSync) {
       try {
-        console.log(`[Platform Manager] Syncing ${platformName} for user ${userId}`);
+        logger.info(`[Platform Manager] Syncing ${platformName} for user ${userId}`);
         
         // Get tokens (will auto-refresh if needed)
         const tokens = await getTokens(userId, platformName);
@@ -172,7 +173,7 @@ router.post('/sync', async (req, res) => {
           MusicPlatformService.fetchUserGenres(platformName, tokens.accessToken)
         ]);
         
-        console.log(`[Platform Manager] Fetched ${artists.length} artists and ${genres.length} genres for ${platformName}`);
+        logger.info(`[Platform Manager] Fetched ${artists.length} artists and ${genres.length} genres for ${platformName}`);
         
         // Update user's platform data
         if (!user.platformData) {
@@ -185,7 +186,7 @@ router.post('/sync', async (req, res) => {
           lastSyncedAt: new Date()
         };
         
-        console.log(`[Platform Manager] Saved to platformData.${platformName}: ${artists.length} artists, ${genres.length} genres`);
+        logger.info(`[Platform Manager] Saved to platformData.${platformName}: ${artists.length} artists, ${genres.length} genres`);
         
         // Update last synced timestamp in UserMusicPlatform
         await UserMusicPlatform.findOneAndUpdate(
@@ -201,7 +202,7 @@ router.post('/sync', async (req, res) => {
         });
         
       } catch (error) {
-        console.error(`Error syncing ${platformName}:`, error);
+        logger.error(`Error syncing ${platformName}:`, error);
         errors.push({
           platform: platformName,
           error: error.message,
@@ -211,13 +212,13 @@ router.post('/sync', async (req, res) => {
     }
     
     // Aggregate data from all platforms
-    console.log(`[Platform Manager] Aggregating data for user ${userId}...`);
+    logger.info(`[Platform Manager] Aggregating data for user ${userId}...`);
     const aggregated = await MusicPlatformService.aggregateUserData(userId);
-    console.log(`[Platform Manager] Aggregated ${aggregated.artists.length} artists and ${aggregated.genres.length} genres`);
+    logger.info(`[Platform Manager] Aggregated ${aggregated.artists.length} artists and ${aggregated.genres.length} genres`);
     await user.save();
-    console.log(`[Platform Manager] Saved user document`);
+    logger.info(`[Platform Manager] Saved user document`);
     
-    console.log(`[Platform Manager] Sync completed for user ${userId}`);
+    logger.info(`[Platform Manager] Sync completed for user ${userId}`);
     
     res.json({
       success: syncResults.length > 0,
@@ -227,7 +228,7 @@ router.post('/sync', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error syncing platforms:', error);
+    logger.error('Error syncing platforms:', error);
     res.status(500).json({ 
       error: 'Failed to sync platforms',
       message: error.message 
@@ -292,7 +293,7 @@ router.delete('/:platform', async (req, res) => {
     // Revoke token in database
     await revokeConnection(userId, platform);
     
-    console.log(`[Platform Manager] Disconnected ${platform} for user ${userId}`);
+    logger.info(`[Platform Manager] Disconnected ${platform} for user ${userId}`);
     
     res.json({
       success: true,
@@ -302,7 +303,7 @@ router.delete('/:platform', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error disconnecting platform:', error);
+    logger.error('Error disconnecting platform:', error);
     res.status(500).json({ 
       error: 'Failed to disconnect platform',
       message: error.message 
@@ -357,10 +358,10 @@ router.post('/:platform/force-disconnect', async (req, res) => {
     try {
       await revokeConnection(userId, platform);
     } catch (err) {
-      console.log(`Token revocation failed (may not exist): ${err.message}`);
+      logger.info(`Token revocation failed (may not exist): ${err.message}`);
     }
     
-    console.log(`[Platform Manager] Force disconnected ${platform} for user ${userId}`);
+    logger.info(`[Platform Manager] Force disconnected ${platform} for user ${userId}`);
     
     res.json({
       success: true,
@@ -369,7 +370,7 @@ router.post('/:platform/force-disconnect', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error force disconnecting platform:', error);
+    logger.error('Error force disconnecting platform:', error);
     res.status(500).json({ 
       error: 'Failed to force disconnect platform',
       message: error.message 
@@ -417,7 +418,7 @@ router.get('/status', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error fetching platform status:', error);
+    logger.error('Error fetching platform status:', error);
     res.status(500).json({ 
       error: 'Failed to fetch platform status',
       message: error.message 
@@ -455,7 +456,7 @@ router.post('/complete-migration', async (req, res) => {
     user.migrationDate = new Date();
     await user.save();
     
-    console.log(`[Platform Manager] User ${userId} completed migration`);
+    logger.info(`[Platform Manager] User ${userId} completed migration`);
     
     res.json({
       success: true,
@@ -464,7 +465,7 @@ router.post('/complete-migration', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error completing migration:', error);
+    logger.error('Error completing migration:', error);
     res.status(500).json({ 
       error: 'Failed to complete migration',
       message: error.message 

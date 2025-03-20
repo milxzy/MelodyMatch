@@ -1,5 +1,6 @@
 import express from "express"
 import User from "../models/user.js"
+import logger from "../utils/logger.js"
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ router.get("/:userId", async (req, res) => {
 
     res.json({ matches: filteredMatches });
   } catch (error) {
-    console.error("error fetching matches:", error);
+    logger.error("error fetching matches:", error);
     res.status(500).json({ message: "server error" });
   }
 });

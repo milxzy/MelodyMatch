@@ -1,4 +1,5 @@
 import User from '../models/user.js';
+import logger from '../utils/logger.js';
 
 // Update user profile
 export const updateProfile = async (req, res) => {
@@ -43,7 +44,7 @@ export const updateProfile = async (req, res) => {
       user: updatedUser
     });
   } catch (error) {
-    console.error('Error updating profile:', error);
+    logger.error('Error updating profile:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -75,7 +76,7 @@ export const deleteAccount = async (req, res) => {
       message: 'Account deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting account:', error);
+    logger.error('Error deleting account:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -104,7 +105,7 @@ export const uploadProfilePhoto = async (req, res) => {
       user: updatedUser
     });
   } catch (error) {
-    console.error('Error uploading profile photo:', error);
+    logger.error('Error uploading profile photo:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -123,7 +124,7 @@ export const getPreferences = async (req, res) => {
       preferences: user.preferences || {}
     });
   } catch (error) {
-    console.error('Error getting preferences:', error);
+    logger.error('Error getting preferences:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -155,7 +156,7 @@ export const updatePreferences = async (req, res) => {
       preferences: updatedUser.preferences
     });
   } catch (error) {
-    console.error('Error updating preferences:', error);
+    logger.error('Error updating preferences:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

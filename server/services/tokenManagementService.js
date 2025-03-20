@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import UserMusicPlatform from '../models/userMusicPlatform.js';
+import logger from '../utils/logger.js';
 
 const ENCRYPTION_KEY = process.env.TOKEN_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
 const ALGORITHM = 'aes-256-gcm';
@@ -74,13 +75,7 @@ export function decryptToken(encryptedText) {
  * @returns {Promise<Object>} - Stored platform connection
  */
 export async function storeTokens(userId, platform, tokenData) {
-  console.log('[storeTokens] Called with:', {
-    userId,
-    platform,
-    hasAccessToken: !!tokenData.accessToken,
-    platformUserId: tokenData.platformUserId,
-    platformDisplayName: tokenData.platformDisplayName
-  });
+  logger.debug(`[storeTokens] Storing tokens for user ${userId} on platform ${platform}`);
 
   if (!tokenData.platformUserId) {
     throw new Error('platformUserId is required in tokenData');
@@ -206,19 +201,19 @@ export async function refreshTokenIfNeeded(userId, platform) {
       case 'apple_music':
         // Apple Music user tokens cannot be refreshed server-side
         // User must re-authenticate
-        console.warn('Apple Music tokens cannot be refreshed. User must re-authenticate.');
+        logger.warn('Apple Music tokens cannot be refreshed. User must re-authenticate.');
         return false;
       default:
-        console.error(`Unknown platform for token refresh: ${platform}`);
+        logger.error(`Unknown platform for token refresh: ${platform}`);
         return false;
     }
-    
+
     // Store new tokens
     await storeTokens(userId, platform, newTokenData);
     return true;
-    
+
   } catch (error) {
-    console.error(`Failed to refresh token for ${platform}:`, error);
+    logger.error(`Failed to refresh token for ${platform}:`, error);
     return false;
   }
 }

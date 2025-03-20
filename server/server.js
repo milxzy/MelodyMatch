@@ -1,19 +1,14 @@
 import express from "express";
 import { createServer } from "http";
-import fetch from "node-fetch";
-const app = express()
 import dotenv from 'dotenv'
 dotenv.config()
 import mongoose from "mongoose";
 import cors from "cors"
-
 import helmet from 'helmet'
 import { corsOptions } from './config/security.js'
 import userRoutes from "./routes/user.js"
 import session from 'express-session'
-import passportLocalMongoose from 'passport-local-mongoose'
 import passport from 'passport'
-import connectEnsureLogin from 'connect-ensure-login'
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import User from "./models/user.js";
@@ -27,6 +22,9 @@ import profileViewRoutes from "./routes/profileView.js"
 import profileRoutes from "./routes/profile.js"
 import matchManagementRoutes from "./routes/matchManagement.js"
 import { initializeSocket } from "./socket.js"
+import logger from "./utils/logger.js"
+
+const app = express()
 
 
 
@@ -127,93 +125,7 @@ passport.use(new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
 
 
 
-const redirect_uri = process.env.REDIRECT_URI
-const client_id =  process.env.CLIENT_ID
-const client_secret = process.env.CLIENT_SECRET
-global.access_token
 
-// app.get('/', function (req, res) {
-// res.render('index')
-// })
-
-app.get('/authorize', (req, res) => {
-  let auth_query_paramerters = new URLSearchParams({
-    response_type: 'code',
-    client_id: client_id,
-    scope: "user-read-private user-read-email user-follow-read",
-    redirect_uri:redirect_uri
-  })
-
-
-
-  res.redirect("https://accounts.spotify.com/authorize?" + auth_query_paramerters.toString())
-
-})
-
-app.get("/callback", async (req, res) => {
-  const code = req.query.code;
-  let body = new URLSearchParams({
-    code: code,
-    redirect_uri: redirect_uri,
-    grant_type: "authorization_code"
-
-  })
-  const response = await fetch('https://accounts.spotify.com/api/token', {
-    method: "post",
-    body: body,
-    headers: {
-      "Content-type": "application/x-www-form-urlencoded",
-      Authorization: 
-      "Basic " + Buffer.from(client_id + ":" + client_secret).toString("base64")
-    }
-  })
-   const data = await response.json()
-  global.access_token = data.access_token;
- 
-res.redirect('/dashboard')
-})
-
-
-app.post('/api/spotify/callback', (req, res) => {
-  const params = req.body;
-  console.log('Received Spotify callback data:', params);
-    const accessToken = params.access_token;
-    const tokenType = params.token_type;
-    const expiresIn = params.expires_in;
-   console.log(`Access Token: ${accessToken}`);
-    console.log(`Token Type: ${tokenType}`);
-    console.log(`Expires In: ${expiresIn}`);
-      // process or save the data as needed
-    res.json({
-        message: 'Spotify callback processed successfully',
-        data: { accessToken, tokenType, expiresIn },
-    });
-})
-// app.get('/dashboard', async (req, res) => {
-
-
-// const response = await fetch('https://api.spotify.com/v1/me', {
-// method: 'get',
-// headers: {
-// authorization: 'bearer ' + global.access_token
-// }
-// })
-// const data = await response.json()
-// console.log(data)
-
-// const artistgenres = await fetch('https://api.spotify.com/v1/me/following?type=artist', {
-// method: 'get',
-// headers: {
-// authorization: 'bearer ' + global.access_token
-// }
-// })
-
-// const artistdata = await artistgenres.json()
-// console.log(artistdata.artists.items)
-
-
-// res.render('dashboard', {user: data})
-// })
 
 // Error handling middleware (must be after all routes)
 app.use(notFound);
@@ -230,11 +142,11 @@ mongoose.connect(
   connectionString
 ).then(() => {
   httpServer.listen(port, function () {
-    console.log(`server listening on port ${port}`);
-    console.log(`socket.io enabled for real-time messaging`);
+    logger.info(`server listening on port ${port}`);
+    logger.info(`socket.io enabled for real-time messaging`);
   });
 })
 
 const db = mongoose.connection;
-db.on("error", (error) => console.error(error));
-db.once("open", () => console.log("connected to database"));
+db.on("error", (error) => logger.error("MongoDB connection error:", error));
+db.once("open", () => logger.info("connected to database"));

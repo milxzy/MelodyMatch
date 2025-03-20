@@ -3,8 +3,8 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import { authLimiter, actionLimiter } from '../middlewares/rateLimiter.js';
 import { protect } from '../middlewares/authMiddleware.js';
-
-import { backendLogin,  makeAUser, registerUser, like, getUsers, createUser, getUser, getSingleUser, databaseLookup, addSpotifyArtists, addUserInfo, addSpotifyData, displayDashboard, getMatches, updateUserProfile } from '../controllers/user.js';
+import logger from '../utils/logger.js';
+import { backendLogin, makeAUser, registerUser, like, getUsers, getUser, getSingleUser, databaseLookup, addSpotifyArtists, addUserInfo, addSpotifyData, getMatches, updateUserProfile } from '../controllers/user.js';
 
 const router = express.Router();
 
@@ -25,7 +25,6 @@ router.get('/profile', passport.authenticate('jwt', { session: false }), (req, r
 
 router.post('/like', protect, actionLimiter, like)
 
-router.get('/dashboard', protect, displayDashboard)
 router.get('/getMatches/:userId', protect, getMatches)
 
 router.post('/addUserInfo', addUserInfo)
@@ -43,7 +42,7 @@ router.get('/getUserById/:userId', async (req, res) => {
     }
     res.json({ user });
   } catch (error) {
-    console.error('error fetching user:', error);
+    logger.error('error fetching user:', error);
     res.status(500).json({ error: 'internal server error' });
   }
 })

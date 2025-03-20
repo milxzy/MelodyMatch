@@ -3,6 +3,7 @@ import cors from "cors";
 import { corsOptions } from "../config/security.js";
 const router = express.Router();
 import Waitlist from "../models/waitlistModel.js"
+import logger from "../utils/logger.js"
 
 // Handle OPTIONS preflight
 router.options('/add-to-waitlist', cors(corsOptions));
@@ -32,7 +33,7 @@ router.post('/add-to-waitlist', async (req, res) => {
     await newWaitlistEntry.save();
     return res.status(200).json({ message: 'Successfully added to the waitlist' });
   } catch (err) {
-    console.error(err);
+    logger.error('Error adding to waitlist:', err);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -48,7 +49,7 @@ router.get('/check-status/:email', async (req, res) => {
     }
     return res.status(200).json({ status: user.status });
   } catch (err) {
-    console.error(err);
+    logger.error('Error checking waitlist status:', err);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -73,7 +74,7 @@ router.post('/approve-reject', async (req, res) => {
 
     return res.status(200).json({ message: `User ${action}d successfully` });
   } catch (err) {
-    console.error(err);
+    logger.error('Error approving/rejecting waitlist user:', err);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });

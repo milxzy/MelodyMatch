@@ -1,5 +1,6 @@
 import User from '../models/user.js';
 import Match from '../models/matches.js';
+import logger from '../utils/logger.js';
 
 // Unmatch with a user
 export const unmatchUser = async (req, res) => {
@@ -32,7 +33,7 @@ export const unmatchUser = async (req, res) => {
       message: 'Unmatched successfully'
     });
   } catch (error) {
-    console.error('Error unmatching user:', error);
+    logger.error('Error unmatching user:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -86,7 +87,7 @@ export const blockUser = async (req, res) => {
       message: 'User blocked successfully'
     });
   } catch (error) {
-    console.error('Error blocking user:', error);
+    logger.error('Error blocking user:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -105,7 +106,7 @@ export const unblockUser = async (req, res) => {
       message: 'User unblocked successfully'
     });
   } catch (error) {
-    console.error('Error unblocking user:', error);
+    logger.error('Error unblocking user:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -123,8 +124,7 @@ export const reportUser = async (req, res) => {
     }
 
     // TODO: Create Report model and save report
-    // For now, just log it
-    console.log(`User ${reporterId} reported user ${targetUserId} for: ${reason}`);
+    logger.info(`User ${reporterId} reported user ${targetUserId} for: ${reason}`);
 
     // In production, you would:
     // 1. Save to a Report model
@@ -135,7 +135,7 @@ export const reportUser = async (req, res) => {
       message: 'Report submitted successfully. Our team will review it.'
     });
   } catch (error) {
-    console.error('Error reporting user:', error);
+    logger.error('Error reporting user:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -152,7 +152,7 @@ export const getBlockedUsers = async (req, res) => {
       blockedUsers: user.blockedUsers || []
     });
   } catch (error) {
-    console.error('Error getting blocked users:', error);
+    logger.error('Error getting blocked users:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

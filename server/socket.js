@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import Message from "./models/message.js";
+import logger from "./utils/logger.js";
 
 // store online users
 const onlineUsers = new Map();
@@ -14,12 +15,12 @@ export const initializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log(`user connected: ${socket.id}`);
+    logger.debug(`user connected: ${socket.id}`);
 
     // user joins with their id
     socket.on("user-online", (userId) => {
       onlineUsers.set(userId, socket.id);
-      console.log(`user ${userId} is online with socket ${socket.id}`);
+      logger.debug(`user ${userId} is online with socket ${socket.id}`);
 
       // broadcast online status to all clients
       io.emit("user-status-change", {
@@ -50,7 +51,7 @@ export const initializeSocket = (server) => {
         // send confirmation back to sender
         socket.emit("message-sent", message);
       } catch (error) {
-        console.error("error sending message:", error);
+        logger.error("error sending message:", error);
         socket.emit("message-error", { error: "failed to send message" });
       }
     });
@@ -76,7 +77,7 @@ export const initializeSocket = (server) => {
 
     // handle disconnect
     socket.on("disconnect", () => {
-      console.log(`user disconnected: ${socket.id}`);
+      logger.debug(`user disconnected: ${socket.id}`);
 
       // find and remove user from online users
       for (const [userId, socketId] of onlineUsers.entries()) {

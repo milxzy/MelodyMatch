@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import fetch from 'node-fetch';
+import logger from '../utils/logger.js';
 
 /**
  * Apple Music Adapter - Handles all Apple Music API interactions
@@ -85,7 +86,7 @@ class AppleMusicAdapter {
       ...options.headers
     };
     
-    console.log(`[Apple Music API] Requesting: ${url}`);
+    logger.debug(`[Apple Music API] Requesting: ${url}`);
     
     const response = await fetch(url, {
       ...options,
@@ -95,7 +96,7 @@ class AppleMusicAdapter {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       const errorDetail = error.errors?.[0]?.detail || error.errors?.[0]?.title || response.statusText;
-      console.error(`[Apple Music API] Error ${response.status}: ${errorDetail}`);
+      logger.error(`[Apple Music API] Error ${response.status}: ${errorDetail}`);
       throw new Error(`Apple Music API error: ${response.status} - ${errorDetail}`);
     }
     
@@ -112,7 +113,7 @@ class AppleMusicAdapter {
       const data = await this.makeRequest('/me/storefront', userToken);
       return data.data?.[0] || null;
     } catch (error) {
-      console.error('Error fetching Apple Music storefront:', error);
+      logger.error('Error fetching Apple Music storefront:', error);
       throw error;
     }
   }
@@ -133,7 +134,7 @@ class AppleMusicAdapter {
         const path = url.pathname.replace(/^\/v1/, '');
         return path + url.search;
       } catch (e) {
-        console.error('[Apple Music] Error parsing next URL:', e);
+        logger.error('[Apple Music] Error parsing next URL:', e);
         return null;
       }
     }
@@ -152,7 +153,7 @@ class AppleMusicAdapter {
       const artists = new Set(); // Use Set for automatic deduplication
       
       // 1. Extract artists from library songs (with pagination)
-      console.log('[Apple Music] Fetching artists from library songs...');
+      logger.info('[Apple Music] Fetching artists from library songs...');
       let nextSongsUrl = '/me/library/songs?limit=100';
       let songsPageCount = 0;
       const MAX_PAGES = 50; // Safety limit: 5000 songs max
@@ -173,21 +174,21 @@ class AppleMusicAdapter {
           songsPageCount++;
           
           if (songsPageCount % 5 === 0) {
-            console.log(`[Apple Music] Processed ${songsPageCount} pages of songs, found ${artists.size} unique artists so far...`);
+            logger.debug(`[Apple Music] Processed ${songsPageCount} pages of songs, found ${artists.size} unique artists so far...`);
           }
         } catch (error) {
           if (error.message.includes('404')) {
-            console.log('[Apple Music] No more songs found in library (404)');
+            logger.debug('[Apple Music] No more songs found in library (404)');
             break;
           }
           throw error;
         }
       }
-      
-      console.log(`[Apple Music] Extracted ${artists.size} artists from ${songsPageCount} pages of songs`);
-      
+
+      logger.info(`[Apple Music] Extracted ${artists.size} artists from ${songsPageCount} pages of songs`);
+
       // 2. Also extract artists from library albums (better coverage)
-      console.log('[Apple Music] Fetching artists from library albums...');
+      logger.info('[Apple Music] Fetching artists from library albums...');
       let nextAlbumsUrl = '/me/library/albums?limit=100';
       let albumsPageCount = 0;
       
@@ -207,17 +208,17 @@ class AppleMusicAdapter {
           albumsPageCount++;
         } catch (error) {
           if (error.message.includes('404')) {
-            console.log('[Apple Music] No more albums found in library (404)');
+            logger.debug('[Apple Music] No more albums found in library (404)');
             break;
           }
           throw error;
         }
       }
-      
-      console.log(`[Apple Music] Extracted ${artists.size} total unique artists from ${songsPageCount} pages of songs and ${albumsPageCount} pages of albums`);
+
+      logger.info(`[Apple Music] Extracted ${artists.size} total unique artists from ${songsPageCount} pages of songs and ${albumsPageCount} pages of albums`);
       return Array.from(artists);
     } catch (error) {
-      console.error('Error fetching Apple Music artists:', error);
+      logger.error('Error fetching Apple Music artists:', error);
       // Return empty array on error instead of throwing
       return [];
     }
@@ -234,7 +235,7 @@ class AppleMusicAdapter {
       const genres = new Set();
       
       // Get genres from ALL library songs with pagination
-      console.log('[Apple Music] Fetching genres from library songs...');
+      logger.info('[Apple Music] Fetching genres from library songs...');
       let nextSongsUrl = '/me/library/songs?limit=100';
       let songsPageCount = 0;
       const MAX_PAGES = 50; // Safety limit: 5000 songs max
@@ -255,21 +256,21 @@ class AppleMusicAdapter {
           songsPageCount++;
           
           if (songsPageCount % 5 === 0) {
-            console.log(`[Apple Music] Processed ${songsPageCount} pages of songs, found ${genres.size} unique genres so far...`);
+            logger.debug(`[Apple Music] Processed ${songsPageCount} pages of songs, found ${genres.size} unique genres so far...`);
           }
         } catch (error) {
           if (error.message.includes('404')) {
-            console.log('[Apple Music] No more songs found in library (404)');
+            logger.debug('[Apple Music] No more songs found in library (404)');
             break;
           }
           throw error;
         }
       }
-      
-      console.log(`[Apple Music] Extracted ${genres.size} genres from ${songsPageCount} pages of songs`);
-      
+
+      logger.info(`[Apple Music] Extracted ${genres.size} genres from ${songsPageCount} pages of songs`);
+
       // Also get genres from ALL albums with pagination
-      console.log('[Apple Music] Fetching genres from library albums...');
+      logger.info('[Apple Music] Fetching genres from library albums...');
       let nextAlbumsUrl = '/me/library/albums?limit=100';
       let albumsPageCount = 0;
       
@@ -289,17 +290,17 @@ class AppleMusicAdapter {
           albumsPageCount++;
         } catch (error) {
           if (error.message.includes('404')) {
-            console.log('[Apple Music] No more albums found in library (404)');
+            logger.debug('[Apple Music] No more albums found in library (404)');
             break;
           }
           throw error;
         }
       }
-      
-      console.log(`[Apple Music] Fetched ${genres.size} total unique genres from ${songsPageCount} pages of songs and ${albumsPageCount} pages of albums`);
+
+      logger.info(`[Apple Music] Fetched ${genres.size} total unique genres from ${songsPageCount} pages of songs and ${albumsPageCount} pages of albums`);
       return Array.from(genres);
     } catch (error) {
-      console.error('Error fetching Apple Music genres:', error);
+      logger.error('Error fetching Apple Music genres:', error);
       // Return empty array on error instead of throwing
       return [];
     }
@@ -326,7 +327,7 @@ class AppleMusicAdapter {
         topTracks: [] // Apple Music doesn't expose "top tracks" in library
       };
     } catch (error) {
-      console.error('Error fetching Apple Music library:', error);
+      logger.error('Error fetching Apple Music library:', error);
       throw error;
     }
   }
@@ -353,7 +354,7 @@ class AppleMusicAdapter {
       
       return playlists;
     } catch (error) {
-      console.error('Error fetching Apple Music playlists:', error);
+      logger.error('Error fetching Apple Music playlists:', error);
       return [];
     }
   }

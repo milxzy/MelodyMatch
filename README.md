@@ -160,19 +160,28 @@ see [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for the full guide.
 
 ```
 MelodyMatch/
-├── client/                 # react frontend
+├── client/                    # react frontend (vite)
 │   ├── src/
-│   │   ├── components/    # ui components
-│   │   └── main.jsx       # entry point
+│   │   ├── components/        # ui components
+│   │   ├── theme/             # chakra ui theme
+│   │   └── main.jsx           # entry point
 │   └── package.json
-├── server/                # express backend
-│   ├── controllers/       # route handlers
-│   ├── models/           # mongoose schemas
-│   ├── routes/           # api routes
-│   ├── utils/            # helpers
-│   │   └── matchingAlgorithm.js
-│   ├── socket.js         # real-time messaging
-│   └── server.js         # entry point
+├── server/                    # express backend
+│   ├── adapters/              # platform adapters (apple music, youtube music)
+│   ├── config/                # security, env validation
+│   ├── controllers/           # route handlers
+│   ├── db/                    # database connection
+│   ├── middlewares/           # auth, rate limiting, error handling
+│   ├── models/                # mongoose schemas
+│   ├── python-services/       # youtube music fastapi microservice
+│   │   └── youtube-music/
+│   ├── routes/                # api routes
+│   │   └── auth/              # multi-platform oauth flows
+│   ├── services/              # token management, music platform aggregation
+│   ├── tests/                 # jest tests
+│   ├── utils/                 # matching algorithm, logger, jwt helpers
+│   ├── socket.js              # socket.io real-time messaging
+│   └── server.js              # entry point
 └── README.md
 ```
 

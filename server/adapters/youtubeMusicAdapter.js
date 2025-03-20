@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import logger from '../utils/logger.js';
 
 /**
  * YouTube Music Adapter - Handles YouTube Music API interactions
@@ -46,7 +47,7 @@ class YouTubeMusicAdapter {
       
       return await response.json();
     } catch (error) {
-      console.error('Python service call failed:', error);
+      logger.error('Python service call failed:', error);
       throw new Error(`Failed to communicate with YouTube Music service: ${error.message}`);
     }
   }
@@ -78,7 +79,7 @@ class YouTubeMusicAdapter {
       const response = await this.callPythonService('/user/artists', { token });
       return response.artists || [];
     } catch (error) {
-      console.error('Error fetching YouTube Music artists:', error);
+      logger.error('Error fetching YouTube Music artists:', error);
       throw error;
     }
   }
@@ -94,7 +95,7 @@ class YouTubeMusicAdapter {
       const response = await this.callPythonService('/user/genres', { token });
       return response.genres || [];
     } catch (error) {
-      console.error('Error fetching YouTube Music genres:', error);
+      logger.error('Error fetching YouTube Music genres:', error);
       throw error;
     }
   }
@@ -115,7 +116,7 @@ class YouTubeMusicAdapter {
         topTracks: response.topTracks || []
       };
     } catch (error) {
-      console.error('Error fetching YouTube Music library:', error);
+      logger.error('Error fetching YouTube Music library:', error);
       throw error;
     }
   }
@@ -136,7 +137,7 @@ class YouTubeMusicAdapter {
         expiresIn: response.expires_in
       };
     } catch (error) {
-      console.error('Error refreshing YouTube Music token:', error);
+      logger.error('Error refreshing YouTube Music token:', error);
       throw error;
     }
   }

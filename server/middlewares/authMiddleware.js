@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
+import logger from '../utils/logger.js';
 
 // Middleware to protect routes that require authentication
 export const protect = async (req, res, next) => {
@@ -25,7 +26,7 @@ export const protect = async (req, res, next) => {
 
       next();
     } catch (error) {
-      console.error('Auth middleware error:', error);
+      logger.error('Auth middleware error:', error);
       return res.status(401).json({ message: 'Not authorized, token failed' });
     }
   }

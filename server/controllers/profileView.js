@@ -1,4 +1,5 @@
 import ProfileView from '../models/profileView.js';
+import logger from '../utils/logger.js';
 
 // Record a profile view
 export const recordProfileView = async (req, res) => {
@@ -36,7 +37,7 @@ export const recordProfileView = async (req, res) => {
       profileView 
     });
   } catch (error) {
-    console.error('Error recording profile view:', error);
+    logger.error('Error recording profile view:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -55,7 +56,7 @@ export const getProfileViewCount = async (req, res) => {
       viewCount 
     });
   } catch (error) {
-    console.error('Error getting profile view count:', error);
+    logger.error('Error getting profile view count:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -76,7 +77,7 @@ export const getRecentViewers = async (req, res) => {
       recentViewers: recentViews 
     });
   } catch (error) {
-    console.error('Error getting recent viewers:', error);
+    logger.error('Error getting recent viewers:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import crypto from 'crypto';
+import logger from '../utils/logger.js';
 
 const { Schema } = mongoose;
 
@@ -135,7 +136,7 @@ userMusicPlatformSchema.methods.decryptToken = function(encryptedToken) {
     
     return decrypted;
   } catch (error) {
-    console.error('Token decryption failed:', error);
+    logger.error('Token decryption failed:', error);
     return null;
   }
 };

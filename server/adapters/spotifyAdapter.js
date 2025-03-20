@@ -1,3 +1,5 @@
+import logger from '../utils/logger.js';
+
 /**
  * Spotify Adapter - Legacy support (read-only)
  * Spotify API access is no longer available due to 250k MAU requirement
@@ -5,7 +7,7 @@
  */
 class SpotifyAdapter {
   constructor() {
-    console.warn('Spotify adapter is deprecated. Spotify API access requires 250k MAU.');
+    logger.warn('Spotify adapter is deprecated. Spotify API access requires 250k MAU.');
   }
 
   /**

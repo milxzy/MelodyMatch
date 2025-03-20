@@ -1,10 +1,7 @@
 import User from "../models/user.js";
-import Trial from "../models/trial.js";
-// import matches from "../../client/src/components/matches.jsx";
-import { match } from "assert";
-import Match from "../models/matches.js"
-import asyncHandler from "express-async-handler" 
+import asyncHandler from "express-async-handler"
 import generateToken from '../utils/generateToken.js'
+import logger from '../utils/logger.js'
 
 
 
@@ -41,7 +38,7 @@ export const getUser = async (req, res) => {
           res.status(404).json({message: 'cannot find player'})
         }
        } catch (err) {
-      console.error(err)
+      logger.error('Error fetching user by name:', err)
        }
 };
 
@@ -50,122 +47,43 @@ export const getUser = async (req, res) => {
 
 
 
-export const displayDashboard = async (req, res) => {
-  const response = await fetch("https://api.spotify.com/v1/me", {
-    method: "get",
-    headers: {
-      Authorization: "Bearer " + global.access_token,
-    },
-  });
-  const data = await response.json();
-  console.log(data);
-
-  const artistGenres = await fetch(
-    "https://api.spotify.com/v1/me/following?type=artist",
-    {
-      method: "get",
-      headers: {
-        Authorization: "Bearer " + global.access_token,
-      },
-    }
-  );
-
-  const artistData = await artistGenres.json();
-
-  const allGenres = [];
-
-  artistData.artists.items.forEach((artist) => {
-    if (artist.genres && artist.genres.length > 0) {
-      allGenres.push(...artist.genres);
-    }
-  });
-
-  const artistNames = [];
-  artistData.artists.items.forEach((artist) => {
-    artistNames.push(artist.name);
-  });
-
-  res.render("dashboard", { user: data });
-  console.log(artistData.artists.items);
-  console.log(allGenres);
-  console.log(artistNames);
-};
-
-export const callback = async (req, res) => {
-  console.log('callback')
-    const code = req.query.code;
-    let body = new URLSearchParams({
-      code: code,
-      redirect_uri: redirect_uri,
-      grant_type: "authorization_code"
-  
-    })
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-      method: "post",
-      body: body,
-      headers: {
-        "Content-type": "application/x-www-form-urlencoded",
-        Authorization: 
-        "Basic " + Buffer.from(client_id + ":" + client_secret).toString("base64")
-      }
-    })
-     const data = await response.json()
-     const userFromDB = await User.findOne({ email: data.email });
-     if (!userFromDB) {
-      // handle case where user is not found in mongodb
-      return res.status(404).send('User not found');
-    }
-    req.user = { id: userFromDB._id };
-    global.access_token = data.access_token;
-   
-  res.redirect('/dashboard')
-}
-
 export const addUserInfo = async (req, res) => {
+  let someData = JSON.stringify(req.body)
+  let parsedData = JSON.parse(someData)
 
-console.log('added user info: ' + req.body)
-let someData = JSON.stringify(req.body)
-let parsedData = JSON.parse(someData)
-console.log(parsedData)
-console.log(parsedData.form.beEmail)
-
-const user = await User.findOneAndUpdate(
-  {
-    email: parsedData.form.beEmail
+  const user = await User.findOneAndUpdate(
+    {
+      email: parsedData.form.beEmail
+    }, {
+    contact_info:parsedData.form.contactInfo,
+    preferred_name:parsedData.form.preferredName,
+    age:parsedData.form.age,
+    gender:parsedData.form.gender,
+    beEmail: parsedData.form.beEmail,
+    password: parsedData.form.bePass,
+    genres:parsedData.genreState,
+    artists:parsedData.artistState,
+    country:parsedData.profileState[0],
+    email:parsedData.profileState[1],
+    spotify_id:parsedData.profileState[2],
+    spotify_display_name:parsedData.profileState[3],
+    profile_pic:parsedData.profileState[4]
   }, {
-  contact_info:parsedData.form.contactInfo,
-  preferred_name:parsedData.form.preferredName,
-  age:parsedData.form.age,
-  gender:parsedData.form.gender,
-  beEmail: parsedData.form.beEmail,
-  password: parsedData.form.bePass,
-  genres:parsedData.genreState,
-  artists:parsedData.artistState,
-  country:parsedData.profileState[0],
-  email:parsedData.profileState[1],
-  spotify_id:parsedData.profileState[2],
-  spotify_display_name:parsedData.profileState[3],
-  profile_pic:parsedData.profileState[4]
-}, {
-  new: true
-}) 
-try {
-  console.log('user about to save')
-  console.log('saved user info: ', user)
-  res.status(201).json(user)
-} catch (err) {
-  res.status(400).json({ message: err.message });
-}
+    new: true
+  })
+  try {
+    res.status(201).json(user)
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 }
 
 export const addSpotifyData = async (req, res) => {
-  console.log(req.body.userInfo)
   const data = req.body.userInfo
   const country = data[0]
   const email = data[1]
   const spotifyId = data[2]
   const spotifyDisplayName = data[3]
-  console.log(data[0])
 
   const user = new User({
     spotify_id: spotifyId,
@@ -185,7 +103,6 @@ export const addSpotifyData = async (req, res) => {
 
 
 export const addSpotifyArtists = async (req, res) => {
-  console.log(req.body)
   const user = new User({
     user_info:req.body.userInfo
   }) 
@@ -200,22 +117,18 @@ export const addSpotifyArtists = async (req, res) => {
 
 
 export const databaseLookup = async (req, res) => {
-
-
-console.log('backend working')
-const searchTerm = req.query.keyword
-try {
-  const existingUser = await User.findOne({ spotify_id: searchTerm })
-  if(!existingUser) {
-    console.log('not found')
-    res.json('not found')
-  } else {
-    res.json('found')
+  const searchTerm = req.query.keyword
+  try {
+    const existingUser = await User.findOne({ spotify_id: searchTerm })
+    if(!existingUser) {
+      res.json('not found')
+    } else {
+      res.json('found')
+    }
+  } catch (error) {
+    logger.error('Database lookup error:', error)
+    res.status(500).json({ message: 'Server error' })
   }
-} catch {
-  console.error(error)
-}
-
 }
 
 export const makeAUser = async (req, res) => {
@@ -226,18 +139,13 @@ export const makeAUser = async (req, res) => {
 
 export const getSingleUser = async (req, res) => {
   const user = req.query.keyword
-  console.log(`backend working for ${user}`)
-    try {
-      const searchedUser = await User.findOne({ email: user})
-      console.log('searched user: ',searchedUser)
-      res.json({searchedUser})
-      if(!user) {
-        console.log('error')
-      }
-    } catch {
-      console.error(req.error)
-    }
-  
+  try {
+    const searchedUser = await User.findOne({ email: user})
+    res.json({searchedUser})
+  } catch (error) {
+    logger.error('Error fetching single user:', error)
+    res.status(500).json({ message: 'Server error' })
+  }
 }
 
 
@@ -303,8 +211,8 @@ export const getUsers = async (req, res) => {
     const totalUsers = sortedUsers.length;
     const totalPages = Math.ceil(totalUsers / limitNum);
 
-    console.log(`found ${sortedUsers.length} potential matches for user ${userId} (page ${pageNum}/${totalPages})`);
-    
+    logger.info(`found ${sortedUsers.length} potential matches for user ${userId} (page ${pageNum}/${totalPages})`);
+
     res.json({ 
       users: paginatedUsers,
       pagination: {
@@ -316,7 +224,7 @@ export const getUsers = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("error fetching users:", error);
+    logger.error("error fetching users:", error);
     res.status(500).json({ error: "internal server error" });
   }
 };
@@ -326,34 +234,23 @@ export const getUsers = async (req, res) => {
 
 export const like = async (req, res) => {
   const likedUserId = req.body.likedUserId;
-   const likingUserId = req.body.liker;
-  console.log(`${likingUserId} likes ${likedUserId}`)
+  const likingUserId = req.body.liker;
 
-// add db functionality
-
-try {
-const likingUser = await User.findById(likingUserId);
-if (!likingUser) {
-  return res.status(404).json({ error: 'Liking user not found' });
-}
- // add the liked user to the likedusers array
- likingUser.likedUsers.push(likedUserId);
-
- // save the changes
- await likingUser.save();
- console.log(likingUser.likedUsers)
-
- res.status(200).json({ message: 'User liked successfully' });
-} catch (error) {
-  console.error(error);
-  res.status(500).json({ error: 'Server error' });
-}
-
+  try {
+    const likingUser = await User.findById(likingUserId);
+    if (!likingUser) {
+      return res.status(404).json({ error: 'Liking user not found' });
+    }
+    likingUser.likedUsers.push(likedUserId);
+    await likingUser.save();
+    res.status(200).json({ message: 'User liked successfully' });
+  } catch (error) {
+    logger.error('Error liking user:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
 }
 export const registerUser = asyncHandler(async (req, res) => {
-  console.log('42')
   const { loginName, email, pass } = req.body;
-  console.log(req.body)
   const userExists = await User.findOne({email})
   if (userExists){
     res.status(400)
@@ -361,12 +258,11 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.create({
-    loginName, 
+    loginName,
     email,
     password: pass,
     allowedAccess: true, // Auto-approve all new users
   })
-  console.log(user)
 
   if(user) {
     res.status(201).json({
@@ -428,9 +324,7 @@ export const backendLogin = asyncHandler(async (req, res) => {
 
 
 export const getMatches = async (req, res) => {
-  console.log('getting user connected')
   const { userId } = req.params
-  console.log(userId) 
   try {
     const user = await User.findById(userId).populate('likedUsers').populate('likedBy')
     
@@ -441,10 +335,9 @@ export const getMatches = async (req, res) => {
     // filter out the current user from the matches list
     const filteredMatches = matches.filter(match => !match._id.equals(userId));
 
-    console.log(filteredMatches)
     res.json({ matches: filteredMatches })
   } catch (error) {
-    console.error(error)
+    logger.error('Error fetching matches:', error)
     res.status(500).json({ message: 'server error' })
   }
 }
@@ -504,7 +397,7 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error updating user profile:', error);
+    logger.error('Error updating user profile:', error);
     res.status(500);
     throw new Error('Failed to update profile');
   }

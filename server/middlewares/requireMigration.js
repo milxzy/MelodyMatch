@@ -1,4 +1,5 @@
 import User from '../models/user.js';
+import logger from '../utils/logger.js';
 
 /**
  * Middleware to enforce platform migration
@@ -53,7 +54,7 @@ export const requireMigration = async (req, res, next) => {
     next();
     
   } catch (error) {
-    console.error('Error in requireMigration middleware:', error);
+    logger.error('Error in requireMigration middleware:', error);
     res.status(500).json({
       error: 'MIGRATION_CHECK_FAILED',
       message: 'Failed to verify migration status',
@@ -98,7 +99,7 @@ export const warnMigration = async (req, res, next) => {
     next();
     
   } catch (error) {
-    console.error('Error in warnMigration middleware:', error);
+    logger.error('Error in warnMigration middleware:', error);
     next(); // Don't block on errors in soft check
   }
 };
@@ -145,7 +146,7 @@ export const requirePlatform = (platformName) => {
       next();
       
     } catch (error) {
-      console.error(`Error in requirePlatform(${platformName}) middleware:`, error);
+      logger.error(`Error in requirePlatform(${platformName}) middleware:`, error);
       res.status(500).json({
         error: 'PLATFORM_CHECK_FAILED',
         message: 'Failed to verify platform connection',
@@ -198,7 +199,7 @@ export const requireMinPlatforms = (minCount) => {
       next();
       
     } catch (error) {
-      console.error(`Error in requireMinPlatforms(${minCount}) middleware:`, error);
+      logger.error(`Error in requireMinPlatforms(${minCount}) middleware:`, error);
       res.status(500).json({
         error: 'PLATFORM_COUNT_CHECK_FAILED',
         message: 'Failed to verify platform count',

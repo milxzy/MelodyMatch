@@ -21,6 +21,9 @@ const ClayButton = forwardRef(({
       isLoading={isLoading}
       leftIcon={leftIcon}
       rightIcon={rightIcon}
+      style={{ willChange: 'transform' }}
+      // Suppress Chakra's CSS hover transform — Framer Motion owns transform exclusively
+      sx={{ '&:hover': { transform: 'none !important' } }}
       whileTap={{ 
         scale: 0.92,
         y: 3,

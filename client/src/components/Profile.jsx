@@ -1,5 +1,5 @@
 // Profile - Main profile page with Kawaii Cute design
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { 
   Center, 
   Heading, 
@@ -31,7 +31,6 @@ import {
   ClayCardBody, 
   ClayButton, 
   OutlineButton,
-  CyanBadge,
   FloatingShapes 
 } from "./ui";
 
@@ -40,7 +39,13 @@ const MotionBox = motion(Box);
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
 const Profile = () => {
-  const userData = JSON.parse(localStorage.getItem("userInfo"));
+  const userData = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("userInfo"));
+    } catch {
+      return null;
+    }
+  }, []);
   const [user, setUser] = useState({
     age: "",
     artists: [],
@@ -58,8 +63,15 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [dataRefreshKey, setDataRefreshKey] = useState(0);
   const [tabIndex, setTabIndex] = useState(0);
+  // Track which tabs have been visited so we only mount their content on first click
+  const [visitedTabs, setVisitedTabs] = useState(new Set([0]));
 
   const navigate = useNavigate();
+
+  const handleTabChange = (index) => {
+    setTabIndex(index);
+    setVisitedTabs(prev => new Set([...prev, index]));
+  };
 
   async function getMainUser() {
     try {
@@ -115,10 +127,12 @@ const Profile = () => {
   useEffect(() => {
     if (!userData || !userData.email) {
       console.error("User not found in localStorage");
-      navigate("/belogin");
+      navigate("/login");
       return;
     }
     getMainUser();
+    // intentionally run only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePlatformUpdate = () => {
@@ -217,7 +231,7 @@ const Profile = () => {
                 {/* Tabs */}
                 <Tabs 
                   index={tabIndex}
-                  onChange={setTabIndex}
+                  onChange={handleTabChange}
                   w="full"
                   variant="unstyled"
                 >
@@ -242,7 +256,7 @@ const Profile = () => {
                         borderRadius="full"
                         px={6}
                         py={3}
-                        transition="all 0.2s"
+                        transition="background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease"
                         _hover={{ color: tabIndex === index ? tab.color : "text.primary" }}
                         _focus={{ outline: "none" }}
                       >
@@ -340,7 +354,7 @@ const Profile = () => {
                             flex="1"
                             size="lg"
                             leftIcon={<Icon as={FiHeart} />}
-                            onClick={() => navigate('/matches')}
+                            onClick={() => navigate('/discover')}
                           >
                             Find Matches
                           </ClayButton>
@@ -356,30 +370,32 @@ const Profile = () => {
                       </VStack>
                     </TabPanel>
 
-                    {/* Music Platforms Tab */}
+                    {/* Music Platforms Tab — only mounts after first click */}
                     <TabPanel p={0}>
-                      <VStack spacing={6}>
-                        <ClayCard maxW="600px" mx="auto" w="full">
-                          <ClayCardBody>
-                            <Text fontFamily="body" color="text.muted" textAlign="center">
-                              Manage your connected music platforms. Connect multiple platforms
-                              for more accurate matching!
-                            </Text>
-                          </ClayCardBody>
-                        </ClayCard>
-                        
-                        {user.userId && (
-                          <PlatformSelector 
-                            userId={user.userId}
-                            onPlatformConnected={handlePlatformUpdate}
-                          />
-                        )}
-                      </VStack>
+                      {visitedTabs.has(1) && (
+                        <VStack spacing={6}>
+                          <ClayCard maxW="600px" mx="auto" w="full">
+                            <ClayCardBody>
+                              <Text fontFamily="body" color="text.muted" textAlign="center">
+                                Manage your connected music platforms. Connect multiple platforms
+                                for more accurate matching!
+                              </Text>
+                            </ClayCardBody>
+                          </ClayCard>
+                          
+                          {user.userId && (
+                            <PlatformSelector 
+                              userId={user.userId}
+                              onPlatformConnected={handlePlatformUpdate}
+                            />
+                          )}
+                        </VStack>
+                      )}
                     </TabPanel>
 
-                    {/* My Music Data Tab */}
+                    {/* My Music Data Tab — only mounts after first click */}
                     <TabPanel p={0}>
-                      {user.userId && (
+                      {visitedTabs.has(2) && user.userId && (
                         <MusicDataBreakdown 
                           key={dataRefreshKey}
                           userId={user.userId} 

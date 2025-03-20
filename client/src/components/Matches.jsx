@@ -1,5 +1,5 @@
 // Matches - Swipe interface with Kawaii Cute design
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import ProfileCard from "./ProfileCard";
 import Header from "./Header";
@@ -32,7 +32,6 @@ import {
   ClayCardBody, 
   ClayButton, 
   CyanButton,
-  OutlineButton,
   GhostButton,
   FloatingShapes 
 } from "./ui";
@@ -140,7 +139,7 @@ const Matches = () => {
     });
   };
 
-  const fetchUserProfiles = async () => {
+  const fetchUserProfiles = useCallback(async () => {
     try {
       const activeUser = JSON.parse(localStorage.getItem("userInfo"));
       if (!activeUser || !activeUser._id) {
@@ -167,7 +166,7 @@ const Matches = () => {
       console.error("Error fetching users:", error);
       setState((prevState) => ({ ...prevState, loading: false }));
     }
-  };
+  }, []);
   
   const applyFilters = async () => {
     setState((prevState) => ({ ...prevState, loading: true }));
@@ -227,7 +226,7 @@ const Matches = () => {
       return;
     }
     fetchUserProfiles();
-  }, [navigate]);
+  }, [navigate, fetchUserProfiles]);
 
   return (
     <>
@@ -263,18 +262,21 @@ const Matches = () => {
                   icon={<Icon as={FiSliders} />}
                   onClick={onFilterToggle}
                   bg={isFilterOpen ? "kawaii.pink" : "surface.card"}
-                  color={isFilterOpen ? "white" : "text.primary"}
-                  _hover={{ bg: isFilterOpen ? "kawaii.pink" : "surface.elevated" }}
+                  color={isFilterOpen ? "white.pure" : "text.primary"}
+                  _hover={{ opacity: 0.85 }}
                   aria-label="Toggle filters"
                   borderRadius="full"
                   boxShadow="0 4px 12px rgba(0, 0, 0, 0.1)"
+                  transition="background-color 0.2s ease, opacity 0.15s ease"
+                  style={{ willChange: 'transform, opacity' }}
+                  sx={{ '&:hover': { transform: 'none !important' } }}
                 />
               </HStack>
             </MotionBox>
 
             {/* Filter Panel */}
-            <Collapse in={isFilterOpen} animateOpacity style={{ width: '100%' }}>
-              <ClayCard mb={4}>
+            <Collapse in={isFilterOpen} animateOpacity style={{ width: '100%', overflow: 'visible' }}>
+              <ClayCard mb={4} overflow="visible">
                 <ClayCardBody>
                   <VStack spacing={5} align="stretch">
                     <HStack justify="space-between">

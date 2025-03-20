@@ -2,7 +2,7 @@
 import { Box, Heading, Text, VStack, Icon, Circle } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { FiAlertCircle, FiHome, FiMusic } from 'react-icons/fi';
+import { FiHome, FiMusic } from 'react-icons/fi';
 import { ClayCard, ClayCardBody, ClayButton, FloatingShapes } from './ui';
 
 const MotionBox = motion(Box);

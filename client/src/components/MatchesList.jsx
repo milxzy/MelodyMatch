@@ -35,8 +35,6 @@ import {
   ClayButton, 
   CyanButton,
   OutlineButton,
-  CyanBadge,
-  PinkBadge,
   FloatingShapes 
 } from "./ui";
 
@@ -211,7 +209,7 @@ const MatchesList = () => {
                           No Matches Yet
                         </Heading>
                         <Text fontFamily="body" color="text.muted" textAlign="center">
-                          Start swiping to find people who share your music taste!
+                          Discover people who share your music taste!
                         </Text>
                       </VStack>
 
@@ -220,7 +218,7 @@ const MatchesList = () => {
                           w="full"
                           size="lg"
                           leftIcon={<Icon as={FiHeart} />}
-                          onClick={() => navigate("/matches")}
+                          onClick={() => navigate("/discover")}
                         >
                           Find Matches
                         </ClayButton>
@@ -282,7 +280,8 @@ const MatchesList = () => {
                     key={match._id || index}
                     variants={itemVariants}
                     w="full"
-                    whileHover={{ scale: 1.01, y: -2 }}
+                    style={{ willChange: 'transform' }}
+                    whileHover={{ scale: 1.01, y: -2, transition: { type: 'spring', stiffness: 300, damping: 25 } }}
                   >
                     <ClayCard>
                       <ClayCardBody>
@@ -404,26 +403,26 @@ const MatchesList = () => {
                                     bg="surface.elevated"
                                     color="text.primary"
                                     borderRadius="full"
-                                    _hover={{ bg: "surface.card", transform: "scale(1.05)" }}
-                                    _disabled={{ opacity: 0.3, cursor: "not-allowed" }}
-                                    transition="all 0.2s"
-                                  />
-                                  <Text fontFamily="body" fontSize="xs" color="text.muted" alignSelf="center">
-                                    {Math.floor(currentIndex / 5) + 1} / {Math.ceil(userGenres.length / 5)}
-                                  </Text>
-                                  <IconButton
-                                    aria-label="Next genres"
-                                    icon={<FiChevronRight />}
-                                    onClick={() => handleNextClick(index)}
-                                    isDisabled={currentIndex + 5 >= userGenres.length}
-                                    size="sm"
-                                    bg="surface.elevated"
-                                    color="text.primary"
-                                    borderRadius="full"
-                                    _hover={{ bg: "surface.card", transform: "scale(1.05)" }}
-                                    _disabled={{ opacity: 0.3, cursor: "not-allowed" }}
-                                    transition="all 0.2s"
-                                  />
+                                     _hover={{ bg: "surface.card" }}
+                                     _disabled={{ opacity: 0.3, cursor: "not-allowed" }}
+                                     transition="background-color 0.2s ease"
+                                   />
+                                   <Text fontFamily="body" fontSize="xs" color="text.muted" alignSelf="center">
+                                     {Math.floor(currentIndex / 5) + 1} / {Math.ceil(userGenres.length / 5)}
+                                   </Text>
+                                   <IconButton
+                                     aria-label="Next genres"
+                                     icon={<FiChevronRight />}
+                                     onClick={() => handleNextClick(index)}
+                                     isDisabled={currentIndex + 5 >= userGenres.length}
+                                     size="sm"
+                                     bg="surface.elevated"
+                                     color="text.primary"
+                                     borderRadius="full"
+                                     _hover={{ bg: "surface.card" }}
+                                     _disabled={{ opacity: 0.3, cursor: "not-allowed" }}
+                                     transition="background-color 0.2s ease"
+                                   />
                                 </Flex>
                               );
                             })()}
@@ -433,7 +432,7 @@ const MatchesList = () => {
                           <CyanButton
                             w="full"
                             leftIcon={<Icon as={FiMessageCircle} />}
-                            onClick={() => navigate("/messaging")}
+                            onClick={() => navigate("/messages")}
                           >
                             Send Message
                           </CyanButton>

@@ -85,14 +85,14 @@ const Login = () => {
             fontSize="lg"
             fontWeight="bold"
             borderRadius="full"
-            transition="all 0.2s"
+            transition="background-color 0.2s ease, transform 0.2s ease"
             boxShadow="lg"
           >
-            LOGIN WITH SPOTIFY
+            LOGIN
           </Button>
 
           <Text color="#6e6a86" fontSize="sm" textAlign="center">
-            By logging in, you agree to connect your Spotify account
+            By logging in, you agree to connect your music account
           </Text>
         </VStack>
       </Container>

@@ -15,7 +15,7 @@ import {
   Circle,
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
-import { FiCheckCircle, FiAlertTriangle, FiMusic } from 'react-icons/fi';
+import { FiCheckCircle, FiAlertTriangle } from 'react-icons/fi';
 import { ClayCard, ClayCardBody, ClayButton, OutlineButton, FloatingShapes } from './ui';
 
 const MotionBox = motion(Box);

@@ -22,7 +22,7 @@ const theme = extendTheme({
         color: colors.text.muted,
       },
       '*, *::before, *::after': {
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderColor: 'rgba(255, 200, 210, 0.08)',
       },
       // Reduced motion support
       '@media (prefers-reduced-motion: reduce)': {

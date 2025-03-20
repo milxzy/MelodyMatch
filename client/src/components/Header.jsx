@@ -37,9 +37,9 @@ const Header = () => {
 
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: FiHome, color: "kawaii.pink" },
-    { name: "Discover", path: "/matches", icon: FiHeart, color: "kawaii.lilac" },
-    { name: "Matches", path: "/matcheslist", icon: FiUsers, color: "kawaii.mint" },
-    { name: "Messages", path: "/messaging", icon: FiMessageCircle, color: "kawaii.peach" },
+    { name: "Discover", path: "/discover", icon: FiHeart, color: "kawaii.lilac" },
+    { name: "Matches", path: "/matches", icon: FiUsers, color: "kawaii.mint" },
+    { name: "Messages", path: "/messages", icon: FiMessageCircle, color: "kawaii.peach" },
     { name: "Profile", path: "/profile", icon: FiUser, color: "kawaii.pink" },
   ];
 
@@ -72,7 +72,7 @@ const Header = () => {
           spacing={3} 
           cursor="pointer" 
           _hover={{ transform: "scale(1.02)" }} 
-          transition="all 0.2s"
+          transition="transform 0.2s ease"
         >
           <MotionBox
             whileHover={{ rotate: [0, -10, 10, 0] }}

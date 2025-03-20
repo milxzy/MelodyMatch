@@ -50,7 +50,7 @@ const BeRegister = () => {
     }
   }, [navigate]);
 
-  const goToLogin = () => navigate("/belogin");
+  const goToLogin = () => navigate("/login");
   const goHome = () => navigate("/");
 
   const submitHandler = async (e) => {
@@ -196,7 +196,7 @@ const BeRegister = () => {
             <VStack align="flex-start" spacing={3} pt={4}>
               {[
                 { icon: FiHeart, text: "Find your music soulmate", color: "kawaii.pink" },
-                { icon: FiMusic, text: "Connect Spotify or Apple Music", color: "kawaii.lilac" },
+                { icon: FiMusic, text: "Connect your music platform", color: "kawaii.lilac" },
                 { icon: FiStar, text: "Match based on real taste", color: "kawaii.mint" },
               ].map((item, i) => (
                 <MotionBox

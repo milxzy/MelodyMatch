@@ -114,6 +114,9 @@ const Messaging = () => {
         socketRef.current.disconnect();
       }
     };
+    // selectedConversation and toast are intentionally excluded: re-running this
+    // effect would disconnect and reconnect the socket on every conversation change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   useEffect(() => {
@@ -214,26 +217,27 @@ const Messaging = () => {
   const selectedMatch = matches.find((m) => m._id === selectedConversation);
 
   return (
-    <Box bg="surface.base" minH="100vh" position="relative">
+    <Flex bg="surface.base" minH="100vh" direction="column" position="relative">
       <FloatingShapes variant="subtle" />
       
       {/* Fixed Header */}
-      <Box position="relative" zIndex={10}>
+      <Box position="relative" zIndex={10} flexShrink={0}>
         <Header />
       </Box>
 
-      {/* Main Chat Container - fills remaining viewport */}
+      {/* Main Chat Container - fills remaining space */}
       <Flex
+        flex="1"
         position="relative"
         zIndex={1}
         mx={{ base: 0, md: 6 }}
-        mt={4}
-        mb={4}
-        height={{ base: "calc(100vh - 100px)", md: "calc(100vh - 120px)" }}
+        mt={{ base: 2, md: 4 }}
+        mb={{ base: 2, md: 4 }}
+        minH={0}
         borderRadius={{ base: "none", md: "3xl" }}
         overflow="hidden"
         border={{ base: "none", md: "2px solid" }}
-        borderColor="rgba(255, 200, 210, 0.1)"
+        borderColor="rgba(255, 200, 210, 0.12)"
         boxShadow={{ base: "none", md: "0 8px 32px rgba(0, 0, 0, 0.15)" }}
       >
         {/* Conversations Sidebar */}
@@ -243,7 +247,7 @@ const Messaging = () => {
           flexShrink={0}
           bg="surface.card"
           borderRight={{ base: "none", md: "1px solid" }}
-          borderColor="rgba(255, 200, 210, 0.08)"
+          borderColor="rgba(255, 200, 210, 0.12)"
           display={{ base: selectedConversation ? "none" : "flex", md: "flex" }}
         >
           {/* Sidebar Header */}
@@ -281,10 +285,10 @@ const Messaging = () => {
                         No matches yet
                       </Text>
                       <Text fontFamily="body" fontSize="sm" color="text.muted">
-                        Start swiping to find your music soulmate!
+                        Find your music soulmate in Discover!
                       </Text>
                     </VStack>
-                    <CyanButton size="sm" onClick={() => navigate('/matches')}>
+                    <CyanButton size="sm" onClick={() => navigate('/discover')}>
                       Find Matches
                     </CyanButton>
                   </VStack>
@@ -303,17 +307,17 @@ const Messaging = () => {
                       bg={selectedConversation === match._id ? "surface.elevated" : "transparent"}
                       boxShadow={selectedConversation === match._id ? "0 4px 12px rgba(0, 0, 0, 0.1)" : "none"}
                       border="2px solid"
-                      borderColor={selectedConversation === match._id ? "kawaii.pink" : "transparent"}
-                      _hover={{ bg: "surface.elevated", cursor: "pointer" }}
+                      borderColor={selectedConversation === match._id ? "rgba(255, 181, 186, 0.35)" : "transparent"}
+                      _hover={{ bg: "surface.elevated", cursor: "pointer", borderColor: "rgba(255, 181, 186, 0.2)" }}
                       onClick={() => setSelectedConversation(match._id)}
-                      transition="all 0.2s"
+                      transition="background-color 0.2s ease, border-color 0.2s ease"
                     >
                       <Avatar
                         src={match.profile_pic}
                         name={match.preferred_name}
                         size="md"
-                        border="3px solid"
-                        borderColor={selectedConversation === match._id ? "kawaii.pink" : "kawaii.lilac"}
+                        border="2px solid"
+                        borderColor={selectedConversation === match._id ? "rgba(255, 181, 186, 0.5)" : "rgba(212, 191, 255, 0.3)"}
                       />
                       <Box flex="1" minW={0}>
                         <Text fontFamily="body" fontWeight="bold" color="text.primary" noOfLines={1}>
@@ -347,7 +351,7 @@ const Messaging = () => {
                 p={4}
                 bg="surface.card"
                 borderBottom="1px solid"
-                borderColor="rgba(255, 200, 210, 0.08)"
+                borderColor="rgba(255, 200, 210, 0.12)"
                 flexShrink={0}
               >
                 <IconButton
@@ -364,8 +368,8 @@ const Messaging = () => {
                   src={selectedMatch?.profile_pic}
                   name={selectedMatch?.preferred_name}
                   size="sm"
-                  border="3px solid"
-                  borderColor="kawaii.pink"
+                  border="2px solid"
+                  borderColor="rgba(255, 181, 186, 0.4)"
                 />
                 <Box flex="1" minW={0}>
                   <HStack spacing={2}>
@@ -460,7 +464,7 @@ const Messaging = () => {
                 p={4} 
                 bg="surface.card" 
                 borderTop="1px solid"
-                borderColor="rgba(255, 200, 210, 0.08)"
+                borderColor="rgba(255, 200, 210, 0.12)"
                 spacing={3}
                 flexShrink={0}
               >
@@ -502,7 +506,7 @@ const Messaging = () => {
           )}
         </Flex>
       </Flex>
-    </Box>
+    </Flex>
   );
 };
 

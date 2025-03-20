@@ -1,0 +1,14 @@
+
+Hope you enjoy your new logo, here are the people that
+made your beautiful logo happen :)
+font name: Comfortaa-Light
+font link: https://fonts.google.com/specimen/Comfortaa
+font author: Johan Aakerlund
+font author site: https://aajohan.deviantart.com/
+
+
+icon designer: Mrfa Studio
+icon designer link: /creator/mrfa/
+        
+{"bg":"#F3E5E6","icon-gradient-0":"#420F14","icon-gradient-1":"#C5545E","font":"#40181B","slogan":"#542c2f"}
+      

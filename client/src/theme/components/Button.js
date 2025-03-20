@@ -8,7 +8,7 @@ export const Button = {
     letterSpacing: 'wide',
     borderRadius: 'full', // Super round pill shape
     cursor: 'pointer',
-    transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+    transition: 'background-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
     position: 'relative',
     overflow: 'hidden',
     _focus: {

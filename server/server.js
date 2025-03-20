@@ -6,7 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 import mongoose from "mongoose";
 import cors from "cors"
-import bodyParser from 'body-parser'
+
 import helmet from 'helmet'
 import { corsOptions } from './config/security.js'
 import userRoutes from "./routes/user.js"
@@ -61,13 +61,10 @@ app.use(session({
 }));
 
 app.use(express.static('public'))
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.json())
-// maybe delete the line below
-app.use(express.urlencoded({ extended: true }))
 
 // Health check endpoint (no auth required)
 app.get('/health', (req, res) => {

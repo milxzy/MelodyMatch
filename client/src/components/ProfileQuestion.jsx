@@ -28,7 +28,7 @@ const ProfileQuestion = () => {
   };
 
   const handleSkip = () => {
-    navigate("/matches");
+    navigate("/discover");
   };
 
   return (

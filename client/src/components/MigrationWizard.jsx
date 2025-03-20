@@ -1,5 +1,5 @@
 // MigrationWizard - Platform migration wizard with Kawaii Cute design
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Heading,
@@ -21,7 +21,7 @@ import {
   Circle,
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
-import { FiMusic, FiArrowRight, FiCheckCircle, FiAlertTriangle, FiHeart } from 'react-icons/fi';
+import { FiMusic, FiArrowRight, FiCheckCircle, FiHeart } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import PlatformSelector from './PlatformSelector';
 import { ClayCard, ClayCardBody, ClayButton, CyanButton, FloatingShapes } from './ui';
@@ -44,7 +44,7 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
       const parsed = JSON.parse(userInfo);
       setUserId(parsed._id || parsed.id);
     } else if (!userIdProp) {
-      const timer = setTimeout(() => navigate('/belogin'), 0);
+      const timer = setTimeout(() => navigate('/login'), 0);
       return () => clearTimeout(timer);
     }
   }, [userIdProp, navigate]);
@@ -53,9 +53,9 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
     if (userId) {
       checkMigrationStatus();
     }
-  }, [userId]);
+  }, [userId, checkMigrationStatus]);
 
-  const checkMigrationStatus = async () => {
+  const checkMigrationStatus = useCallback(async () => {
     if (!userId) {
       setLoading(false);
       return;
@@ -97,7 +97,7 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, onComplete, navigate]);
 
   const handlePlatformConnected = async (platform) => {
     try {
@@ -163,7 +163,7 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
       </Heading>
       
       <Text fontFamily="body" color="text.secondary" fontSize="md">
-        Spotify recently changed their API policy and now requires 250,000 monthly active users for access.
+        We&apos;ve upgraded our music platform integrations to give you a better experience.
       </Text>
       
       <Alert 
@@ -176,10 +176,10 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
         <AlertIcon color="kawaii.mint" />
         <VStack align="start" spacing={1}>
           <Text fontFamily="body" fontWeight="bold" color="text.primary" fontSize="sm">
-            We're making MelodyMatch even better!
+            We&apos;re making MelodyMatch even better!
           </Text>
           <Text fontFamily="body" fontSize="xs" color="text.muted">
-            We've added support for Apple Music, with YouTube Music coming soon!
+            We&apos;ve added support for Apple Music, with YouTube Music coming soon!
           </Text>
         </VStack>
       </Alert>
@@ -381,12 +381,13 @@ const MigrationWizard = ({ userId: userIdProp, onComplete }) => {
   }
 
   if (!userId) {
-    navigate('/belogin');
+    navigate('/login');
     return null;
   }
 
   if (migrationStatus && !migrationStatus.needsMigration) {
-    navigate('/profile');
+    // User has completed migration — render nothing, don't navigate
+    // (navigating to /profile while on /profile causes an infinite remount loop)
     return null;
   }
 

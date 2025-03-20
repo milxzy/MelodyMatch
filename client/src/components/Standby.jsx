@@ -86,6 +86,8 @@ const Standby = () => {
       "Profile Pic:", profielePicState,
       "Ultimate State:", ultimateState
     );
+    // intentionally only re-runs when spotifyIdState changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spotifyIdState]);
 
   return (

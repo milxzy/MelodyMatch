@@ -34,7 +34,7 @@ router.get('/connected', async (req, res) => {
       return {
         platform: p.platform,
         isPrimary: user.primaryPlatform === p.platform,
-        lastSyncedAt: p.lastSyncedAt,
+        lastSyncedAt: p.lastSynced,
         tokenExpiry: p.tokenExpiry,
         artistCount: platformData?.artists?.length || 0,
         genreCount: platformData?.genres?.length || 0,
@@ -190,7 +190,7 @@ router.post('/sync', async (req, res) => {
         // Update last synced timestamp in UserMusicPlatform
         await UserMusicPlatform.findOneAndUpdate(
           { userId, platform: platformName },
-          { lastSyncedAt: new Date() }
+          { lastSynced: new Date() }
         );
         
         syncResults.push({

@@ -24,7 +24,7 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { FiMusic, FiEye, FiEyeOff, FiMail, FiLock, FiArrowRight, FiHeart } from "react-icons/fi";
-import { FloatingShapes, ClayCard, ClayCardBody, ClayButton, CyanButton, OutlineButton } from "./ui";
+import { FloatingShapes, ClayCard, ClayCardBody, ClayButton, OutlineButton } from "./ui";
 import { GlowInput } from "./ui/GlowInput";
 
 const MotionBox = motion(Box);
@@ -47,7 +47,7 @@ const BeLogin = () => {
     }
   }, [navigate]);
 
-  const goToRegister = () => navigate("/beregister");
+  const goToRegister = () => navigate("/register");
   const goHome = () => navigate("/");
 
   const submitHandler = async (e) => {
@@ -118,7 +118,7 @@ const BeLogin = () => {
           
           <HStack spacing={3}>
             <Text fontFamily="body" fontSize="sm" color="text.muted" display={{ base: "none", md: "block" }}>
-              Don't have an account?
+              Don&apos;t have an account?
             </Text>
             <OutlineButton size="sm" onClick={goToRegister}>
               Sign Up
@@ -316,7 +316,7 @@ const BeLogin = () => {
 
                     {/* Footer */}
                     <Text fontFamily="body" fontSize="sm" color="text.muted" pt={2}>
-                      Don't have an account?{" "}
+                      Don&apos;t have an account?{" "}
                       <Link
                         color="kawaii.pink"
                         fontWeight="bold"

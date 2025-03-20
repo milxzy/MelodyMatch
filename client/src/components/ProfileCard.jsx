@@ -52,6 +52,7 @@ const ProfileCard = ({
       border="2px solid"
       borderColor="rgba(255, 200, 210, 0.1)"
       boxShadow="0 12px 40px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(0, 0, 0, 0.1)"
+      style={{ willChange: 'transform, opacity' }}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -121,7 +122,7 @@ const ProfileCard = ({
                     : "rgba(255, 220, 225, 0.5)"
                   }
                   borderRadius="full"
-                  transition="all 0.2s"
+                  transition="background-color 0.2s ease"
                 />
               ))}
             </HStack>
@@ -212,7 +213,7 @@ const ProfileCard = ({
                       border="2px solid"
                       borderColor="rgba(181, 234, 221, 0.4)"
                       borderRadius="full"
-                      transition="all 0.2s"
+                      transition="background-color 0.2s ease, transform 0.2s ease"
                       _hover={{ 
                         bg: "rgba(181, 234, 221, 0.25)",
                         transform: "translateY(-1px)"
@@ -298,10 +299,10 @@ const ProfileCard = ({
           border="3px solid"
           borderColor="rgba(255, 200, 210, 0.12)"
           boxShadow="0 4px 16px rgba(0, 0, 0, 0.1)"
+          style={{ willChange: 'transform' }}
           _hover={{ 
             bg: "surface.muted",
             color: "text.secondary",
-            transform: "scale(1.05)"
           }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -317,9 +318,9 @@ const ProfileCard = ({
           bg="kawaii.pink"
           color="white.pure"
           boxShadow="0 6px 16px rgba(0, 0, 0, 0.15)"
+          style={{ willChange: 'transform' }}
           _hover={{ 
             bg: "#ff9da3",
-            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.18)"
           }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}

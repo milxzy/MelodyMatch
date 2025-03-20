@@ -322,7 +322,7 @@ export async function getUserPlatforms(userId) {
   const platforms = await UserMusicPlatform.find({
     userId,
     isActive: true
-  }).select('platform lastSyncedAt tokenExpiry');
+  }).select('platform lastSynced tokenExpiry');
   
   return platforms;
 }

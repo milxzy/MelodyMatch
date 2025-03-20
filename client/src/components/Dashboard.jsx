@@ -25,9 +25,6 @@ import {
   ClayButton, 
   CyanButton,
   OutlineButton,
-  NeonBadge,
-  PinkBadge,
-  CyanBadge,
   FloatingShapes 
 } from "./ui";
 
@@ -332,7 +329,7 @@ const Dashboard = () => {
                           <Text fontFamily="body" color="text.muted" textAlign="center">
                             No genres found yet
                           </Text>
-                          <OutlineButton size="sm" onClick={() => navigate("/migrate")}>
+                          <OutlineButton size="sm" onClick={() => navigate("/migrate")} >
                             Connect Music Platform
                           </OutlineButton>
                         </VStack>
@@ -360,7 +357,7 @@ const Dashboard = () => {
                           Recent Matches
                         </Heading>
                       </HStack>
-                      <ClayButton size="sm" onClick={() => navigate("/messaging")}>
+                      <ClayButton size="sm" onClick={() => navigate("/messages")}>
                         View All
                       </ClayButton>
                     </HStack>
@@ -369,8 +366,9 @@ const Dashboard = () => {
                         stats.recentMatches.map((match) => (
                           <MotionBox
                             key={match._id}
-                            whileHover={{ scale: 1.02, y: -2 }}
-                            whileTap={{ scale: 0.98 }}
+                            style={{ willChange: 'transform' }}
+                            whileHover={{ scale: 1.02, y: -2, transition: { type: 'spring', stiffness: 300, damping: 25 } }}
+                            whileTap={{ scale: 0.98, transition: { type: 'spring', stiffness: 500, damping: 30 } }}
                           >
                             <HStack
                               p={3}
@@ -379,9 +377,9 @@ const Dashboard = () => {
                               border="2px solid"
                               borderColor="rgba(255, 200, 210, 0.06)"
                               cursor="pointer"
-                              onClick={() => navigate("/messaging")}
+                              onClick={() => navigate("/messages")}
                               _hover={{ borderColor: "kawaii.lilac" }}
-                              transition="all 0.2s"
+                              transition="border-color 0.2s ease"
                             >
                               <Avatar
                                 src={match.profile_pic}
@@ -410,9 +408,9 @@ const Dashboard = () => {
                             <Icon as={FiHeart} color="text.muted" boxSize={6} />
                           </Circle>
                           <Text fontFamily="body" color="text.muted" textAlign="center">
-                            No matches yet. Start swiping!
+                            No matches yet. Start discovering!
                           </Text>
-                          <CyanButton size="sm" onClick={() => navigate("/matches")}>
+                           <CyanButton size="sm" onClick={() => navigate("/discover")}>
                             Find Matches
                           </CyanButton>
                         </VStack>
@@ -445,15 +443,15 @@ const Dashboard = () => {
                       size="lg"
                       w="full"
                       leftIcon={<Icon as={FiUsers} />}
-                      onClick={() => navigate("/matches")}
-                    >
+                       onClick={() => navigate("/discover")}
+                     >
                       Find Matches
                     </ClayButton>
                     <CyanButton
                       size="lg"
                       w="full"
                       leftIcon={<Icon as={FiMessageCircle} />}
-                      onClick={() => navigate("/messaging")}
+                      onClick={() => navigate("/messages")}
                     >
                       View Messages
                     </CyanButton>

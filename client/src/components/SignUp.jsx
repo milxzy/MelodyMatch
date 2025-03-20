@@ -45,7 +45,7 @@ const SignUp = () => {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("db_token", data.token);
-        navigate("/Profile");
+        navigate("/profile");
       } else {
         alert("login failed");
         console.error("Login failed:", data.message);

@@ -1,5 +1,5 @@
 // Settings - Settings page with Kawaii Cute design
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -47,6 +47,8 @@ import { GlowInput, GlowTextarea } from './ui/GlowInput';
 
 const MotionBox = motion(Box);
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
+
 const Settings = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -69,13 +71,9 @@ const Settings = () => {
   const navigate = useNavigate();
   const cancelRef = useRef();
 
-  const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const userId = userInfo?._id || userInfo?.id;
@@ -109,7 +107,11 @@ const Settings = () => {
         isClosable: true,
       });
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -117,36 +119,61 @@ const Settings = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: 'Error',
-          description: 'Image size must be less than 5MB',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-        return;
-      }
+    if (!file) return;
 
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: 'Error',
-          description: 'Please upload an image file',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-        setFormData({ ...formData, profile_pic: reader.result });
-      };
-      reader.readAsDataURL(file);
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Error',
+        description: 'Please upload an image file',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
     }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: 'Error',
+        description: 'Image size must be less than 10MB',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Compress via Canvas — resize to max 1024px, JPEG at 80% quality
+    // This reduces a 5MB photo to ~100-250KB before sending
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_SIZE = 1024;
+        let { width, height } = img;
+
+        if (width > MAX_SIZE || height > MAX_SIZE) {
+          if (width > height) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          } else {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+
+        const compressed = canvas.toDataURL('image/jpeg', 0.8);
+        setImagePreview(compressed);
+        setFormData(prev => ({ ...prev, profile_pic: compressed }));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {

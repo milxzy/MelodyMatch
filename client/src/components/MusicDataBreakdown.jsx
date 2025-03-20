@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   VStack,
@@ -16,6 +16,7 @@ import {
   SimpleGrid,
   IconButton,
   Tooltip,
+  Button,
 } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
 import { FaApple, FaYoutube, FaMusic, FaSyncAlt } from 'react-icons/fa';
@@ -23,6 +24,8 @@ import LoadingState from './LoadingState';
 import { ClayCard, NeonBadge } from './ui';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-production.up.railway.app';
+
+const ARTISTS_PAGE_SIZE = 30; // Artists shown per page before "Show more"
 
 // Spin animation for refresh button
 const spin = keyframes`
@@ -49,12 +52,14 @@ const MusicDataBreakdown = ({ userId }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  // Per-platform artist page count: { apple_music: 1, youtube_music: 1, ... }
+  const [artistPages, setArtistPages] = useState({});
 
-  useEffect(() => {
-    fetchUserData();
-  }, [userId]);
+  const showMoreArtists = useCallback((platform) => {
+    setArtistPages(prev => ({ ...prev, [platform]: (prev[platform] || 1) + 1 }));
+  }, []);
 
-  const fetchUserData = async (isRefresh = false) => {
+  const fetchUserData = useCallback(async (isRefresh = false) => {
     try {
       if (isRefresh) {
         setRefreshing(true);
@@ -76,7 +81,11 @@ const MusicDataBreakdown = ({ userId }) => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    fetchUserData();
+  }, [userId, fetchUserData]);
 
   const handleRefresh = () => {
     fetchUserData(true);
@@ -151,7 +160,7 @@ const MusicDataBreakdown = ({ userId }) => {
               _active={{
                 transform: 'scale(0.95)',
               }}
-              transition="all 0.2s"
+              transition="background-color 0.2s ease, transform 0.15s ease"
               aria-label="Refresh music data"
               sx={{
                 '&[data-loading]': {
@@ -181,7 +190,7 @@ const MusicDataBreakdown = ({ userId }) => {
                     _hover={{ bg: 'clay.light' }}
                     borderRadius="xl"
                     p={5}
-                    transition="all 0.2s"
+                    transition="background-color 0.2s ease"
                   >
                     <Flex flex="1" align="center" justify="space-between">
                       <HStack spacing={4}>
@@ -254,37 +263,57 @@ const MusicDataBreakdown = ({ userId }) => {
                           <Text color="text.muted" fontSize="sm" fontStyle="italic" fontFamily="body">
                             No artists found
                           </Text>
-                        ) : (
-                          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={2}>
-                            {artists.map((artist, idx) => (
-                              <Box
-                                key={idx}
-                                p={3}
-                                bg="clay.medium"
-                                borderRadius="lg"
-                                borderWidth="1px"
-                                borderColor="transparent"
-                                _hover={{ 
-                                  bg: 'clay.light',
-                                  borderColor: 'kawaii.pink',
-                                  transform: 'translateY(-2px)',
-                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                }}
-                                transition="all 0.2s"
-                                cursor="default"
-                              >
-                                <Text 
-                                  color="text.primary" 
-                                  fontSize="sm" 
-                                  noOfLines={1}
+                        ) : (() => {
+                          const pages = artistPages[platform] || 1;
+                          const visibleArtists = artists.slice(0, pages * ARTISTS_PAGE_SIZE);
+                          const remaining = artists.length - visibleArtists.length;
+                          return (
+                            <VStack align="stretch" spacing={3}>
+                              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={2}>
+                                {visibleArtists.map((artist, idx) => (
+                                  <Box
+                                    key={idx}
+                                    p={3}
+                                    bg="clay.medium"
+                                    borderRadius="lg"
+                                    borderWidth="1px"
+                                    borderColor="transparent"
+                                    _hover={{ 
+                                      bg: 'clay.light',
+                                      borderColor: 'kawaii.pink',
+                                      transform: 'translateY(-2px)',
+                                    }}
+                                    transition="background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease"
+                                    cursor="default"
+                                  >
+                                    <Text 
+                                      color="text.primary" 
+                                      fontSize="sm" 
+                                      noOfLines={1}
+                                      fontFamily="body"
+                                    >
+                                      {artist}
+                                    </Text>
+                                  </Box>
+                                ))}
+                              </SimpleGrid>
+                              {remaining > 0 && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  color="text.muted"
                                   fontFamily="body"
+                                  onClick={() => showMoreArtists(platform)}
+                                  alignSelf="center"
+                                  _hover={{ color: 'kawaii.pink' }}
                                 >
-                                  {artist}
-                                </Text>
-                              </Box>
-                            ))}
-                          </SimpleGrid>
-                        )}
+                                  Show {remaining > ARTISTS_PAGE_SIZE ? ARTISTS_PAGE_SIZE : remaining} more
+                                  {remaining > ARTISTS_PAGE_SIZE ? ` (${remaining} remaining)` : ''}
+                                </Button>
+                              )}
+                            </VStack>
+                          );
+                        })()}
                       </Box>
 
                       <Divider borderColor="clay.border" opacity={0.3} />

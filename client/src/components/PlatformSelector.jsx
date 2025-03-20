@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Heading,
@@ -6,8 +6,6 @@ import {
   VStack,
   HStack,
   Icon,
-  Alert,
-  AlertIcon,
   useToast,
   Divider,
   Flex,
@@ -16,14 +14,12 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
-  Progress,
   List,
   ListItem,
-  ListIcon,
 } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
 import { FaApple, FaYoutube, FaCheckCircle, FaExclamationCircle, FaSpinner } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+
 import LoadingState from './LoadingState';
 import { ClayCard, ClayButton, NeonBadge } from './ui';
 
@@ -53,13 +49,8 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
     details: []
   });
   const toast = useToast();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchConnectedPlatforms();
-  }, [userId]);
-
-  const fetchConnectedPlatforms = async () => {
+  const fetchConnectedPlatforms = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_URL}/auth/platforms/connected?userId=${userId}`);
@@ -82,7 +73,11 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, toast]);
+
+  useEffect(() => {
+    fetchConnectedPlatforms();
+  }, [userId, fetchConnectedPlatforms]);
 
   const handleConnectAppleMusic = async () => {
     try {
@@ -218,11 +213,6 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
       
       document.head.appendChild(script);
     });
-  };
-
-  const handleConnectYouTubeMusic = () => {
-    // Redirect to YouTube Music OAuth flow
-    window.location.href = `${API_URL}/auth/youtube-music/login?userId=${userId}`;
   };
 
   const handleDisconnect = async (platform) => {
@@ -362,14 +352,6 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
     return names[platform] || platform;
   };
 
-  const getPlatformIcon = (platform) => {
-    const icons = {
-      apple_music: FaApple,
-      youtube_music: FaYoutube
-    };
-    return icons[platform] || FaCheckCircle;
-  };
-
   const isConnected = (platformName) => {
     return platforms.some(p => p.platform === platformName);
   };
@@ -451,8 +433,12 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
           p={6}
           position="relative"
           overflow="hidden"
-          borderColor={isConnected('apple_music') ? 'accent.cyan' : 'transparent'}
-          borderWidth={isConnected('apple_music') ? '1px' : '0'}
+          bg="surface.elevated"
+          border="2px solid"
+          borderColor={isConnected('apple_music') ? 'rgba(181, 234, 221, 0.5)' : 'rgba(255, 200, 210, 0.06)'}
+          _hover={{
+            borderColor: isConnected('apple_music') ? 'rgba(181, 234, 221, 0.8)' : 'rgba(255, 200, 210, 0.2)',
+          }}
           _before={isConnected('apple_music') ? {
             content: '""',
             position: 'absolute',
@@ -582,8 +568,12 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
           p={6}
           position="relative"
           overflow="hidden"
-          borderColor={isConnected('youtube_music') ? 'accent.cyan' : 'transparent'}
-          borderWidth={isConnected('youtube_music') ? '1px' : '0'}
+          bg="surface.elevated"
+          border="2px solid"
+          borderColor={isConnected('youtube_music') ? 'rgba(181, 234, 221, 0.5)' : 'rgba(255, 200, 210, 0.06)'}
+          _hover={{
+            borderColor: isConnected('youtube_music') ? 'rgba(181, 234, 221, 0.8)' : 'rgba(255, 200, 210, 0.2)',
+          }}
           _before={isConnected('youtube_music') ? {
             content: '""',
             position: 'absolute',
@@ -681,7 +671,7 @@ const PlatformSelector = ({ userId, onPlatformConnected }) => {
             <>
               {/* Coming Soon State */}
               <Text color="text.muted" mb={4} fontSize="sm" fontFamily="body">
-                YouTube Music integration coming soon! We're working on bringing full support for your YouTube Music library.
+                YouTube Music integration coming soon! We&apos;re working on bringing full support for your YouTube Music library.
               </Text>
               <ClayButton
                 variant="secondary"

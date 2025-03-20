@@ -21,7 +21,7 @@ const PrivacyPolicy = () => {
                 1. Information We Collect
               </Heading>
               <Text mb={4}>
-                We collect information you provide directly, including your Spotify data
+                We collect information you provide directly, including your music platform data
                 (artists, genres, playlists), profile information, and messages with matches.
               </Text>
 

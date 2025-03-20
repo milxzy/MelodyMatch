@@ -1,5 +1,5 @@
 // Welcome - Profile completion with Kawaii Cute design
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import {
   Box,
@@ -48,16 +48,7 @@ const Welcome = () => {
     beEmail: "",
   });
 
-  useEffect(() => {
-    const userInfo = localStorage.getItem("userInfo");
-    if (!userInfo) {
-      navigate("/belogin");
-      return;
-    }
-    fetchUserData();
-  }, [navigate]);
-
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -90,7 +81,16 @@ const Welcome = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem("userInfo");
+    if (!userInfo) {
+      navigate("/login");
+      return;
+    }
+    fetchUserData();
+  }, [navigate, fetchUserData]);
 
   function updateForm(value) {
     return setForm((prev) => ({ ...prev, ...value }));

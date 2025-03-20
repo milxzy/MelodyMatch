@@ -49,23 +49,23 @@ function App() {
             <Routes>
               {/* public routes */}
               <Route path="/" element={<Auth />} />
-              <Route path="/belogin" element={<BeLogin />} />
-              <Route path="/beregister" element={<BeRegister />} />
-              <Route path="/spotify" element={<Login />} />
+              <Route path="/login" element={<BeLogin />} />
+              <Route path="/register" element={<BeRegister />} />
+              <Route path="/login/spotify" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
-              <Route path="/standby" element={<Standby />} />
+              <Route path="/connecting" element={<Standby />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/connect-success" element={<ConnectSuccess />} />
+              <Route path="/connect/success" element={<ConnectSuccess />} />
               <Route path="/migrate" element={<MigrationWizard />} />
 
               {/* protected routes */}
-              <Route path="/matcheslist" element={<MatchesList />} />
+              <Route path="/matches" element={<MatchesList />} />
               <Route path="/welcome" element={<Welcome />} />
-              <Route path="/profilequestion" element={<ProfileQuestion />} />
+              <Route path="/onboarding" element={<ProfileQuestion />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
-              <Route path="/matches" element={<Matches />} />
-              <Route path="/messaging" element={<Messaging />} />
+              <Route path="/discover" element={<Matches />} />
+              <Route path="/messages" element={<Messaging />} />
             </Routes>
           </div>
         </Router>

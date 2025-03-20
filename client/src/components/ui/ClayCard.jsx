@@ -6,7 +6,6 @@ const MotionBox = motion(Box);
 
 const ClayCard = ({ 
   children, 
-  variant = 'default', 
   hover = true,
   glow = null, // kept for backwards compat but no longer glows
   onClick,
@@ -59,6 +58,7 @@ const ClayCard = ({
       borderColor={borderColor}
       overflow="hidden"
       position="relative"
+      style={{ willChange: 'transform' }}
       boxShadow={`
         0 2px 8px rgba(0, 0, 0, 0.12),
         0 4px 16px rgba(0, 0, 0, 0.08),
@@ -67,13 +67,9 @@ const ClayCard = ({
       {...hoverAnimation}
       {...clickAnimation}
       onClick={onClick}
+      transition="border-color 0.2s ease"
       _hover={hover ? {
         borderColor: accentColor ? accentColors[accentColor] : 'rgba(255, 200, 210, 0.2)',
-        boxShadow: `
-          0 4px 12px rgba(0, 0, 0, 0.15),
-          0 8px 24px rgba(0, 0, 0, 0.1),
-          inset 0 1px 3px rgba(255, 220, 225, 0.12)
-        `,
       } : {}}
       {...props}
     >

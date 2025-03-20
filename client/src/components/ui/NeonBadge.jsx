@@ -1,5 +1,5 @@
 // BubbleBadge - Soft, pillowy badge for tags and labels
-import { Badge, Box } from '@chakra-ui/react';
+import { Badge } from '@chakra-ui/react';
 
 const NeonBadge = ({ 
   children, 

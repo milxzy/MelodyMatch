@@ -13,15 +13,13 @@ import {
   Grid,
   GridItem,
   Circle,
-  Image,
 } from "@chakra-ui/react";
 import { motion, useReducedMotion } from "framer-motion";
-import { FiMusic, FiHeart, FiUsers, FiMessageCircle, FiArrowRight, FiStar } from "react-icons/fi";
+import { FiMusic, FiHeart, FiMessageCircle, FiArrowRight, FiStar } from "react-icons/fi";
 import { FaApple, FaYoutube } from "react-icons/fa";
 import { FloatingShapes, ClayCard, ClayCardBody, ClayButton, OutlineButton, CyanButton, PinkBadge, CyanBadge } from "./ui";
 
 const MotionBox = motion(Box);
-const MotionFlex = motion(Flex);
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -52,8 +50,8 @@ const Auth = () => {
     };
   }, []);
 
-  const goToLogin = () => navigate("/belogin");
-  const goToRegister = () => navigate("/beregister");
+  const goToLogin = () => navigate("/login");
+  const goToRegister = () => navigate("/register");
 
   // Simpler animation for better performance
   const floatAnimation = shouldReduceMotion || isScrolling ? {} : {

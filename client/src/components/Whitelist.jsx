@@ -45,7 +45,7 @@ const Whitelist = () => {
                 </Text>
 
                 <VStack align="start" pl={4} color="white.pure" spacing={2}>
-                  <Text>• Connect with Spotify and import your music taste</Text>
+                  <Text>• Connect your music platform and import your music taste</Text>
                   <Text>• Discover users with similar music preferences</Text>
                   <Text>• Match with people who share your musical interests</Text>
                   <Text>• Chat with your matches</Text>

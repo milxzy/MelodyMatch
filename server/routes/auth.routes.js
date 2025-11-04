@@ -1,4 +1,4 @@
-// In your backend (assuming Express)
+// in your backend (assuming express)
 // auth.routes.js or similar
 import express from "express"
 const router = express.Router();
@@ -6,14 +6,13 @@ import querystring  from 'querystring';
 import crypto from 'crypto';
 import dotenv from 'dotenv'
 dotenv.config()
-// console.log('All env variables:', process.env);
+// console.log('all env variables:', process.env);
 
-// Your Spotify API credentials
+// your spotify api credentials
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-console.log(CLIENT_SECRET)
-const REDIRECT_URI = "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"; // Change in production
-//const FRONTEND_URI = 'https://melody-match-flax.vercel.app'; // Change in production
+const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI || "https://melodymatch-3ro0.onrender.com/auth/spotify/callback";
+const FRONTEND_URI = process.env.FRONTEND_URL || 'https://melody-match-flax.vercel.app';
 
 
 router.get('/login', (req, res) => {
@@ -25,10 +24,10 @@ router.get('/login', (req, res) => {
     "user-library-read",
     "playlist-read-private"
 ];
-  const redirect_uri = "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"; // Change in production
+  const redirect_uri = REDIRECT_URI;
   
   
-  const authUrl = 'https://accounts.spotify.com/authorize?' + 
+  const authUrl = 'https://accounts.spotify.com/authorize?' +
     new URLSearchParams({
         response_type: 'code',
         client_id: process.env.CLIENT_ID,
@@ -41,7 +40,7 @@ router.get('/login', (req, res) => {
 
 
 
-// Route to initiate Spotify login
+// route to initiate spotify login
 router.get('/spotify/callback', async (req, res) => {
   console.log('spotify callback')
   const  code  = req.query.code;
@@ -50,19 +49,19 @@ router.get('/spotify/callback', async (req, res) => {
   console.log('secret: ' + CLIENT_SECRET)
    // const redirect_uri = 'https://melodymatch-3ro0.onrender.com/auth/spotify/callback';
   // if (!state) {
-  //   return res.redirect(`localhost:5173/error?message=state_mismatch`);
+  // return res.redirect(`localhost:5173/error?message=state_mismatch`);
   // }
   
   const redirectUri = "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"
 
 
-  
+
     const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': 'Basic ' + Buffer.from(
-          `8fbcd37be4d04871bc6e482ea4b64807:066df6cb08d242e7b3d025c5d82d3696`
+          `${CLIENT_ID}:${CLIENT_SECRET}`
         ).toString('base64')
       },
       body: new URLSearchParams({
@@ -75,12 +74,12 @@ router.get('/spotify/callback', async (req, res) => {
      const data = await tokenResponse.json();
      console.log(data)
     
-    // Redirect to frontend with tokens
+    // redirect to frontend with tokens
       if (data.access_token) {
-        res.redirect(`https://melody-match-flax.vercel.app/standby?token=${data.access_token}`);
+        res.redirect(`${FRONTEND_URI}/standby?token=${data.access_token}`);
     } else {
-        // Handle the error case
-        res.redirect(`https://melody-match-flax.vercel.app/error`);
+        // handle the error case
+        res.redirect(`${FRONTEND_URI}/error`);
     }
 
 });
@@ -101,7 +100,7 @@ router.get('/callback', async (req, res) => {
         })
     });
     const data = await response.json();
-    res.redirect(`https://melody-match-flax.vercel.app/standby?token=${data.access_token}`);
+    res.redirect(`${FRONTEND_URI}/standby?token=${data.access_token}`);
 });
 
 

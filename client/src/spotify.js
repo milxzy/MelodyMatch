@@ -1,11 +1,10 @@
 import axios from 'axios'
 
-
 export const authEndpoint = "https://accounts.spotify.com/authorize"
 
-const redirectUri = "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"
+const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI || "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"
 
-const clientId = '8fbcd37be4d04871bc6e482ea4b64807'
+const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID || '8fbcd37be4d04871bc6e482ea4b64807'
 
 const scopes = [
      "user-read-private",
@@ -13,7 +12,9 @@ const scopes = [
      "user-follow-read"
 ]
 
-export const loginUrl = `https://melodymatch-3ro0.onrender.com/auth/login`;
+const apiUrl = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com'
+
+export const loginUrl = `${apiUrl}/auth/login`;
 
 
 const apiClient = axios.create({
@@ -38,7 +39,7 @@ const refreshSpotifyToken = async () => {
 
     const { newToken } = await response.json();
     window.localStorage.setItem("token", newToken);
-    setClientToken(newToken);  // Set the refreshed token in apiClient
+    setClientToken(newToken);  // set the refreshed token in apiclient
   }
 };
   

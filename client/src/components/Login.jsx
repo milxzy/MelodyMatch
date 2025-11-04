@@ -6,19 +6,19 @@ const Login = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if there's already a valid token
+    // check if there's already a valid token
     const token = localStorage.getItem("token");
 
 
 
-    // Simulate an async check for loginUrl (if necessary)
+    // simulate an async check for loginurl (if necessary)
     if (loginUrl) {
       setLoading(false);
     }
-  }, []); // Empty dependency array ensures this runs only once
+  }, []); // empty dependency array ensures this runs only once
 
   if (loading) {
-    // Show a loading spinner while loginUrl is being prepared
+    // show a loading spinner while loginurl is being prepared
     return (
       <Center bg="#232136" h="100vh">
         <Spinner size="xl" color="green.500" />

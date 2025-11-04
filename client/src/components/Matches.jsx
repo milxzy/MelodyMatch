@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import ProfileCard from "./ProfileCard";
 import Header from "./Header";
 import { Center, Flex, Text, Button, Heading } from "@chakra-ui/react";
 
 const Matches = () => {
+  const navigate = useNavigate();
   const [state, setState] = useState({
     matches: [],
     currentMatchIndex: 0,
@@ -13,16 +15,16 @@ const Matches = () => {
 
   const { matches, currentMatchIndex, loading, allMatchesViewed } = state;
 
-  const [currentIndex, setCurrentIndex] = useState(0); // Initialize currentIndex state
+  const [currentIndex, setCurrentIndex] = useState(0); // initialize currentindex state
 
-  // Function to handle click on previous button
+  // function to handle click on previous button
   const handlePrevClick = () => {
     setCurrentIndex(currentIndex - 5 < 0 ? 0 : currentIndex - 5);
   };
 
   
 
-  // Function to handle click on next button
+  // function to handle click on next button
   const handleNextClick = () => {
     setCurrentIndex(
       currentIndex + 5 > activeMatch.genres.length - 1
@@ -31,7 +33,7 @@ const Matches = () => {
     );
   };
 
-  // Get the current active match safely
+  // get the current active match safely
   const activeMatch = useMemo(
     () => matches[currentMatchIndex] || null,
     [matches, currentMatchIndex]
@@ -59,7 +61,7 @@ const Matches = () => {
       console.log('work')
       const activeUser = JSON.parse(localStorage.getItem("userInfo"));
 
-      // Send the like to the database
+      // send the like to the database
       await fetch("https://melodymatch-3ro0.onrender.com/like", {
         method: "POST",
         headers: {
@@ -86,7 +88,7 @@ const Matches = () => {
     try {
       const activeUser = JSON.parse(localStorage.getItem("userInfo"));
 
-      // Optionally, log or handle a "dislike" action if needed
+      // optionally, log or handle a "dislike" action if needed
       console.log(`User ${activeUser._id} disliked ${activeMatch._id}`);
     } catch (error) {
       console.error("Error disliking user:", error);
@@ -118,8 +120,8 @@ const Matches = () => {
           console.error("User not found in localStorage");
           return;
         }
-        const userId = activeUser._id; // Get the current user's ID
-  
+        const userId = activeUser._id; // get the current user's id
+
         const response = await fetch(`https://melodymatch-3ro0.onrender.com/GetUsers?userId=${userId}`);
         const data = await response.json();
         console.log(data);

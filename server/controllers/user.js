@@ -1,6 +1,6 @@
 import User from "../models/user.js";
 import Trial from "../models/trial.js";
-// import Matches from "../../client/src/components/Matches.jsx";
+// import matches from "../../client/src/components/matches.jsx";
 import { match } from "assert";
 import Match from "../models/matches.js"
 import asyncHandler from "express-async-handler" 
@@ -51,7 +51,7 @@ export const getUser = async (req, res) => {
 
 
 export const displayDashboard = async (req, res) => {
-  const response = await fetch("https://api.spotify.com/v1/me", {
+  const response = await fetch("https:// api.spotify.com/v1/me", {
     method: "get",
     headers: {
       Authorization: "Bearer " + global.access_token,
@@ -61,7 +61,7 @@ export const displayDashboard = async (req, res) => {
   console.log(data);
 
   const artistGenres = await fetch(
-    "https://api.spotify.com/v1/me/following?type=artist",
+    "https:// api.spotify.com/v1/me/following?type=artist",
     {
       method: "get",
       headers: {
@@ -100,7 +100,7 @@ export const callback = async (req, res) => {
       grant_type: "authorization_code"
   
     })
-    const response = await fetch('https://accounts.spotify.com/api/token', {
+    const response = await fetch('https:// accounts.spotify.com/api/token', {
       method: "post",
       body: body,
       headers: {
@@ -112,7 +112,7 @@ export const callback = async (req, res) => {
      const data = await response.json()
      const userFromDB = await User.findOne({ email: data.email });
      if (!userFromDB) {
-      // Handle case where user is not found in MongoDB
+      // handle case where user is not found in mongodb
       return res.status(404).send('User not found');
     }
     req.user = { id: userFromDB._id };
@@ -219,7 +219,7 @@ try {
 }
 
 export const makeAUser = async (req, res) => {
-  // res.send("Hello from the 'test' URL");
+  // res.send("hello from the 'test' url");
   req.session.username = req.body.username;
   res.end()
 }
@@ -242,21 +242,38 @@ export const getSingleUser = async (req, res) => {
 
 
 export const getUsers = async (req, res) => {
-  const { userId } = req.query;  // Get userId from query parameters
+  const { userId } = req.query;  // get userid from query parameters
 
   if (!userId) {
     return res.status(400).json({ error: "User ID is required" });
   }
 
   try {
-    // Find all users excluding the current user
-    const allUsers = await User.find({ _id: { $ne: userId } });
+    // get current user to compare against
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-    console.log(allUsers);
-    res.json({ users: allUsers });
+    // find all users excluding the current user and those already liked
+    const allUsers = await User.find({
+      _id: {
+        $ne: userId,
+        $nin: currentUser.likedUsers || []
+      }
+    });
+
+    // import matching algorithm
+    const { sortUsersByCompatibility } = await import('../utils/matchingAlgorithm.js');
+
+    // sort users by music compatibility
+    const sortedUsers = sortUsersByCompatibility(currentUser, allUsers);
+
+    console.log(`found ${sortedUsers.length} potential matches for user ${userId}`);
+    res.json({ users: sortedUsers });
   } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("error fetching users:", error);
+    res.status(500).json({ error: "internal server error" });
   }
 };
 
@@ -275,10 +292,10 @@ const likingUser = await User.findById(likingUserId);
 if (!likingUser) {
   return res.status(404).json({ error: 'Liking user not found' });
 }
- // Add the liked user to the likedUsers array
+ // add the liked user to the likedusers array
  likingUser.likedUsers.push(likedUserId);
 
- // Save the changes
+ // save the changes
  await likingUser.save();
  console.log(likingUser.likedUsers)
 
@@ -354,7 +371,7 @@ export const getMatches = async (req, res) => {
       likedUser.likedUsers.some(likedByUser => likedByUser.equals(userId))
     );
     
-    // Filter out the current user from the matches list
+    // filter out the current user from the matches list
     const filteredMatches = matches.filter(match => !match._id.equals(userId));
 
     console.log(filteredMatches)
@@ -367,6 +384,6 @@ export const getMatches = async (req, res) => {
 
 
 
-//search for user
-//if user is found, return found
-//if user is not found return notFound
+// search for user
+// if user is found, return found
+// if user is not found return notfound

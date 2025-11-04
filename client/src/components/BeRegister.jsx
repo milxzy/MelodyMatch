@@ -40,7 +40,7 @@ const submitHandler = async (e) => {
     };
     
     const {data} = await axios.post(
-      "https://melodymatch-3ro0.onrender.com/registerUser",
+      "http://localhost:4000/registeruser",
       {
          loginName, email, pass, allowedAccess,
       },
@@ -50,8 +50,8 @@ const submitHandler = async (e) => {
 localStorage.setItem("userInfo", JSON.stringify(data))
 console.log('Succsesful registration')
 
-//if user allowedAccess === false, then take them to a landing page that explains they have to wait 24 hours for access
-//automate a job that will get the blacklisted users and automate them
+// if user allowedaccess === false, then take them to a landing page that explains they have to wait 24 hours for access
+// automate a job that will get the blacklisted users and automate them
 
 
 navigate("/whitelist")

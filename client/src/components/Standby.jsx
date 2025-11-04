@@ -44,7 +44,7 @@ const Standby = () => {
         console.log("Checking for user:", searchTerm);
         const sharedVariable = searchTerm;
         const response = await fetch(
-          `https://melodymatch-3ro0.onrender.com/databaseLookup?keyword=${searchTerm}`,
+          `http://localhost:4000/databaselookup?keyword=${searchTerm}`,
           {
             method: "GET",
             headers: {

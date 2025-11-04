@@ -1,15 +1,7 @@
-import React, { useState } from "react";
-import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
-import Header from "./Header";
-
+import React from "react";
 import { Stack, HStack, VStack } from "@chakra-ui/react";
-import {
-  FaHeart,
-  FaTimes,
-  FaChevronLeft,
-  FaChevronRight,
-} from "react-icons/fa";
-import { Box, Image, Badge, Text, Flex, IconButton } from "@chakra-ui/react";
+import { FaHeart, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { Box, Image, Badge, Text, Flex, IconButton, Heading, Wrap, WrapItem } from "@chakra-ui/react";
 
 const ProfileCard = ({
   name,
@@ -25,108 +17,161 @@ const ProfileCard = ({
   handlePrevClick,
   currentIndex,
 }) => {
-
   return (
-    <>
-      <Box
-        maxW="sm"
-        width="400px"
-        borderWidth="1px"
-        borderRadius="lg"
-        overflow="hidden"
-        boxShadow="md"
-        position="relative"
-        bg="#908caa"
-        borderColor="#908caa"
-      >
-        <Flex justifyContent="center" alignItems="center" p="2">
-          <Image
-            src={profilePic}
-            alt={`${name}'s picture`}
-            boxSize="150px"
-            borderRadius="10%"
-          />
-        </Flex>
+    <Box
+      maxW="md"
+      width={{ base: "90vw", md: "450px" }}
+      borderWidth="2px"
+      borderRadius="2xl"
+      overflow="hidden"
+      boxShadow="2xl"
+      bg="#2a273f"
+      borderColor="#393552"
+      transition="all 0.3s"
+      _hover={{ transform: "translateY(-4px)", boxShadow: "0 20px 40px rgba(235, 111, 146, 0.3)" }}
+    >
+      {/* profile image section */}
+      <Box position="relative" bg="#393552">
+        <Image
+          src={profilePic || "https://via.placeholder.com/300"}
+          alt={`${name}'s picture`}
+          width="100%"
+          height="300px"
+          objectFit="cover"
+        />
+        <Box
+          position="absolute"
+          bottom="0"
+          left="0"
+          right="0"
+          bgGradient="linear(to-t, rgba(42, 39, 63, 0.95), transparent)"
+          p="4"
+        >
+          <Heading size="lg" color="#e0def4" mb="1">
+            {name}, {age}
+          </Heading>
+          {country && (
+            <Text color="#908caa" fontSize="sm">
+              📍 {country}
+            </Text>
+          )}
+        </Box>
+      </Box>
 
-        <Box p="6">
-          <Flex justifyContent="space-between" alignItems="center">
-            <Box d="flex" alignItems="baseline">
-              <Badge borderRadius="full" px="2" colorScheme="teal">
-                {primaryGenre}
-              </Badge>
-            </Box>
-          </Flex>
+      {/* content section */}
+      <Box p="6">
+        {/* primary genre badge */}
+        {primaryGenre && (
+          <Badge
+            borderRadius="full"
+            px="4"
+            py="1"
+            bg="#eb6f92"
+            color="#e0def4"
+            fontSize="sm"
+            fontWeight="bold"
+            mb="4"
+          >
+            🎵 {primaryGenre}
+          </Badge>
+        )}
 
-          <Flex mt="2" justifyContent="space-between" alignItems="center">
-            <Box fontWeight="bold" as="h4" lineHeight="tight" isTruncated>
-              {name}, {age}
-            </Box>
-          </Flex>
-
-          <Text mt="2" color="gray.500">
-            {country}
+        {/* genres section */}
+        <Box>
+          <Text color="#908caa" fontSize="sm" fontWeight="bold" mb="2">
+            music taste:
           </Text>
-
-          <Stack mt="2" spacing={1}>
-            {Array.isArray(genres)
-              ? genres
-                  .slice(currentIndex, currentIndex + 5)
-                  .map((genre, index) => (
+          <Wrap spacing={2} mb="2">
+            {Array.isArray(genres) && genres.length > 0
+              ? genres.slice(currentIndex, currentIndex + 5).map((genre, index) => (
+                  <WrapItem key={index}>
                     <Badge
-                      key={index}
                       borderRadius="full"
-                      px="2"
-                      colorScheme="blue"
+                      px="3"
+                      py="1"
+                      bg="#393552"
+                      color="#9ccfd8"
+                      fontSize="xs"
+                      textTransform="capitalize"
                     >
                       {genre}
                     </Badge>
-                  ))
-              : null}
-          </Stack>
-          {/* Navigation buttons */}
-          {genres.length > 5 && (
-            <Flex mt="2" justifyContent="space-between">
+                  </WrapItem>
+                ))
+              : (
+                <Text color="#6e6a86" fontSize="sm">
+                  no genres available
+                </Text>
+              )}
+          </Wrap>
+
+          {/* genre navigation */}
+          {genres && genres.length > 5 && (
+            <Flex justify="center" gap={2} mt="3">
               <IconButton
-                aria-label="Previous"
+                aria-label="previous genres"
                 icon={<FaChevronLeft />}
                 onClick={handlePrevClick}
                 isDisabled={currentIndex === 0}
+                size="sm"
+                bg="#393552"
+                color="#e0def4"
+                _hover={{ bg: "#524f67" }}
+                _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
               />
+              <Text color="#908caa" fontSize="xs" alignSelf="center">
+                {Math.floor(currentIndex / 5) + 1} / {Math.ceil(genres.length / 5)}
+              </Text>
               <IconButton
-                aria-label="Next"
+                aria-label="next genres"
                 icon={<FaChevronRight />}
                 onClick={handleNextClick}
                 isDisabled={currentIndex + 5 >= genres.length}
+                size="sm"
+                bg="#393552"
+                color="#e0def4"
+                _hover={{ bg: "#524f67" }}
+                _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
               />
             </Flex>
           )}
         </Box>
-
-        <Flex
-          // position="absolute"
-          bottom="0"
-          left="0"
-          right="0"
-          justifyContent="space-between"
-          p="6"
-        >
-          <IconButton
-            onClick={handlePreviousMatch}
-            colorScheme="red"
-            aria-label="Dislike"
-            icon={<FaTimes />}
-            isRound
-          />
-          <IconButton
-            onClick={handleNextMatch}
-            colorScheme="green"
-            aria-label="Like"
-            icon={<FaHeart />}
-            isRound
-          />
-        </Flex>
       </Box>
-    </>
+
+      {/* action buttons */}
+      <Flex
+        justifyContent="center"
+        gap={6}
+        p="6"
+        pt="0"
+        pb="8"
+      >
+        <IconButton
+          onClick={handlePreviousMatch}
+          aria-label="dislike"
+          icon={<FaTimes />}
+          isRound
+          size="lg"
+          bg="#393552"
+          color="#e0def4"
+          _hover={{ bg: "#eb6f92", transform: "scale(1.1)" }}
+          transition="all 0.2s"
+          boxShadow="lg"
+        />
+        <IconButton
+          onClick={handleNextMatch}
+          aria-label="like"
+          icon={<FaHeart />}
+          isRound
+          size="lg"
+          bg="#eb6f92"
+          color="#e0def4"
+          _hover={{ bg: "#d45879", transform: "scale(1.1)" }}
+          transition="all 0.2s"
+          boxShadow="lg"
+        />
+      </Flex>
+    </Box>
   );
 };
 

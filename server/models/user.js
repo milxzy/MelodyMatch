@@ -93,13 +93,13 @@ const userSchema = new mongoose.Schema({
   },
   pic: {
     type: String,
-    default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+    default: "https:// icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
   },
   likedUsers: [{
     type: Schema.Types.ObjectId,
     ref: 'User'
   }],
-  likedBy: [{  // Define the likedBy field
+  likedBy: [{  // define the likedby field
     type: Schema.Types.ObjectId,
     ref: 'User'
   }],

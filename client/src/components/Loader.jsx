@@ -6,7 +6,7 @@ const Loader = () => {
       display="flex" 
       alignItems="center" 
       justifyContent="center" 
-      height="100vh" // Full viewport height
+      height="100vh" // full viewport height
     >
       <Spinner size="xl" color="teal.500" />
       <Text ml={4} fontSize="lg" color="teal.500">

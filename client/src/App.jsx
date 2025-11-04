@@ -43,7 +43,7 @@ function App() {
       <Router>
         <div className="app">
           <Routes>
-            {/* Public Routes */}
+            {/* public routes */}
             <Route path="/" element={<Auth />} />
             <Route path="/belogin" element={<BeLogin />} />
             <Route path="/beregister" element={<BeRegister />} />
@@ -53,7 +53,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/whitelist" element={<Whitelist />} />
 
-            {/* Protected Routes */}
+            {/* protected routes */}
             <Route path="/matcheslist" element={<MatchesList />} />
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/profilequestion" element={<ProfileQuestion />} />

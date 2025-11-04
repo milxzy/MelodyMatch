@@ -6,25 +6,25 @@ import { backendLogin,  makeAUser, registerUser, like, getUsers, createUser, get
 
 const router = express.Router();
 
-// router.get('/', getUsers);
+// router.get('/', getusers);
 
-// router.post('/add', createUser);
+// router.post('/add', createuser);
 
-// router.get('/:id', getUser);
+// router.get('/:id', getuser);
 
-// router.delete('/:id', deleteUser);
+// router.delete('/:id', deleteuser);
 
-// router.patch('/:id', updateUser);
+// router.patch('/:id', updateuser);
 
 router.post('/makeauser', makeAUser)
-// Login Route
+// login route
 router.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
-    const token = jwt.sign({ id: req.user._id }, 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#'); // Generate JWT token
+    const token = jwt.sign({ id: req.user._id }, 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#'); // generate jwt token
     res.json({ token });
 });
 
 router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res) => {
-    res.json({ user: req.user }); // Access user information from req.user
+    res.json({ user: req.user }); // access user information from req.user
 });
 
 router.post('/like', like)
@@ -38,6 +38,19 @@ router.post('/addSpotifyArtists', addSpotifyArtists)
 router.get('/databaseLookup', databaseLookup)
 router.get('/getSingleUser', getSingleUser)
 router.get('/getUsers', getUsers)
+router.get('/getUserById/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await import('../models/user.js').then(m => m.default.findById(userId));
+    if (!user) {
+      return res.status(404).json({ error: 'user not found' });
+    }
+    res.json({ user });
+  } catch (error) {
+    console.error('error fetching user:', error);
+    res.status(500).json({ error: 'internal server error' });
+  }
+})
 router.post('/registerUser', registerUser)
 router.post('/backendlogin', backendLogin)
 

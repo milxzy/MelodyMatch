@@ -22,14 +22,14 @@ const UserProfileCard = ({
   handleNextMatch,
   handlePreviousMatch,
 }) => {
-  const [currentIndex, setCurrentIndex] = useState(0); // Initialize currentIndex state
+  const [currentIndex, setCurrentIndex] = useState(0); // initialize currentindex state
 
-  // Function to handle click on previous button
+  // function to handle click on previous button
   const handlePrevClick = () => {
     setCurrentIndex(currentIndex - 5 < 0 ? 0 : currentIndex - 5);
   };
 
-  // Function to handle click on next button
+  // function to handle click on next button
   const handleNextClick = () => {
     setCurrentIndex(
       currentIndex + 5 > genres.length - 1
@@ -90,7 +90,7 @@ const UserProfileCard = ({
                   ))
               : null}
           </Stack>
-          {/* Navigation buttons */}
+          {/* navigation buttons */}
           {genres.length > 5 && (
             <Flex mt="2" justifyContent="space-between">
               <IconButton

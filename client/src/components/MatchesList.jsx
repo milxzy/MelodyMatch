@@ -26,7 +26,7 @@ const MatchesList = ({}) => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentIndices, setCurrentIndices] = useState([]);
-  const [noMatches, setNoMatches] = useState(false); // New state for no matches message
+  const [noMatches, setNoMatches] = useState(false); // new state for no matches message
   const navigate = useNavigate();
 
 
@@ -66,7 +66,7 @@ const MatchesList = ({}) => {
       setLoading(true);
       try {
         const response = await fetch(
-          `https://melodymatch-3ro0.onrender.com/getMatches/${userId}`,
+          `http://localhost:4000/getmatches/${userId}`,
           {
             method: "GET",
             headers: {
@@ -76,17 +76,17 @@ const MatchesList = ({}) => {
         );
         const data = await response.json();
   
-        console.log(data.matches); // Debugging matches data
+        console.log(data.matches); // debugging matches data
         setMatches(data.matches);
   
         if (data.matches.length === 0) {
-          setNoMatches(true); // Set noMatches to true if there are no matches
+          setNoMatches(true); // set nomatches to true if there are no matches
         } else {
-          setNoMatches(false); // Otherwise, reset noMatches
+          setNoMatches(false); // otherwise, reset nomatches
         }
   
-        // Initialize pagination indices for each match
-        setCurrentIndices(new Array(data.matches.length).fill(0)); // Fill with 0
+        // initialize pagination indices for each match
+        setCurrentIndices(new Array(data.matches.length).fill(0)); // fill with 0
       } catch (error) {
         console.log("error fetching matches");
       } finally {
@@ -104,7 +104,7 @@ const MatchesList = ({}) => {
           Matches
         </Heading>
 
-        {/* Display a message if there are no matches */}
+        {/* display a message if there are no matches */}
         {noMatches ? (
           <Center>
             <Text color="white" fontSize="lg" mt={4}>
@@ -165,13 +165,13 @@ const MatchesList = ({}) => {
                       <IconButton
                         aria-label="Previous"
                         icon={<FaChevronLeft />}
-                        onClick={() => handlePrevClick(index)} // Pass the index here
+                        onClick={() => handlePrevClick(index)} // pass the index here
                         isDisabled={currentIndices[index] === 0}
                       />
                       <IconButton
                         aria-label="Next"
                         icon={<FaChevronRight />}
-                        onClick={() => handleNextClick(index)} // Pass the index here
+                        onClick={() => handleNextClick(index)} // pass the index here
                         isDisabled={currentIndices[index] + 5 >= match.genres.length}
                       />
                     </Flex>

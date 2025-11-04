@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-// import { getTokenFromUrl } from '../spotify.js'
+// import { gettokenfromurl } from '../spotify.js'
 import SpotifyWebApi from "spotify-web-api-js";
 import axios from "axios";
 import apiClient from "../spotify";
@@ -21,6 +21,7 @@ import {
 } from "@chakra-ui/react";
 
 const Welcome = () => {
+  const navigate = useNavigate();
   const [artistState, setArtistState] = useState([]);
   const [profileState, setProfileState] = useState([]);
   const [genreState, setGenreState] = useState([]);
@@ -71,7 +72,6 @@ const Welcome = () => {
     fetchData();
   }, []);
 
-  const navigate = useNavigate();
   const [text, setText] = useState({
     contactInfo: "",
   });

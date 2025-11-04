@@ -1,24 +1,24 @@
 import express from "express"
 const router = express.Router();
-// import Waitlist from "../models/waitlistModel.js"
+import Waitlist from "../models/waitlistModel.js"
 
-// 1. Route to add a user to the waitlist
+// 1. route to add a user to the waitlist
 router.post('/add-to-waitlist', async (req, res) => {
   const { email } = req.body;
   
-  // Basic email validation
+  // basic email validation
   if (!email || !email.includes('@')) {
     return res.status(400).json({ message: 'Invalid email address' });
   }
 
   try {
-    // Check if the email is already on the waitlist
+    // check if the email is already on the waitlist
     const existingUser = await Waitlist.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already on the waitlist' });
     }
 
-    // Create a new waitlist entry
+    // create a new waitlist entry
     const newWaitlistEntry = new Waitlist({
       email,
     });
@@ -31,7 +31,7 @@ router.post('/add-to-waitlist', async (req, res) => {
   }
 });
 
-// 2. Route to check the current status of a user on the waitlist
+// 2. route to check the current status of a user on the waitlist
 router.get('/check-status/:email', async (req, res) => {
   const { email } = req.params;
 
@@ -47,7 +47,7 @@ router.get('/check-status/:email', async (req, res) => {
   }
 });
 
-// 3. Admin route to approve or reject users
+// 3. admin route to approve or reject users
 router.post('/approve-reject', async (req, res) => {
   const { email, action } = req.body; // 'approve' or 'reject'
 

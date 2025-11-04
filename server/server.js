@@ -1,4 +1,5 @@
 import express from "express";
+import { createServer } from "http";
 import fetch from "node-fetch";
 const app = express()
 import dotenv from 'dotenv'
@@ -17,28 +18,23 @@ import User from "./models/user.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 import waitlistRoutes from "./routes/waitlistRoutes.js"
 import authRoutes from "./routes/auth.routes.js"
-// import messagesRoute from "./routes/message.js"
-// import matchesRoute from "./routes/matches.js"
-
-
-
-
-// app.use("/api/matches", matchesRoute);
-// app.use("/api/messages", messagesRoute);
+import messagesRoute from "./routes/message.js"
+import matchesRoute from "./routes/matches.js"
+import { initializeSocket } from "./socket.js"
 
 
 
 const port = process.env.PORT || 10000
 const connectionString = process.env.CONNECTION_STRING
 
-// app.use(notFound)
-// app.use(errorHandler)
+// app.use(notfound)
+// app.use(errorhandler)
 
 // app.set('views', './views')
 // app.set('view engine', 'pug')
 
 app.use(session({
-  secret: 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#',
+  secret: process.env.SESSION_SECRET || 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#',
   resave: false,
   saveUninitialized: true,
   cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
@@ -46,9 +42,9 @@ app.use(session({
 
 
 app.use(cors({
-  origin: '*', // Replace with your React app's origin
+  origin: '*', // replace with your react app's origin
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: false, // If you need to support cookies or authentication headers
+  credentials: false, // if you need to support cookies or authentication headers
 }));
 
 app.use(express.static('public'))
@@ -58,15 +54,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json())
-//maybe delete the line below
+// maybe delete the line below
 app.use(express.urlencoded({ extended: true }))
 app.use('/', userRoutes)
 app.use('/api/waitlist', waitlistRoutes);
 app.use('/auth', authRoutes)
+app.use("/api/matches", matchesRoute);
+app.use("/api/messages", messagesRoute);
 
 passport.use(new LocalStrategy(
   {
-      usernameField: 'email', // Assuming your login form submits email and password
+      usernameField: 'email', // assuming your login form submits email and password
       passwordField: 'password'
   },
   async (email, password, done) => {
@@ -84,10 +82,10 @@ passport.use(new LocalStrategy(
   }
 ));
 
-// Passport JWT Strategy
+// passport jwt strategy
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#' // Replace with your secret key
+  secretOrKey: process.env.JWT_SECRET || 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#'
 };
 
 passport.use(new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
@@ -115,7 +113,7 @@ const client_secret = process.env.CLIENT_SECRET
 global.access_token
 
 // app.get('/', function (req, res) {
-//   res.render('index')
+// res.render('index')
 // })
 
 app.get('/authorize', (req, res) => {
@@ -165,7 +163,7 @@ app.post('/api/spotify/callback', (req, res) => {
    console.log(`Access Token: ${accessToken}`);
     console.log(`Token Type: ${tokenType}`);
     console.log(`Expires In: ${expiresIn}`);
-      // Process or save the data as needed
+      // process or save the data as needed
     res.json({
         message: 'Spotify callback processed successfully',
         data: { accessToken, tokenType, expiresIn },
@@ -174,39 +172,45 @@ app.post('/api/spotify/callback', (req, res) => {
 // app.get('/dashboard', async (req, res) => {
 
 
-//   const response = await fetch('https://api.spotify.com/v1/me', {
-//     method: 'get',
-//     headers: {
-//       Authorization: 'Bearer ' + global.access_token
-//     }
-//   })
-//   const data = await response.json()
-//   console.log(data)
+// const response = await fetch('https://api.spotify.com/v1/me', {
+// method: 'get',
+// headers: {
+// authorization: 'bearer ' + global.access_token
+// }
+// })
+// const data = await response.json()
+// console.log(data)
 
-//   const artistGenres = await fetch('https://api.spotify.com/v1/me/following?type=artist', {
-//     method: 'get',
-//     headers: {
-//       Authorization: 'Bearer ' + global.access_token
-//     }
-//   })
-
-//   const artistData = await artistGenres.json()
-//   console.log(artistData.artists.items)
-
-
-//   res.render('dashboard', {user: data})
+// const artistgenres = await fetch('https://api.spotify.com/v1/me/following?type=artist', {
+// method: 'get',
+// headers: {
+// authorization: 'bearer ' + global.access_token
+// }
 // })
 
-// let listener = app.listen(port, function () {
-//   console.log('Your app is listening on http://localhost:' + listener.address().port)
+// const artistdata = await artistgenres.json()
+// console.log(artistdata.artists.items)
+
+
+// res.render('dashboard', {user: data})
 // })
+
+// create http server for socket.io
+const httpServer = createServer(app);
+
+// initialize socket.io
+initializeSocket(httpServer);
+
+// connect to database and start server
 mongoose.connect(
   connectionString
 ).then(() => {
-  app.listen(port, function () {
-    console.log(`listening on port ${port}`);
-  });  
+  httpServer.listen(port, function () {
+    console.log(`server listening on port ${port}`);
+    console.log(`socket.io enabled for real-time messaging`);
+  });
 })
+
 const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
-db.once("open", () => console.log("Connected to Database"));
+db.once("open", () => console.log("connected to database"));

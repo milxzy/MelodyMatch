@@ -15,16 +15,15 @@ import {
   Avatar,
   Badge,
   Divider,
-  Spinner,
   Progress,
   Card,
   CardBody,
   Icon,
-  Flex,
   Button,
 } from "@chakra-ui/react";
 import { FiHeart, FiUsers, FiMessageCircle, FiMusic } from "react-icons/fi";
 import Header from "./Header";
+import Loader from "./Loader";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
 
@@ -98,14 +97,7 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return (
-      <>
-        <Header />
-        <Flex minHeight="100vh" bg="#232136" align="center" justify="center">
-          <Spinner size="xl" color="#eb6f92" thickness="4px" />
-        </Flex>
-      </>
-    );
+    return <Loader message="Loading your dashboard..." />;
   }
 
   return (

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import apiClient, { setClientToken } from "../spotify";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
+import Loader from "./Loader";
 
 const Standby = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -83,11 +84,7 @@ const Standby = () => {
     );
   }, [spotifyIdState]);
 
-  return (
-    <>
-      <h1>Loading</h1>
-    </>
-  );
+  return <Loader message="Connecting to Spotify..." />;
 };
 
 export default Standby;

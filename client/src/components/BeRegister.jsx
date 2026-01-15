@@ -5,6 +5,8 @@ import Header from './Header';
 
 import { Box, VStack, Heading, Image, Badge, Text, Flex, Button, Center, Stack } from '@chakra-ui/react';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const BeRegister= () => {
 const navigate = useNavigate()
 const [email, setEmail] = useState('') 
@@ -40,7 +42,7 @@ const submitHandler = async (e) => {
     };
     
     const {data} = await axios.post(
-      "http://localhost:4000/registeruser",
+      `${API_URL}/registeruser`,
       {
          loginName, email, pass, allowedAccess,
       },

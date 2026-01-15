@@ -30,6 +30,7 @@ Thumbs.db
 *.log
 *.tmp
 *.swp
+tmpclaude-*
 
 # Dependency directories
 jspm_packages/

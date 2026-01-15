@@ -12,8 +12,7 @@ html, body {
     margin: 0;                 /* Removes default margin */
     padding: 0;                /* Removes default padding */
     min-height: 100vh;         /* Ensures full height */
-    overflow-x: hidden; 
-    overflow: hidden;       /* Prevents horizontal scrolling */
+    overflow-x: hidden;        /* Prevents horizontal scrolling only */
   }
 
 /* *{

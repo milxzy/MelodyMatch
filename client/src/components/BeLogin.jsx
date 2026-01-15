@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { Center, Square, Circle } from "@chakra-ui/react";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import Header from "./Header";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
 const BeLogin = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -37,7 +40,7 @@ const BeLogin = () => {
 
       setLoading(true);
       const { data } = await axios.post(
-        "http://localhost:4000/backendlogin",
+        `${API_URL}/backendlogin`,
         {
           email,
           pass,

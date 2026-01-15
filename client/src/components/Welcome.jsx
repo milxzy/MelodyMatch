@@ -18,7 +18,13 @@ import {
   Text,
   Flex,
   Center,
+  Spinner,
+  Alert,
+  AlertIcon,
+  VStack,
 } from "@chakra-ui/react";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -26,6 +32,9 @@ const Welcome = () => {
   const [profileState, setProfileState] = useState([]);
   const [genreState, setGenreState] = useState([]);
   const [beState, setBeState] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const [userData, setUserData] = useState({
     userSpotifyData: {},
@@ -41,36 +50,46 @@ const Welcome = () => {
       return;
     }
     async function fetchData() {
-      const myProfileResponse = await apiClient.get("me");
-      const myProfileData = myProfileResponse.data;
-      const country = myProfileData.country;
-      const email = myProfileData.email;
-      const spotifyId = myProfileData.id;
-      const displayName = myProfileData.display_name;
-      const profilePic = myProfileData.images[0].url;
-      console.log(profilePic);
-      const profileInfo = [country, email, spotifyId, displayName, profilePic];
-      setProfileState(profileInfo);
+      try {
+        setLoading(true);
+        setError(null);
 
-      const followedArtistsResponse = await apiClient.get(
-        "me/following?type=artist"
-      );
-      const artistData = followedArtistsResponse.data;
-      const allGenres = [];
-      const followedArtists = [];
-      artistData.artists.items.forEach((artist) => {
-        if (artist.genres && artist.genres.length > 0) {
-          allGenres.push(...artist.genres);
-        }
-      });
-      artistData.artists.items.forEach((artist) => {
-        followedArtists.push(artist.name);
-      });
-      setArtistState(followedArtists);
-      setGenreState(allGenres);
+        const myProfileResponse = await apiClient.get("me");
+        const myProfileData = myProfileResponse.data;
+        const country = myProfileData.country;
+        const email = myProfileData.email;
+        const spotifyId = myProfileData.id;
+        const displayName = myProfileData.display_name;
+        const profilePic = myProfileData.images[0]?.url || "";
+        console.log(profilePic);
+        const profileInfo = [country, email, spotifyId, displayName, profilePic];
+        setProfileState(profileInfo);
+
+        const followedArtistsResponse = await apiClient.get(
+          "me/following?type=artist"
+        );
+        const artistData = followedArtistsResponse.data;
+        const allGenres = [];
+        const followedArtists = [];
+        artistData.artists.items.forEach((artist) => {
+          if (artist.genres && artist.genres.length > 0) {
+            allGenres.push(...artist.genres);
+          }
+        });
+        artistData.artists.items.forEach((artist) => {
+          followedArtists.push(artist.name);
+        });
+        setArtistState(followedArtists);
+        setGenreState(allGenres);
+      } catch (err) {
+        console.error("Error fetching Spotify data:", err);
+        setError("Failed to load Spotify data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     }
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const [text, setText] = useState({
     contactInfo: "",
@@ -91,24 +110,35 @@ const Welcome = () => {
 
   async function onSubmit(e) {
     e.preventDefault();
-    const newPerson = { form, artistState, genreState, profileState };
-    await fetch("https://melodymatch-3ro0.onrender.com/addUserInfo", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newPerson),
-    })
-      .then((res) => res.json())
-      .then((data) => console.log(data))
-      .catch((error) => {
-        window.alert(error);
-        return;
+
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const newPerson = { form, artistState, genreState, profileState };
+      const response = await fetch(`${API_URL}/addUserInfo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newPerson),
       });
 
-    setForm({ contactInfo: "", preferredName: "", age: "", gender: "" });
-    navigate("/Profile");
-    console.log(newPerson);
+      if (!response.ok) {
+        throw new Error("Failed to save profile information");
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      setForm({ contactInfo: "", preferredName: "", age: "", gender: "" });
+      navigate("/Profile");
+    } catch (error) {
+      console.error("Error submitting profile:", error);
+      setError(error.message || "Failed to save profile. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
   async function onDecline() {
     const response = await fetch("https://api.spotify.com/v1/me", {
@@ -136,6 +166,18 @@ const Welcome = () => {
         px={4}
       >
         <Center>
+          {loading ? (
+            <VStack spacing={4}>
+              <Spinner
+                thickness="4px"
+                speed="0.65s"
+                emptyColor="gray.200"
+                color="#eb6f92"
+                size="xl"
+              />
+              <Text color="white">Loading your Spotify data...</Text>
+            </VStack>
+          ) : (
           <Box
             bg="#2a273f"
             borderRadius="lg"
@@ -153,6 +195,14 @@ const Welcome = () => {
             >
               Register for MelodyMatch
             </Heading>
+
+            {error && (
+              <Alert status="error" mb={4} borderRadius="md">
+                <AlertIcon />
+                {error}
+              </Alert>
+            )}
+
             <form onSubmit={onSubmit}>
               <Stack spacing={4}>
                 <FormControl>
@@ -239,6 +289,8 @@ const Welcome = () => {
                     color="white"
                     _hover={{ bg: "#d45879" }}
                     flex={1}
+                    isLoading={submitting}
+                    loadingText="Saving..."
                   >
                     Submit
                   </Button>
@@ -248,6 +300,7 @@ const Welcome = () => {
                     color="white"
                     _hover={{ bg: "gray.500" }}
                     flex={1}
+                    isDisabled={submitting}
                   >
                     Decline
                   </Button>
@@ -255,6 +308,7 @@ const Welcome = () => {
               </Stack>
             </form>
           </Box>
+          )}
         </Center>
       </Flex>
     </>

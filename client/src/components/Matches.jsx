@@ -4,6 +4,8 @@ import ProfileCard from "./ProfileCard";
 import Header from "./Header";
 import { Center, Flex, Text, Button, Heading } from "@chakra-ui/react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Matches = () => {
   const navigate = useNavigate();
   const [state, setState] = useState({
@@ -62,7 +64,7 @@ const Matches = () => {
       const activeUser = JSON.parse(localStorage.getItem("userInfo"));
 
       // send the like to the database
-      await fetch("https://melodymatch-3ro0.onrender.com/like", {
+      await fetch(`${API_URL}/like`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -122,7 +124,7 @@ const Matches = () => {
         }
         const userId = activeUser._id; // get the current user's id
 
-        const response = await fetch(`https://melodymatch-3ro0.onrender.com/GetUsers?userId=${userId}`);
+        const response = await fetch(`${API_URL}/GetUsers?userId=${userId}`);
         const data = await response.json();
         console.log(data);
   

@@ -24,7 +24,7 @@ import { initializeSocket } from "./socket.js"
 
 
 
-const port = process.env.PORT || 10000
+const port = process.env.PORT || 4000
 const connectionString = process.env.CONNECTION_STRING
 
 // app.use(notfound)
@@ -34,7 +34,7 @@ const connectionString = process.env.CONNECTION_STRING
 // app.set('view engine', 'pug')
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
@@ -42,13 +42,12 @@ app.use(session({
 
 
 app.use(cors({
-  origin: '*', // replace with your react app's origin
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: false, // if you need to support cookies or authentication headers
+  credentials: true,
 }));
 
 app.use(express.static('public'))
-app.use(cors())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(passport.initialize());
@@ -85,7 +84,7 @@ passport.use(new LocalStrategy(
 // passport jwt strategy
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET || 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#'
+  secretOrKey: process.env.JWT_SECRET
 };
 
 passport.use(new JwtStrategy(jwtOptions, async (jwtPayload, done) => {

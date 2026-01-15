@@ -2,9 +2,9 @@ import axios from 'axios'
 
 export const authEndpoint = "https://accounts.spotify.com/authorize"
 
-const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI || "https://melodymatch-3ro0.onrender.com/auth/spotify/callback"
+const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI
 
-const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID || '8fbcd37be4d04871bc6e482ea4b64807'
+const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID
 
 const scopes = [
      "user-read-private",
@@ -12,7 +12,7 @@ const scopes = [
      "user-follow-read"
 ]
 
-const apiUrl = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com'
+const apiUrl = import.meta.env.VITE_API_URL
 
 export const loginUrl = `${apiUrl}/auth/login`;
 

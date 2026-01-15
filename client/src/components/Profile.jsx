@@ -92,6 +92,12 @@ const Profile = () => {
       return;
     }
 
+    if (!userData || !userData.email) {
+      console.error("User not found in localStorage");
+      navigate("/");
+      return;
+    }
+
     console.log(user)
     getMainUser();
   }, []);

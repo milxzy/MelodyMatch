@@ -261,7 +261,7 @@ export const getUsers = async (req, res) => {
         $ne: userId,
         $nin: currentUser.likedUsers || []
       }
-    });
+    }).lean();
 
     // import matching algorithm
     const { sortUsersByCompatibility } = await import('../utils/matchingAlgorithm.js');

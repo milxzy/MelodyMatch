@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import apiClient, { setClientToken } from "../spotify";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
+import { Center, VStack, Heading, Text, Spinner } from "@chakra-ui/react";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Standby = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -44,7 +47,7 @@ const Standby = () => {
         console.log("Checking for user:", searchTerm);
         const sharedVariable = searchTerm;
         const response = await fetch(
-          `http://localhost:4000/databaselookup?keyword=${searchTerm}`,
+          `${API_URL}/databaselookup?keyword=${searchTerm}`,
           {
             method: "GET",
             headers: {
@@ -85,7 +88,23 @@ const Standby = () => {
 
   return (
     <>
-      <h1>Loading</h1>
+      <Center bg="#232136" minHeight="100vh">
+        <VStack spacing={6}>
+          <Spinner
+            thickness="4px"
+            speed="0.65s"
+            emptyColor="gray.200"
+            color="#eb6f92"
+            size="xl"
+          />
+          <Heading as="h2" size="lg" color="#eb6f92">
+            Loading Your Profile...
+          </Heading>
+          <Text color="white" fontSize="md">
+            Please wait while we set up your account
+          </Text>
+        </VStack>
+      </Center>
     </>
   );
 };

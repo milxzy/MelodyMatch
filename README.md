@@ -50,25 +50,43 @@ a music-based dating application that connects people through their spotify musi
 
    **server .env file** (`server/.env`):
    ```env
+   # mongodb connection string
    CONNECTION_STRING=your_mongodb_connection_string
-   PORT=10000
+
+   # server port
+   PORT=4000
+
+   # spotify api credentials (get from https://developer.spotify.com/dashboard)
    CLIENT_ID=your_spotify_client_id
    CLIENT_SECRET=your_spotify_client_secret
+
+   # jwt secret for authentication tokens (generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
    JWT_SECRET=your_secure_random_jwt_secret
+
+   # session secret (generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
    SESSION_SECRET=your_secure_random_session_secret
+
+   # api urls
    FRONTEND_URL=http://localhost:5173
-   BACKEND_URL=http://localhost:10000
-   SPOTIFY_REDIRECT_URI=http://localhost:10000/auth/spotify/callback
+   BACKEND_URL=http://localhost:4000
+   REDIRECT_URI=http://localhost:4000/callback
    ```
 
    **client .env file** (`client/.env`):
    ```env
-   VITE_API_URL=http://localhost:10000
+   # backend api url
+   VITE_API_URL=http://localhost:4000
+
+   # spotify configuration (should match server CLIENT_ID)
    VITE_SPOTIFY_CLIENT_ID=your_spotify_client_id
-   VITE_SPOTIFY_REDIRECT_URI=http://localhost:10000/auth/spotify/callback
+   VITE_SPOTIFY_REDIRECT_URI=http://localhost:4000/callback
    ```
 
-   see `ENV_SETUP.md` for detailed instructions on obtaining credentials.
+   **important**:
+   - Copy `.env.example` files from both `client` and `server` directories
+   - Never commit your actual `.env` files to version control
+   - Generate secure random secrets for JWT_SECRET and SESSION_SECRET
+   - Use the same CLIENT_ID in both server and client configurations
 
 3. **install dependencies**
    ```bash
@@ -94,16 +112,17 @@ a music-based dating application that connects people through their spotify musi
 
 5. **access the application**
    - frontend: http://localhost:5173
-   - backend api: http://localhost:10000
+   - backend api: http://localhost:4000
 
 ## spotify setup
 
 1. go to [spotify developer dashboard](https://developer.spotify.com/dashboard)
 2. create a new app
-3. add redirect uris:
-   - development: `http://localhost:10000/auth/spotify/callback`
-   - production: `https://your-backend-url.com/auth/spotify/callback`
+3. add redirect uris in the app settings:
+   - development: `http://localhost:4000/callback`
+   - production: `https://your-backend-url.com/callback`
 4. copy your client id and client secret to your .env files
+5. ensure the redirect uri in your spotify dashboard exactly matches the REDIRECT_URI in your server .env file
 
 ## deployment
 
@@ -153,11 +172,13 @@ MelodyMatch/
 ### users
 - `GET /GetUsers?userId={id}` - get sorted list of potential matches
 - `GET /getUserById/:userId` - get user by id
+- `GET /getsingleuser?keyword={email}` - get user by email
+- `GET /databaselookup?keyword={spotifyId}` - check if user exists
 - `POST /addUserInfo` - add user profile information
 - `POST /like` - like another user
 
 ### matches
-- `GET /getMatches/:userId` - get user's matches
+- `GET /getmatches/:userId` - get user's matches
 - `GET /api/matches/:userId` - get matches (alternative endpoint)
 
 ### messaging

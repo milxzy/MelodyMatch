@@ -22,6 +22,8 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import MatchesCard from "./MatchesCard";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const MatchesList = ({}) => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -66,7 +68,7 @@ const MatchesList = ({}) => {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:4000/getmatches/${userId}`,
+          `${API_URL}/getmatches/${userId}`,
           {
             method: "GET",
             headers: {

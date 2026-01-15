@@ -85,10 +85,14 @@ const Matches = () => {
   };
 
   const handleDislike = async () => {
-    if (!activeMatch) return;
+    if (!activeMatch || !activeMatch._id) return;
 
     try {
       const activeUser = JSON.parse(localStorage.getItem("userInfo"));
+      if (!activeUser || !activeUser._id) {
+        console.error("Active user not found");
+        return;
+      }
 
       // optionally, log or handle a "dislike" action if needed
       console.log(`User ${activeUser._id} disliked ${activeMatch._id}`);
@@ -160,6 +164,7 @@ const Matches = () => {
                 profilePic={activeMatch?.profile_pic}
                 name={activeMatch?.preferred_name}
                 age={activeMatch?.age}
+                country={activeMatch?.country}
                 genres={activeMatch?.genres}
                 handleNextMatch={handleLike}
                 handlePreviousMatch={handleDislike}

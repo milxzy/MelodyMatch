@@ -56,6 +56,11 @@ const Welcome = () => {
 
         const myProfileResponse = await apiClient.get("me");
         const myProfileData = myProfileResponse.data;
+
+        if (!myProfileData) {
+          throw new Error("Failed to fetch Spotify profile data");
+        }
+
         const country = myProfileData.country;
         const email = myProfileData.email;
         const spotifyId = myProfileData.id;

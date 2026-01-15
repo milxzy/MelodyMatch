@@ -17,7 +17,7 @@ import {
 import { io } from "socket.io-client";
 import Header from "./Header";
 
-const apiUrl = import.meta.env.VITE_API_URL || 'https:// melodymatch-3ro0.onrender.com';
+const apiUrl = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
 
 const Messaging = () => {
   const navigate = useNavigate();
@@ -257,7 +257,7 @@ const Messaging = () => {
                   borderColor={selectedConversation === match._id ? "#eb6f92" : "transparent"}
                 >
                   <Avatar
-                    src={match.profile_pic || "https:// via.placeholder.com/50"}
+                    src={match.profile_pic || "https://via.placeholder.com/50"}
                     name={match.preferred_name}
                     size="md"
                   />
@@ -298,7 +298,7 @@ const Messaging = () => {
                     ← back
                   </Button>
                   <Avatar
-                    src={selectedMatch?.profile_pic || "https:// via.placeholder.com/50"}
+                    src={selectedMatch?.profile_pic || "https://via.placeholder.com/50"}
                     name={selectedMatch?.preferred_name}
                     size="sm"
                   />

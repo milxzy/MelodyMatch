@@ -4,7 +4,7 @@ import ProfileCard from "./ProfileCard";
 import Header from "./Header";
 import { Center, Flex, Text, Button, Heading } from "@chakra-ui/react";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
 
 const Matches = () => {
   const navigate = useNavigate();

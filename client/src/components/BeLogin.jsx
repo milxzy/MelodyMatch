@@ -6,7 +6,7 @@ import { Center, Square, Circle } from "@chakra-ui/react";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import Header from "./Header";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'https://melodymatch-3ro0.onrender.com';
 
 const BeLogin = () => {
   const navigate = useNavigate();

@@ -208,7 +208,7 @@ const FloatingShapes = memo(({
         { size: 300, color: 'rgba(181, 234, 221, 0.3)', initialX: '15%', initialY: '65%', duration: 32, delay: 5, blur: 75 },
       ],
       hearts: [
-        { size: 24, color: 'rgba(255, 181, 186, 0.65)', initialX: '15%', initialY: '20%', duration: 9, delay: 0 },
+        { size: 24, color: 'rgba(255, 181, 186, 0.65)', initialX: '5%', initialY: '45%', duration: 9, delay: 0 },
         { size: 20, color: 'rgba(255, 181, 186, 0.55)', initialX: '75%', initialY: '30%', duration: 11, delay: 2 },
         { size: 18, color: 'rgba(255, 181, 186, 0.6)', initialX: '25%', initialY: '75%', duration: 10, delay: 1 },
       ],

@@ -1,223 +1,72 @@
 # MelodyMatch
 
-a music-based dating app that connects people through their music taste. find your perfect match based on shared artists, genres, and vibes.
+a music-based dating app that matches people by their music taste. built because spotify said no.
 
-## the pivot
+## what happened with spotify
 
-> **february 2026**: spotify changed their api policy to require 250k monthly active users for access. since we're not there yet, we're going full speed into adding **apple music** and **youtube music** support. the matching algorithm doesn't care where your music comes from - it just needs artists and genres to work its magic.
+spotify now requires 250k monthly active users to get api access. so we're pivoting to apple music and youtube music instead. the matching algorithm doesn't care where the music data comes from, it just needs artists and genres.
 
-## current status
+| platform | status |
+|----------|--------|
+| spotify | blocked (250k MAU requirement) |
+| apple music | in progress |
+| youtube music | coming soon |
 
-| platform | status | notes |
-|----------|--------|-------|
-| spotify | **blocked** | requires 250k MAU for api access |
-| apple music | **in progress** | official api, $99/year, no approval needed |
-| youtube music | **coming soon** | oauth integration in development |
+## how it works
 
-## what it does
+you sign up, connect a music platform, and the app finds people with similar taste. matching uses a weighted score - 60% genre overlap (jaccard similarity) and 40% shared artists. then you can swipe and chat with your matches in real time.
 
-- **music-based matching**: you get ranked by how similar your music taste is to other users
-- **real-time chat**: socket.io messaging with your matches
-- **swipe interface**: like or pass on potential matches
-- **dashboard**: see your stats, matches, and music preferences
+## stack
 
-## how matching works
+- react + vite, chakra ui on the frontend
+- node/express + mongodb on the backend
+- socket.io for messaging
+- passport.js for auth
+- deployed on railway (backend) and vercel (frontend)
 
-the algorithm is platform-agnostic. it just needs:
-- your favorite genres
-- your favorite artists
+## running it locally
 
-then it calculates compatibility:
-- 60% weight on genre overlap (jaccard coefficient)
-- 40% weight on artist overlap
-- ranks everyone from best match to worst
-
-compatibility levels:
-- 80%+ = perfect match
-- 60-79% = great match  
-- 40-59% = good match
-- 20-39% = fair match
-- <20% = probably not your vibe
-
-## tech stack
-
-**frontend**
-- react 18 + vite
-- chakra ui
-- socket.io-client
-- react router v6
-
-**backend**
-- node.js + express
-- mongodb + mongoose
-- socket.io
-- passport.js (jwt)
-- bcryptjs
-
-**deployment**
-- frontend: vercel
-- backend: railway (no cold starts)
-
-## getting started
-
-### prerequisites
-
-- node.js v16+
-- mongodb (atlas or local)
-- apple developer account ($99/year) - for apple music integration
-
-### installation
+need node v16+ and a mongodb instance (atlas works fine).
 
 ```bash
-# clone it
 git clone https://github.com/milxzy/MelodyMatch.git
 cd MelodyMatch
 
-# install server deps
+# server
 cd server && npm install
 
-# install client deps
+# client
 cd ../client && npm install
 ```
 
-### environment variables
-
-**server/.env**
-```env
-CONNECTION_STRING=your_mongodb_connection_string
-PORT=4000
-JWT_SECRET=generate_a_secure_random_string
-SESSION_SECRET=generate_another_secure_random_string
-FRONTEND_URL=http://localhost:5173
-BACKEND_URL=http://localhost:4000
-
-# apple music (coming soon)
-APPLE_TEAM_ID=your_apple_team_id
-APPLE_KEY_ID=your_musickit_key_id
-APPLE_PRIVATE_KEY_PATH=./keys/AuthKey.p8
-```
-
-**client/.env**
-```env
-VITE_API_URL=http://localhost:4000
-
-# apple music (coming soon)
-VITE_APPLE_MUSIC_TEAM_ID=your_apple_team_id
-VITE_APPLE_MUSIC_KEY_ID=your_musickit_key_id
-```
-
-### run it
+copy the env vars from [env-setup.md](./env-setup.md) into `server/.env` and `client/.env`, then:
 
 ```bash
-# terminal 1: start server
+# terminal 1
 cd server && npm run dev
 
-# terminal 2: start client
+# terminal 2
 cd client && npm run dev
 ```
 
-- frontend: http://localhost:5173
-- backend: http://localhost:4000
+frontend runs on :5173, backend on :4000.
 
-## deployment
+## api
 
-**frontend (vercel)**
-1. connect github repo
-2. set env vars
-3. deploy
+**auth**
+- `POST /registerUser` - sign up
+- `POST /backendlogin` - log in
 
-**backend (railway)**
-```bash
-railway login
-railway init
-railway up
-```
-
-see [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for the full guide.
-
-## api endpoints
-
-### auth
-- `POST /registerUser` - create account
-- `POST /backendlogin` - login
-- `GET /auth/login` - oauth flow (apple music coming soon)
-- `GET /auth/callback` - oauth callback
-
-### users
-- `GET /getUsers?userId={id}` - get potential matches (sorted by compatibility)
-- `GET /getUserById/:userId` - get user
+**users**
+- `GET /getUsers?userId={id}` - potential matches sorted by compatibility
+- `GET /getUserById/:userId` - single user
 - `POST /like` - like someone
 
-### matches
-- `GET /getMatches/:userId` - get your matches
-
-### messages
-- `GET /api/messages/:userId/:recipientId` - get conversation
+**matches / messages**
+- `GET /getMatches/:userId` - your matches
+- `GET /api/messages/:userId/:recipientId` - conversation history
 - `POST /api/messages` - send message
-- `PUT /api/messages/read/:userId/:recipientId` - mark as read
-
-## project structure
-
-```
-MelodyMatch/
-├── client/                    # react frontend (vite)
-│   ├── src/
-│   │   ├── components/        # ui components
-│   │   ├── theme/             # chakra ui theme
-│   │   └── main.jsx           # entry point
-│   └── package.json
-├── server/                    # express backend
-│   ├── adapters/              # platform adapters (apple music, youtube music)
-│   ├── config/                # security, env validation
-│   ├── controllers/           # route handlers
-│   ├── db/                    # database connection
-│   ├── middlewares/           # auth, rate limiting, error handling
-│   ├── models/                # mongoose schemas
-│   ├── python-services/       # youtube music fastapi microservice
-│   │   └── youtube-music/
-│   ├── routes/                # api routes
-│   │   └── auth/              # multi-platform oauth flows
-│   ├── services/              # token management, music platform aggregation
-│   ├── tests/                 # jest tests
-│   ├── utils/                 # matching algorithm, logger, jwt helpers
-│   ├── socket.js              # socket.io real-time messaging
-│   └── server.js              # entry point
-└── README.md
-```
-
-## socket events
-
-**client → server**
-- `user-online` - connect with user id
-- `send-message` - send a message
-- `typing-start` / `typing-stop` - typing indicators
-
-**server → client**
-- `receive-message` - new message
-- `message-sent` - confirmation
-- `user-typing` / `user-stopped-typing` - typing indicators
-- `user-status-change` - online/offline
-
-## roadmap
-
-- [x] core matching algorithm
-- [x] real-time messaging
-- [x] user authentication
-- [x] railway deployment
-- [ ] apple music integration
-- [ ] youtube music integration
-- [ ] manual genre/artist entry (fallback)
-- [ ] playlist import
-- [ ] listening history analysis
-
-## contributing
-
-prs welcome. open an issue first if it's a big change.
 
 ## license
 
 mit
-
----
-
-*built because spotify said no. now we're building something better.*

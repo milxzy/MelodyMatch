@@ -1,47 +1,26 @@
-# Railway ignore file - exclude unnecessary files from deployment
-
-# Client directory (frontend is deployed separately on Vercel)
+# frontend deploys separately on vercel
 client/
 
-# Node modules (will be installed during build)
 node_modules/
 server/node_modules/
 
-# Environment files (set in Railway dashboard)
 .env
 .env.*
 !.env.example
 
-# Git files
 .git/
 .gitignore
-
-# IDE files
 .vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS files
 .DS_Store
 Thumbs.db
 
-# Logs
 logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# Testing
 coverage/
-.nyc_output/
 server/tests/
 
-# Documentation (optional - remove this line if you want docs deployed)
 *.md
 !README.md
 
-# Misc
 ss

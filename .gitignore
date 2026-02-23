@@ -1,18 +1,14 @@
-# Node.js dependencies
 node_modules/
 
-# Build output
 /dist
 /build
 
-# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 *.log
 logs/
 
-# Environment files
 .env
 .env.local
 .env.development.local
@@ -22,49 +18,22 @@ server/.env
 client/.env
 server/python-services/**/.env
 
-# Apple Music private keys (CRITICAL - never commit!)
+# apple music keys - do NOT commit
 *.p8
 server/certs/
 certs/
 
-# Python
 __pycache__/
 *.pyc
 *.pyo
 
-# AI agent tooling (not part of the project)
-.agents/
-.claude/
-
-# Tailwind CSS build output
-.tailwind/
-
-# VSCode settings
 .vscode/
-
-# MacOS system files
 .DS_Store
-
-# Windows system files
 Thumbs.db
 
-# Dependency directories
-jspm_packages/
-
-# Next.js build output (if used)
-.next/
-
-# Test/coverage directories
 coverage/
-
-# Vercel deployment
 .vercel
 
-# Temp files
 *.tmp
 *.swp
-tmpclaude-*
-
-# Screenshots/media files accidentally added
 ss
-*.DS_Store
